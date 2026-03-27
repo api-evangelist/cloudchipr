@@ -1,0 +1,39 @@
+aid: cloudchipr
+name: CloudChipr
+description: >-
+  CloudChipr is a cloud cost optimization platform providing automated resource
+  cleanup, rightsizing, and cost governance across multi-cloud environments.
+type: Index
+image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+tags:
+  - FinOps
+  - Cloud Cost Optimization
+url: >-
+  https://raw.githubusercontent.com/api-evangelist/cloudchipr/refs/heads/main/apis.yml
+created: '2026-03-27'
+modified: '2026-03-27'
+specificationVersion: '0.19'
+apis:
+  - aid: cloudchipr:cloudchipr
+    name: CloudChipr
+    description: >-
+      CloudChipr is a cloud cost optimization platform providing automated
+      resource cleanup, rightsizing, and cost governance across multi-cloud
+      environments.
+    humanURL: https://cloudchipr.com/
+    tags:
+      - FinOps
+      - Cloud Cost Optimization
+    properties:
+      - type: Documentation
+        url: https://docs.cloudchipr.com/
+      - type: Getting Started
+        url: https://docs.cloudchipr.com/
+common:
+  - type: Website
+    url: https://cloudchipr.com/
+  - type: Documentation
+    url: https://docs.cloudchipr.com/
+maintainers:
+  - FN: Kin Lane
+    email: kin@apievangelist.com
