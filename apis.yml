@@ -6,8 +6,8 @@ description: >-
 type: Index
 image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
 tags:
-  - FinOps
   - Cloud Cost Optimization
+  - FinOps
 url: >-
   https://raw.githubusercontent.com/api-evangelist/cloudchipr/refs/heads/main/apis.yml
 created: '2026-03-27'
@@ -22,8 +22,8 @@ apis:
       environments.
     humanURL: https://cloudchipr.com/
     tags:
-      - FinOps
       - Cloud Cost Optimization
+      - FinOps
     properties:
       - type: Documentation
         url: https://docs.cloudchipr.com/
