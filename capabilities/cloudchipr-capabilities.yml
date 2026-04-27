@@ -1,0 +1,41 @@
+capabilities:
+  - id: cloudchipr.connect-cloud-accounts
+    name: Connect cloud accounts
+    description: >-
+      Onboard AWS, Azure, and GCP accounts into CloudChipr so that
+      resource inventory, cost data, and rightsizing recommendations
+      can be aggregated across providers.
+    apis:
+      - cloudchipr:cloudchipr-api
+  - id: cloudchipr.inventory-resources
+    name: Inventory cloud resources
+    description: >-
+      Browse the catalog of running cloud resources (compute, storage,
+      networking, databases) collected from connected accounts as the
+      basis for cleanup and rightsizing decisions.
+    apis:
+      - cloudchipr:cloudchipr-api
+  - id: cloudchipr.rightsize-resources
+    name: Rightsize and clean up unused resources
+    description: >-
+      Surface idle, oversized, or untagged resources and apply
+      automated workflows to delete, stop, or downsize them with
+      approvals and audit trails.
+    apis:
+      - cloudchipr:cloudchipr-api
+  - id: cloudchipr.govern-cloud-cost
+    name: Govern multi-cloud cost
+    description: >-
+      Track multi-cloud spend, set budgets, and trigger alerts to
+      finance, engineering, and platform teams when thresholds are
+      crossed.
+    apis:
+      - cloudchipr:cloudchipr-api
+  - id: cloudchipr.integrate-collaboration-tools
+    name: Integrate with collaboration tools
+    description: >-
+      Route findings, alerts, and workflow events into Slack,
+      Microsoft Teams, Jira, and arbitrary webhook endpoints so that
+      cost actions can be acted on inside existing workstreams.
+    apis:
+      - cloudchipr:cloudchipr-api
