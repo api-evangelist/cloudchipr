@@ -76,6 +76,8 @@ common:
     url: https://www.finops.org/members/cloudchipr/
   - type: Naftiko Capabilities
     url: capabilities/cloudchipr-capabilities.yml
+  - type: LLMsTxt
+    url: https://docs.cloudchipr.com/llms.txt
 maintainers:
   - FN: Kin Lane
     email: kin@apievangelist.com
