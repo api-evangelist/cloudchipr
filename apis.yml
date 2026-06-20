@@ -8,7 +8,7 @@ type: Index
 access: 3rd-Party
 position: Consumer
 kind: company
-image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 tags:
   - AWS
   - Azure
@@ -37,7 +37,7 @@ apis:
       - FinOps
       - Multi-Cloud
       - Rightsizing
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     humanURL: https://docs.cloudchipr.com/reference
     properties:
       - url: https://docs.cloudchipr.com/reference
