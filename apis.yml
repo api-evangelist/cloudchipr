@@ -74,9 +74,9 @@ common:
     url: https://github.com/cloudchipr
   - type: FinOpsMember
     url: https://www.finops.org/members/cloudchipr/
-  - type: Naftiko Capabilities
+  - type: X-NaftikoCapabilities
     url: capabilities/cloudchipr-capabilities.yml
-  - type: LLMsTxt
+  - type: LlmsText
     url: https://docs.cloudchipr.com/llms.txt
 maintainers:
   - FN: Kin Lane
