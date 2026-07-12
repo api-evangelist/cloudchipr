@@ -58,6 +58,8 @@ apis:
       paths and authentication details are maintained in that portal
       and gated by an account login.
 common:
+  - type: DomainSecurity
+    url: security/cloudchipr-domain-security.yml
   - type: LinkedIn
     url: https://www.linkedin.com/company/cloudchipr
   - type: Website
