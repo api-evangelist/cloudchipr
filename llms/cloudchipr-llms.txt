@@ -1,0 +1,67 @@
+# Cloudchipr Documentation
+
+> Documentation for Cloudchipr
+
+## Guides
+- [Welcome to Cloudchipr](https://docs.cloudchipr.com/docs/welcome.md): Organizational cost hygiene - Automated.
+- [FAQ](https://docs.cloudchipr.com/docs/faq.md)
+- [Free Trial](https://docs.cloudchipr.com/docs/free-trial.md)
+- [Help](https://docs.cloudchipr.com/docs/get-help.md)
+- [Security & Compliance](https://docs.cloudchipr.com/docs/security-compliance.md)
+- [Glossary](https://docs.cloudchipr.com/docs/concepts.md)
+- [Kubernetes](https://docs.cloudchipr.com/docs/kubernetes.md)
+- [AWS Setup](https://docs.cloudchipr.com/docs/aws-setup.md)
+- [AWS Supported Services](https://docs.cloudchipr.com/docs/aws-supported-services.md)
+- [Create custom roles and permissions in sub-accounts](https://docs.cloudchipr.com/docs/create-custom-roles-and-permissions-in-sub-accounts.md)
+- [GCP Setup](https://docs.cloudchipr.com/docs/gcp-setup.md)
+- [GCP Supported Services](https://docs.cloudchipr.com/docs/gcp-supported-services.md)
+- [Create custom roles and permissions](https://docs.cloudchipr.com/docs/create-custom-roles-and-permissions.md): Create custom roles to grant scopped access to organization/projects.
+- [Azure Setup](https://docs.cloudchipr.com/docs/azure-setup.md)
+- [Azure Supported Services](https://docs.cloudchipr.com/docs/azure-supported-services.md)
+- [Azure Billing Exports Connection](https://docs.cloudchipr.com/docs/azure-billing-exports-connection.md)
+- [OpenAI ](https://docs.cloudchipr.com/docs/openai.md)
+- [Snowflake](https://docs.cloudchipr.com/docs/snowflake.md)
+- [Confluent](https://docs.cloudchipr.com/docs/confluent.md)
+- [MongoDB](https://docs.cloudchipr.com/docs/mongodb.md)
+- [Datadog](https://docs.cloudchipr.com/docs/datadog.md)
+- [Anthropic (Claude)](https://docs.cloudchipr.com/docs/anthropic.md)
+- [Twilio (Coming Soon)](https://docs.cloudchipr.com/docs/twilio.md)
+- [Dashboards](https://docs.cloudchipr.com/docs/dashboard.md)
+- [Billing Explorer](https://docs.cloudchipr.com/docs/billing-explorer.md)
+- [Live Resources Overview](https://docs.cloudchipr.com/docs/live-usage-and-management-overview.md): The Live Resources page provides a single view of all cloud resources across your accounts and regions. It is designed for DevOps and FinOps engineers who need to track live resource usage, identify underutilized spend, and take corrective actions.
+- [Filters](https://docs.cloudchipr.com/docs/filters-and-filter-templates.md)
+- [Utilization Policies](https://docs.cloudchipr.com/docs/send-messages.md): Utilization policies are used to identify underutilized resources. For example, a resource that has been running for more than seven days but shows low CPU utilization (e.g., below 20%) may be considered idle or oversized. Each resource type has its own utilization rules.
+- [Resource Actions](https://docs.cloudchipr.com/docs/resource-actions.md): In Live Resources, you can select one or more resources and perform actions. Actions are divided into two categories: Management Actions and Collaborative Actions.
+- [Create Workflow](https://docs.cloudchipr.com/docs/create-workflow.md): In Live Resources, you can quickly create a workflow using your current filters. This removes the need to reapply filters when setting up a workflow from scratch.
+- [AI Agents](https://docs.cloudchipr.com/docs/ai-agents.md)
+- [Cloudchipr MCP Server](https://docs.cloudchipr.com/docs/cloudchipr-mcp-server.md)
+- [Kubernetes Cost Allocation](https://docs.cloudchipr.com/docs/kubernetes-cost-allocation.md): How Kubernetes costs are calculated
+- [Commitments Overview](https://docs.cloudchipr.com/docs/commitments-page.md): The Commitments page provides an overview of your organization’s coverage, Savings Plans, and Reserved Instances. It also includes recommendations for optimizing commitments. The page is divided into the following sections: Overview, Savings Plans, Reservations, and Recommendations. At the top of the page, a date picker is available. It applies to all commitment pages and updates the displayed data based on the selected range.
+- [Savings Plans](https://docs.cloudchipr.com/docs/savings-plans.md): The Savings Plans page provides details about your active Savings Plans, their utilization, and the resources they cover. It includes metrics, charts, and tables to help track coverage and efficiency.
+- [Reservations](https://docs.cloudchipr.com/docs/reservations.md): The Reservations page provides details about your active Reservations, their utilization, and the resources they cover. It includes metrics, charts, and tables to help track coverage and efficiency.
+- [Recommendations](https://docs.cloudchipr.com/docs/recommendations-page.md): The Recommendations page provides suggestions for both Reserved Instances and Savings Plans. You can switch between them using the corresponding tabs.
+- [Overview](https://docs.cloudchipr.com/docs/overview-1.md)
+- [Budgets](https://docs.cloudchipr.com/docs/budget.md)
+- [Anomaly Alerts](https://docs.cloudchipr.com/docs/anomaly-alerts.md)
+- [Commitment Alerts](https://docs.cloudchipr.com/docs/commitment-alerts.md)
+- [Subscriptions](https://docs.cloudchipr.com/docs/subscriptions.md)
+- [Overview](https://docs.cloudchipr.com/docs/overview.md)
+- [Workflows](https://docs.cloudchipr.com/docs/workflows.md)
+- [Off Hours](https://docs.cloudchipr.com/docs/off-hours.md)
+- [All Opportunities](https://docs.cloudchipr.com/docs/all-opportunities.md)
+- [AI Kubernetes Recommendations](https://docs.cloudchipr.com/docs/kubernetes-recommendations.md)
+- [Tools Integrations](https://docs.cloudchipr.com/docs/integrations.md)
+- [Slack](https://docs.cloudchipr.com/docs/slack.md): Integrate Slack and send notifications manually and automatically.
+- [Tasks](https://docs.cloudchipr.com/docs/tasks.md)
+- [Dimensions](https://docs.cloudchipr.com/docs/dimensions.md)
+- [Execution Logs](https://docs.cloudchipr.com/docs/execution-logs.md)
+- [Smart Tag](https://docs.cloudchipr.com/docs/smart-tag.md)
+- [Multi-Factor Authentication (MFA)](https://docs.cloudchipr.com/docs/multi-factor-authentication-mfa.md)
+- [Single Sign On (SSO) using Okta](https://docs.cloudchipr.com/docs/single-sign-on-sso-using-okta.md)
+- [Single Sign On (SSO) using Azure](https://docs.cloudchipr.com/docs/single-sign-on-sso-using-azure.md)
+- [Users and Roles](https://docs.cloudchipr.com/docs/users-1.md)
+- [Plans & Billing](https://docs.cloudchipr.com/docs/plans-billing.md)
+- [API Keys](https://docs.cloudchipr.com/docs/api-keys.md)
+
+## API Reference
+- [API Documentation](https://docs.cloudchipr.com/reference/getting-started-with-your-api.md): Explore the full API reference to learn about available resources, endpoints, and usage guidelines.
