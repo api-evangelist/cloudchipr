@@ -1,0 +1,101 @@
+generated: '2026-09-05'
+method: searched
+source: >-
+  https://cloudchipr.com/terms-conditions + https://cloudchipr.com/blog +
+  openapi/cloudchipr-enterprise-api-openapi.yml + live probes
+summary: >-
+  CloudChipr publishes dated release notes and legal terms, and nothing else in this family. There
+  is no status page, no deprecation or sunset policy, no SLA document, and no public roadmap. No
+  StatusPage and no Deprecation pointer is emitted - both would be false claims.
+
+versioning:
+  scheme: unversioned-path
+  spec_version: 0.1.0
+  notes: >-
+    No version segment in any of the 26 paths and none in the base URL https://api.cloudchipr.com.
+    The only version identifier published anywhere is info.version 0.1.0 inside the spec. No
+    version-negotiation header, no Accept-version media type, no dated version scheme.
+  agent_risk: >-
+    With no path version and no deprecation policy, a consumer has no contractual signal that the
+    26-operation surface will remain stable. The spec is served as a static file from GitHub Pages
+    (cloudchipr.github.io/api-service/api.yaml) with no version history exposed at that URL.
+
+changelog:
+  url: https://cloudchipr.com/blog
+  artifact: changelog/cloudchipr-changelog.yml
+  scheme: dated-release-notes on the marketing blog, tagged "Release Notes"
+  api_scoped: false
+
+status_page:
+  published: false
+  probed:
+    - url: https://status.cloudchipr.com/
+      status: NXDOMAIN
+      checked: '2026-09-05'
+    - url: https://cloudchipr.com/status
+      status: 404
+      checked: '2026-09-05'
+  note: >-
+    No status page on the conventional subdomain (DNS does not resolve) or on the site. NO
+    StatusPage pointer is emitted.
+
+deprecation:
+  policy_documented: false
+  sunset_header: false
+  rfc8594: false
+  deprecated_operations: []
+  probed_in_spec: >-
+    Zero occurrences of `deprecated` in the 123KB OpenAPI - no operation, parameter or schema is
+    marked deprecated.
+  note: >-
+    No deprecation or sunset policy is published anywhere on cloudchipr.com or
+    docs.cloudchipr.com. NO Deprecation pointer is emitted.
+
+sla:
+  documented: false
+  note: >-
+    The pricing page lists a "Dedicated SRE consultant" and a "Dedicated Slack Channel" on the
+    Enterprise tier, which are support commitments, not an availability SLA. No uptime percentage
+    or credit schedule is published.
+
+roadmap:
+  published: false
+  probed:
+    - url: https://cloudchipr.com/roadmap
+      status: 404
+      checked: '2026-09-05'
+  note: >-
+    The only forward-looking public commitments are feature cards marked "Coming soon" -
+    Microsoft Teams integration (docs Tools Integrations), Twilio (docs), Snowflake and Kubernetes
+    on the pricing-page integrations row, and MCP "Write Actions" on cloudchipr.com/mcp. These are
+    marketing labels, not a roadmap. NO Roadmap pointer is emitted.
+
+terms:
+  url: https://cloudchipr.com/terms-conditions
+  status: 200
+  checked: '2026-09-05'
+privacy:
+  url: https://cloudchipr.com/privacy-policy
+  status: 200
+  checked: '2026-09-05'
+
+api_key_lifecycle:
+  issued_in: CloudChipr app, Settings -> API Keys
+  max_keys_per_account: 2
+  expiry_documented: '1 to 365 days'
+  expiry_superseded: true
+  expiry_note: >-
+    The docs page (updated 2025-10-15) states a mandatory 1-365 day expiry and a maximum of two
+    keys. The 2026-07-01 release notes state the expiration REQUIREMENT was removed and a
+    "Last Used" column added. The docs and the release notes disagree; the release notes are
+    newer. Recorded rather than resolved - CloudChipr has not updated the docs page.
+  source_docs: https://docs.cloudchipr.com/docs/api-keys
+  source_release_notes: https://cloudchipr.com/blog/product-updates-july-1
+
+observed_surface:
+  openapi_operations: 26
+  mcp_tools: 25
+  captured: '2026-09-05'
+  note: >-
+    First capture of this spec by this pipeline. No prior snapshot exists, so no change cadence can
+    be computed yet; a later round can diff against openapi/_original/cloudchipr-enterprise-api.yaml.

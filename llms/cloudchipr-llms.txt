@@ -2,12 +2,15 @@
 
 > Documentation for Cloudchipr
 
+Append .md to any documentation page URL to get its markdown version.
+
 ## Guides
 - [Welcome to Cloudchipr](https://docs.cloudchipr.com/docs/welcome.md): Organizational cost hygiene - Automated.
 - [FAQ](https://docs.cloudchipr.com/docs/faq.md)
 - [Free Trial](https://docs.cloudchipr.com/docs/free-trial.md)
 - [Help](https://docs.cloudchipr.com/docs/get-help.md)
 - [Security & Compliance](https://docs.cloudchipr.com/docs/security-compliance.md)
+- [Read-Only Access Requirements](https://docs.cloudchipr.com/docs/read-only-access-requirements.md): This page describes what access permissions that Cloudchipr needs for collecting billing and usage metrics.
 - [Glossary](https://docs.cloudchipr.com/docs/concepts.md)
 - [Kubernetes](https://docs.cloudchipr.com/docs/kubernetes.md)
 - [AWS Setup](https://docs.cloudchipr.com/docs/aws-setup.md)
@@ -28,6 +31,7 @@
 - [Twilio (Coming Soon)](https://docs.cloudchipr.com/docs/twilio.md)
 - [Dashboards](https://docs.cloudchipr.com/docs/dashboard.md)
 - [Billing Explorer](https://docs.cloudchipr.com/docs/billing-explorer.md)
+- [Forecasting Methodology](https://docs.cloudchipr.com/docs/forecasting-methodology.md)
 - [Live Resources Overview](https://docs.cloudchipr.com/docs/live-usage-and-management-overview.md): The Live Resources page provides a single view of all cloud resources across your accounts and regions. It is designed for DevOps and FinOps engineers who need to track live resource usage, identify underutilized spend, and take corrective actions.
 - [Filters](https://docs.cloudchipr.com/docs/filters-and-filter-templates.md)
 - [Utilization Policies](https://docs.cloudchipr.com/docs/send-messages.md): Utilization policies are used to identify underutilized resources. For example, a resource that has been running for more than seven days but shows low CPU utilization (e.g., below 20%) may be considered idle or oversized. Each resource type has its own utilization rules.

@@ -1,0 +1,101 @@
+generated: '2026-09-05'
+method: derived
+source: openapi/cloudchipr-enterprise-api-openapi.yml
+summary: >-
+  CloudChipr does NOT emit RFC 9457 problem+json. Every declared error response is
+  application/json carrying a single-field object `{ "message": "<string>" }`, defined once in
+  components.responses and re-used by $ref across all 26 operations. One operation
+  (POST /ingest/{destinationId}) is the exception and carries a structured, coded error array.
+format: bespoke-json
+rfc9457: false
+media_type: application/json
+envelope:
+  shape: '{ "message": "<string>" }'
+  fields:
+    - name: message
+      type: string
+      required: false
+      note: >-
+        Declared as an optional property in every error schema (no `required:` list), so a client
+        cannot rely on it being present.
+  missing_vs_rfc9457: [type, title, status, detail, instance]
+
+coverage:
+  operations: 26
+  operations_with_401: 26
+  operations_with_400: 12
+  operations_with_404: 12
+  operations_with_405: 3
+  operations_with_500: 13
+  operations_with_429: 0
+  note: >-
+    401 is declared on all 26 operations - the only universally documented failure. No operation
+    declares 403 (authorization failure is not distinguished from authentication failure in the
+    contract) and no operation declares 429, so an agent has no documented throttling signal.
+
+problem_types:
+  - status: 400
+    component: BadRequest
+    title: Bad Request
+    description: Bad Request.
+    example_message: Some business domain specific validation message
+    remediation: >-
+      The message is free text and domain-specific; it carries no machine code. For billing-explorer
+      queries, call POST /billing-explorer/validate first (204 = valid) rather than parsing this
+      message.
+    operations: 12
+  - status: 401
+    component: UnauthorizedError
+    title: Unauthorized
+    description: Authentication information is missing or invalid
+    example_message: Unauthorized
+    remediation: >-
+      Send a valid x-api-key header. Keys are issued in-app and expire between 1 and 365 days, so a
+      401 on a previously working key most often means expiry, not revocation.
+    operations: 26
+  - status: 404
+    component: NotFound
+    title: Not Found
+    description: Resource was not found.
+    example_message: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
+    remediation: The offending id is echoed in the free-text message; it is not returned as a structured field.
+    operations: 12
+  - status: 405
+    component: MethodNotAllowed
+    title: Method Not Allowed
+    description: Example response
+    remediation: Wrong HTTP verb for the path. Declared only on the budgets operations.
+    operations: 3
+  - status: 500
+    component: InternalServerError
+    title: Internal Server Error
+    description: Internal Server Error.
+    example_message: Internal Server Error.
+    remediation: >-
+      Retry with backoff. Note that only ingestCustomData is idempotent, so a 500 on
+      POST /data-sources cannot be safely retried - see conventions/cloudchipr-conventions.yml.
+    operations: 13
+
+coded_errors:
+  operation: ingestCustomData
+  binding: 'POST /ingest/{destinationId}'
+  status: 400
+  shape: 'oneOf: { errors: [ { ... } ] } | { message: string }'
+  enum: ErrorCode
+  codes:
+    - code: MISSING_MANDATORY_FIELD
+      meaning: An NDJSON line omitted a column the destination declares as mandatory.
+    - code: INVALID_COLUMN_FORMAT
+      meaning: A column value did not match the declared type/format (e.g. the `date` field is not yyyy-MM-dd).
+    - code: INVALID_JSON
+      meaning: A line in the NDJSON body is not parseable JSON.
+  note: >-
+    This is the only place in the contract where an error carries a stable machine-readable code.
+    Every other failure is free text.
+
+gaps:
+  - No `application/problem+json` anywhere in the spec.
+  - No error `code` field on the shared envelope - only free-text `message`.
+  - No 403 declared on any operation; authorization failures are undistinguishable in the contract.
+  - No 429 declared on any operation and no documented rate-limit signal.
+  - No documented error reference page in the docs to enrich these titles from.

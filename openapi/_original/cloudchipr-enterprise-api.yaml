@@ -1,0 +1,4322 @@
+openapi: 3.0.3
+info:
+  title: CloudChipr Enterprise API
+  description: CloudChipr Enterprise API document provides detailed description about how to interact with CloudChipr Enterprise service
+  version: 0.1.0
+  contact:
+    email: info@cloudchipr.com
+  license:
+    name: Cloudchipr 1.0
+    url: 'https://cloudchipr.com'
+tags:
+  - name: Resources
+    description: Endpoints for resources
+  - name: Filters
+    description: Everything about filters
+  - name: Accounts
+    description: Everything about accounts
+  - name: Dashboards
+    description: Everything about dashboards
+  - name: Resource Explorer
+    description: Everything about Resource Explorer
+  - name: Widgets
+    description: Everything about widgets
+  - name: Categories
+    description: Everything about categories
+  - name: Custom Data
+    description: Everything about custom data sources
+  - name: Savings Opportunities
+    description: Everything about savings opportunities
+  - name: Budgets
+    description: Everything about budgets
+servers:
+  - url: 'https://api.cloudchipr.com'
+paths:
+  /billing-explorer:
+    post:
+      summary: Get billing data aggregation
+      description: Retrieves billing data for an organisation with various filtering and grouping options
+      operationId: billingDataByOrganisation
+      tags:
+        - Resource Explorer
+      security:
+        - ApiKey: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BillingDataRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingAggregateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /savings-opportunities:
+    post:
+      summary: Filter savings opportunities
+      description: Returns savings opportunities for the organisation associated with the API key, filtered by the provided filter tree.
+      operationId: filterSavingsOpportunities
+      tags:
+        - Savings Opportunities
+      security:
+        - ApiKey: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavingsOpportunityFilteredRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SavingsOpportunityResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /budgets:
+    get:
+      summary: List budgets
+      description: Returns every budget of the organisation associated with the API key, including the current amount, actual spend to date, forecast, thresholds and scope (filter tree or view).
+      operationId: listBudgets
+      tags:
+        - Budgets
+      security:
+        - ApiKey: [ ]
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Budget'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  '/budgets/{budgetId}':
+    get:
+      summary: Get a budget
+      description: Returns a single budget of the organisation associated with the API key.
+      operationId: getBudget
+      tags:
+        - Budgets
+      security:
+        - ApiKey: [ ]
+      parameters:
+        - name: budgetId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  '/budgets/{budgetId}/history':
+    get:
+      summary: Get budget history per period
+      description: >-
+        Returns one entry per budget period (month, quarter, day or year depending on the budget's period)
+        with the budget amount that was in force during that period, the period's actual spend, and — for the
+        period still in flight — the current forecast. Closed periods have a null forecast because no
+        end-of-period snapshot exists for them. Amount history is recorded from the moment this feature
+        shipped; periods before the first recorded change report the amount known at that time.
+      operationId: getBudgetHistory
+      tags:
+        - Budgets
+      security:
+        - ApiKey: [ ]
+      parameters:
+        - name: budgetId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/QueryDateFrom'
+        - $ref: '#/components/parameters/QueryDateTo'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BudgetHistoryEntry'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /data-sources:
+    post:
+      summary: Creates a data source destination.
+      description: Creates a data source destination.
+      operationId: createDataSource
+      tags:
+        - Custom Data
+      security:
+        - ApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDataSourceRequest'
+      responses:
+        '201':
+          description: Data source created. Use ingest_url to send data to this destination.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateDataSourceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /telemetry:
+    get:
+      summary: List telemetries
+      operationId: listTelemetries
+      tags:
+        - Custom Data
+      security:
+        - ApiKey: []
+      responses:
+        '200':
+          description: List of telemetry destinations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Telemetry'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /custom-sources:
+    get:
+      summary: List custom sources
+      operationId: listCustomSources
+      tags:
+        - Custom Data
+      security:
+        - ApiKey: []
+      responses:
+        '200':
+          description: List of custom sources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomSource'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /resources/lookup:
+    get:
+      summary: Get a resource by its identifier
+      description: >-
+        Returns the full data of a single live resource — its details, prices, account, creation metadata
+        and the complete cloud tag list (including any creator/owner tag the organisation uses). The
+        resource is identified by its provider identifier (e.g. an EC2 instance id or an ARN); when the
+        owning account is not given, every connected cloud account of the organisation is searched.
+        The response shape varies by resource type; the fields listed in the schema are common to all types.
+      operationId: lookupResource
+      tags:
+        - Resources
+      security:
+        - ApiKey: [ ]
+      parameters:
+        - name: resource_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The provider identifier of the resource (instance id, ARN, resource name, ...)
+        - name: resource_type
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Optional resource type (e.g. EC2, EBS, RDS) to speed up the lookup
+        - name: account_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Optional CloudChipr account id when the owning account is known
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceDetails'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /dimensions:
+    get:
+      summary: List dimensions with their categories
+      description: Returns every dimension of the organisation associated with the API key, each with its categories. A category's filter describes the scope it covers and can be matched against a budget's filter tree or used to attribute costs to a team.
+      operationId: listDimensions
+      tags:
+        - Categories
+      security:
+        - ApiKey: [ ]
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Dimension'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /dimensions/category-structure:
+    put:
+      summary: Update category structure for an organisation
+      description: Updates the entire category structure for the specified organisation, including dimensions, categories, and shared costs
+      operationId: updateCategoryStructure
+      tags:
+        - Categories
+      security:
+        - ApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategoryStructureRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DimensionWithCategoriesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  '/accounts/{accountId}/resources':
+    post:
+      summary: Get resources matched with provided filters
+      description: Get resources matched with provided filters
+      tags:
+        - Resources
+      security:
+        - ApiKey: []
+      parameters:
+        - name: accountId
+          required: true
+          in: path
+          description: The id of account which resources will be fetched
+          schema:
+            type: string
+            format: UUID
+      requestBody:
+        $ref: '#/components/requestBodies/GetResourcesWithFilters'
+      responses:
+        '200':
+          description: Json object of resources that matched with filters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ebs:
+                    description: List of elastic block stores
+                    nullable: false
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Ebs'
+                  ec2:
+                    description: List of AWS ec2 instances
+                    type: array
+                    nullable: false
+                    items:
+                      $ref: '#/components/schemas/Ec2'
+                  rds:
+                    description: List of AWS rds instances
+                    type: array
+                    nullable: false
+                    items:
+                      $ref: '#/components/schemas/Rds'
+                  eip:
+                    description: List of AWS eip addresses
+                    type: array
+                    nullable: false
+                    items:
+                      $ref: '#/components/schemas/Eip'
+                  elc:
+                    description: List of AWS elasticache resources
+                    type: array
+                    nullable: false
+                    items:
+                      $ref: '#/components/schemas/Elc'
+                  elb:
+                    description: List of AWS load balancers
+                    type: array
+                    nullable: false
+                    items:
+                      $ref: '#/components/schemas/Elb'
+                  vm:
+                    description: List of GCP virtual machines
+                    type: array
+                    nullable: false
+                    items:
+                      $ref: '#/components/schemas/Vm'
+                  disk:
+                    description: List of GCP disks
+                    type: array
+                    nullable: false
+                    items:
+                      $ref: '#/components/schemas/Disk'
+                  sql:
+                    description: List of GCP sql instances
+                    type: array
+                    nullable: false
+                    items:
+                      $ref: '#/components/schemas/Sql'
+                  ip:
+                    description: List of GCP Ip addresses
+                    type: array
+                    nullable: false
+                    items:
+                      $ref: '#/components/schemas/Ip'
+                  lb:
+                    description: List of GCP load balancers
+                    type: array
+                    nullable: false
+                    items:
+                      $ref: '#/components/schemas/Lb'
+                required:
+                  - ebs
+                  - ec2
+                  - rds
+                  - eip
+                  - elb
+                  - elc
+                  - disk
+                  - sql
+                  - vm
+                  - ip
+                  - lb
+              examples:
+                FilteredResourcesResponse:
+                  $ref: '#/components/examples/FilteredResourcesResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: get-resources
+  '/providers/{provider}/filters':
+    get:
+      summary: Get Filters
+      tags:
+        - Filters
+      security:
+        - ApiKey: []
+      parameters:
+        - name: provider
+          required: true
+          in: path
+          description: Cloud provider
+          schema:
+            $ref: '#/components/schemas/ProviderType'
+      responses:
+        '200':
+          $ref: '#/components/responses/Filters'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+      operationId: get-filters
+      description: Get filters
+    parameters:
+      - schema:
+          type: string
+          enum:
+            - aws
+            - gcp
+        name: provider
+        in: path
+        required: true
+  '/accounts/{accountId}':
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+          example: 00018acc-a66f-4747-9670-fadc3a2ead87
+        name: accountId
+        in: path
+        required: true
+    get:
+      summary: Get account by id
+      tags:
+        - Accounts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+              examples:
+                Example 1:
+                  value:
+                    id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                    type: aws
+                    access_type: read_write
+                    provider_account_id: '389986441234'
+                    provider_account_name: string
+                    provider_details:
+                      aws:
+                        is_root: false
+                        organisation_id: c-xtzel6z9g1
+                    is_sub_account: false
+                    status: connected
+                    created_at: '2019-08-24T14:15:22Z'
+                    outdated: false
+                    last_resource_updated_date: '2019-08-24T14:15:22Z'
+                    estimated_monthly_savings: 0
+                    total_monthly_saved_costs: 10
+                    total_costs: 9.15
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+      operationId: get-accounts-accountId
+      description: Get account by id
+      security:
+        - ApiKey: []
+  /accounts:
+    get:
+      summary: Get accounts
+      tags:
+        - Accounts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+              examples:
+                Example 1:
+                  value:
+                    - id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                      type: aws
+                      access_type: read_write
+                      provider_account_id: '389986441234'
+                      provider_account_name: string
+                      provider_details:
+                        aws:
+                          is_root: false
+                          organisation_id: c-xtzel6z9g1
+                      is_sub_account: false
+                      status: connected
+                      created_at: '2019-08-24T14:15:22Z'
+                      outdated: false
+                      last_resource_updated_date: '2019-08-24T14:15:22Z'
+                      estimated_monthly_savings: 0
+                      total_monthly_saved_costs: 10
+                      total_costs: 9.15
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+      operationId: get-accounts
+      description: Get accounts
+      security:
+        - ApiKey: []
+      parameters:
+        - schema:
+            type: string
+            example: 'connected,deactivated'
+          in: query
+          name: statuses
+        - schema:
+            type: string
+            enum:
+              - aws
+              - gcp
+            example: aws
+          in: query
+          name: provider
+        - schema:
+            type: string
+            enum:
+              - read
+              - read_write
+            example: read_write
+          in: query
+          name: access_type
+  '/providers/{provider}/regions':
+    get:
+      summary: Get regions
+      tags:
+        - Regions
+      parameters:
+        - name: provider
+          required: true
+          in: path
+          description: Cloud provider
+          schema:
+            $ref: '#/components/schemas/ProviderType'
+      security:
+        - ApiKey: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Regions'
+              examples:
+                AWSRegions:
+                  value:
+                    - name: US West (N. California)
+                      key: us-west-1
+                    - name: US East (N. Virginia)
+                      key: us-east-1
+                GCPRegions:
+                  value:
+                    - name: asia-east1 (Taiwan)
+                      key: asia-east1
+                    - name: asia-east2 (Hong Kong)
+                      key: asia-east2
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+      operationId: get-regions
+      description: Get regions
+    parameters:
+      - schema:
+          type: string
+          enum:
+            - aws
+            - gcp
+            - azure
+        name: provider
+        in: path
+        required: true
+  '/dashboards/{dashboardId}':
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+          example: 00018acc-a66f-4747-9670-fadc3a2ead87
+        name: dashboardId
+        in: path
+        required: true
+    get:
+      summary: Get dashboard by id
+      tags:
+        - Dashboards
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/DashboardDetails'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      operationId: get-dashboard-dashboardId
+      description: Get dashboard by id
+      security:
+        - ApiKey: [ ]
+  /widgets/largest-cost-changes/{widgetId}:
+    parameters:
+      - $ref: '#/components/parameters/PathWidgetId'
+      - $ref: '#/components/parameters/QueryCategoryId'
+      - $ref: '#/components/parameters/QueryDateLabel'
+      - $ref: '#/components/parameters/QueryDateFrom'
+      - $ref: '#/components/parameters/QueryDateTo'
+      - $ref: '#/components/parameters/QueryDateType'
+      - $ref: '#/components/parameters/QueryDateValue'
+      - $ref: '#/components/parameters/QueryDateUnit'
+    get:
+      summary: GET largest cost changes widget
+      tags:
+        - Widgets
+      responses:
+        '200':
+          $ref: '#/components/responses/LargestCostChangesWidgetResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+      operationId: get-users-me-organisations-current-widgets-largest-cost-changes
+      security:
+        - ApiKey: [ ]
+      description: GET largest cost changes widget
+  /widgets/cost-and-usage-summary/{widgetId}:
+    parameters:
+      - $ref: '#/components/parameters/PathWidgetId'
+      - $ref: '#/components/parameters/QueryCategoryId'
+      - $ref: '#/components/parameters/QueryDateLabel'
+      - $ref: '#/components/parameters/QueryDateFrom'
+      - $ref: '#/components/parameters/QueryDateTo'
+      - $ref: '#/components/parameters/QueryDateType'
+      - $ref: '#/components/parameters/QueryDateValue'
+      - $ref: '#/components/parameters/QueryDateUnit'
+    get:
+      summary: GET cost and usage summary widget
+      tags:
+        - Widgets
+      responses:
+        '200':
+          $ref: '#/components/responses/CostAndUsageSummaryWidgetResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+      operationId: get-widgets-cost-and-usage-summary
+      security:
+        - ApiKey: [ ]
+      description: GET cost and usage summary widget
+  /widgets/cost-breakdown/{widgetId}:
+    parameters:
+      - $ref: '#/components/parameters/PathWidgetId'
+      - $ref: '#/components/parameters/QueryCategoryId'
+      - $ref: '#/components/parameters/QueryDateLabel'
+      - $ref: '#/components/parameters/QueryDateFrom'
+      - $ref: '#/components/parameters/QueryDateTo'
+      - $ref: '#/components/parameters/QueryDateType'
+      - $ref: '#/components/parameters/QueryDateValue'
+      - $ref: '#/components/parameters/QueryDateUnit'
+    get:
+      summary: GET cost breakdown widget
+      tags:
+        - Widgets
+      responses:
+        '200':
+          $ref: '#/components/responses/CostBreakdownWidgetResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+      operationId: get-users-me-organisations-current-widgets-cost-breakdown
+      security:
+        - ApiKey: [ ]
+      description: GET cost breakdown widget
+  /resource-explorer/possible-groupings:
+    get:
+      summary: Get resource explorer possible groupings
+      tags:
+        - Resource Explorer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceExplorerPossibleGroupings'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      operationId: get-resource-explorer-possible-groupings
+      description: Get resource explorer possible groupings
+      security:
+        - ApiKey: [ ]
+  '/billing-explorer/reports/{reportId}':
+    get:
+      summary: Get billing report data by id
+      description: Retrieves billing aggregation data for a saved billing explorer report using its id.
+      operationId: get-billing-explorer-report-billing-data
+      tags:
+        - Resource Explorer
+      security:
+        - ApiKey: [ ]
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          description: Billing explorer report id
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingAggregateResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /resource-explorer/possible-filters:
+    get:
+      summary: Get resource explorer possible filters
+      description: Returns the list of available filter types per provider
+      operationId: get-resource-explorer-possible-filters
+      tags:
+        - Resource Explorer
+      security:
+        - ApiKey: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  '/resource-explorer/filters/{filterProvider}/{filterType}/values':
+    get:
+      summary: Get filter values for a specific filter type
+      description: Returns possible values for a specific filter provider and filter type
+      operationId: get-resource-explorer-filter-values
+      tags:
+        - Resource Explorer
+      security:
+        - ApiKey: [ ]
+      parameters:
+        - name: filterProvider
+          in: path
+          required: true
+          description: The cloud provider for the filter (e.g. aws, gcp, azure)
+          schema:
+            type: string
+        - name: filterType
+          in: path
+          required: true
+          description: The filter type to retrieve values for
+          schema:
+            type: string
+        - name: key
+          in: query
+          required: false
+          description: Optional key to further narrow the filter values
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /billing-explorer/validate:
+    post:
+      summary: Validate billing explorer request
+      description: Validates a billing explorer request body without executing the query. Returns 204 No Content on success.
+      operationId: validate-billing-explorer
+      tags:
+        - Resource Explorer
+      security:
+        - ApiKey: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BillingDataRequest'
+      responses:
+        '204':
+          description: Validation successful, no content returned
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /ingest/{destinationId}:
+    post:
+      summary: Ingest custom data
+      description: Ingests newline-delimited JSON (NDJSON) payload to a destination.
+      operationId: ingestCustomData
+      tags:
+        - Custom Data
+      security:
+        - ApiKey: []
+      parameters:
+        - name: destinationId
+          in: path
+          required: true
+          description: Destination identifier (Telemetry or Custom Source Id)
+          schema:
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: Idempotency key to ensure request is processed only once
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/x-ndjson:
+            schema:
+              type: string
+            examples:
+              ndjsonWithDate:
+                summary: NDJSON lines with date-only field
+                description: Each line is a JSON object. The "date" field must be a date in yyyy-MM-dd format.
+                value: |-
+                  {"deviceId":"1b2e5e34-2c3a-4a5f-9c1a-2d3e4f5a6b7c","metric":"cpu_usage","value":73.4,"date":"2026-02-16"}
+                  {"deviceId":"1b2e5e34-2c3a-4a5f-9c1a-2d3e4f5a6b7c","metric":"memory_usage","value":58.1,"date":"2026-02-16"}
+      responses:
+        '200':
+          description: Ingestion result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  processed_rows:
+                    type: integer
+                required:
+                  - processed_rows
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      errors:
+                        type: array
+                        items:
+                          oneOf:
+                            - type: object
+                              description: Invalid JSON
+                              properties:
+                                code:
+                                  $ref: '#/components/schemas/ErrorCode'
+                              required:
+                                - code
+                            - type: object
+                              description: Mandatory field missing
+                              properties:
+                                column:
+                                  type: string
+                                code:
+                                  $ref: '#/components/schemas/ErrorCode'
+                              required:
+                                - code
+                                - column
+                            - type: object
+                              description: Invalid column format
+                              properties:
+                                column:
+                                  type: string
+                                invalid_value:
+                                  type: string
+                                row_number:
+                                  type: integer
+                                expected_format:
+                                  type: string
+                                code:
+                                  $ref: '#/components/schemas/ErrorCode'
+                              required:
+                                - code
+                                - column
+                                - invalid_value
+                                - row_number
+                                - expected_format
+                    required:
+                      - errors
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  parameters:
+    PathWidgetId:
+      name: widgetId
+      schema:
+        type: string
+        format: uuid
+      in: path
+      required: true
+    QueryCategoryId:
+      name: category_id
+      in: query
+      schema:
+        type: string
+        format: uuid
+    QueryDateLabel:
+      name: date_label
+      in: query
+      schema:
+        $ref: '#/components/schemas/DateLabelNullable'
+    QueryDateFrom:
+      name: date_from
+      in: query
+      schema:
+        $ref: '#/components/schemas/NullableDate'
+    QueryDateTo:
+      name: date_to
+      in: query
+      schema:
+        $ref: '#/components/schemas/NullableDate'
+    QueryDateType:
+      name: date_type
+      in: query
+      schema:
+        $ref: '#/components/schemas/DateType'
+    QueryDateValue:
+      name: date_value
+      in: query
+      schema:
+        type: number
+        nullable: true
+    QueryDateUnit:
+      name: date_unit
+      in: query
+      schema:
+        $ref: '#/components/schemas/DateUnit'
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      name: x-api-key
+      in: header
+  schemas:
+    ErrorCode:
+      type: string
+      enum:
+        - MISSING_MANDATORY_FIELD
+        - INVALID_COLUMN_FORMAT
+        - INVALID_JSON
+    CreateDataSourceRequest:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - TELEMETRY
+            - CUSTOM_SOURCE
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataSourceColumnRequest'
+          nullable: true
+          description: Optional. Required when type is CUSTOM_SOURCE. List of column definitions.
+    DataSourceColumnRequest:
+      type: object
+      required:
+        - name
+        - display_name
+        - data_type
+      properties:
+        name:
+          type: string
+          description: Column name (e.g. "Organization", "Account", "Service_ID").
+        display_name:
+          type: string
+          description: Human-readable display name shown in the UI.
+        data_type:
+          type: string
+          enum:
+            - string
+            - number
+            - date
+          description: Data type of the column.
+        next_grouping:
+          type: string
+          nullable: true
+          description: Name of the column this one drills down into. Null means terminal level (no further drill-down).
+    CreateDataSourceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - TELEMETRY
+            - CUSTOM_SOURCE
+        ingest_url:
+          type: string
+          description: Relative path to send data to this data source.
+    Telemetry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        created_by:
+          type: string
+          format: uuid
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        modified_by:
+          type: string
+          format: uuid
+          nullable: true
+        modified_at:
+          type: string
+          format: date-time
+          nullable: true
+        columns:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+    CustomSourceColumnResponse:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+    CustomSource:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        created_by:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        modified_by:
+          type: string
+          format: uuid
+          nullable: true
+        modified_at:
+          type: string
+          format: date-time
+          nullable: true
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomSourceColumnResponse'
+      required:
+        - id
+        - name
+        - created_by
+        - created_at
+        - columns
+    Ebs:
+      type: object
+      description: AWS Ebs volume
+      properties:
+        id:
+          type: string
+          format: UUID
+          readOnly: true
+          example: d74d45ff-f686-4b2f-86c0-54d3801a236c
+          nullable: false
+        volume_id:
+          type: string
+          example: vol-02d58dce2f4667172
+          nullable: false
+        size:
+          type: string
+          example: '1073741824'
+          nullable: false
+        state:
+          type: string
+          example: available
+          nullable: false
+        type:
+          type: string
+          example: gp2
+          nullable: false
+        price_per_month:
+          type: number
+          example: 0.1
+          nullable: false
+        availability_zone:
+          type: string
+          example: us-east-1a
+          nullable: false
+        has_attachments:
+          type: boolean
+          example: true
+          nullable: false
+        created_at:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Date'
+        tags:
+          type: array
+          items:
+            allOf:
+              - nullable: false
+              - $ref: '#/components/schemas/Tags'
+          description: List of tags
+        region:
+          type: string
+          example: us-east-1
+          description: Region of ebs volume
+          nullable: false
+        link:
+          type: string
+          example: 'https://console.aws.amazon.com/ec2/home?region=us-east-1#VolumeDetails:volumeId=vol-02d58dce2f4667172'
+          nullable: false
+      required:
+        - id
+        - volume_id
+        - size
+        - state
+        - type
+        - price_per_month
+        - availability_zone
+        - has_attachments
+        - created_at
+        - tags
+        - region
+        - link
+    Eip:
+      type: object
+      description: AWS Eip address
+      properties:
+        id:
+          type: string
+          format: UUID
+          readOnly: true
+          example: b8414855-8b25-436f-9364-16c5df2e960d
+          nullable: false
+        ip:
+          type: string
+          example: 44.199.21.179
+          nullable: false
+        allocation_id:
+          type: string
+          example: eipalloc-0d32941e0f777d5aa
+          nullable: true
+        association_id:
+          type: string
+          example: eipassoc-0d50c0ad2e169e445
+          nullable: true
+        instance_id:
+          type: string
+          example: i-0af2561eb64b7ab79
+          nullable: true
+        domain:
+          type: string
+          example: vpc
+          nullable: true
+        price_per_month:
+          type: number
+          example: 3.6
+          nullable: false
+        created_at:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Date'
+        region:
+          type: string
+          example: us-east-1
+          nullable: false
+        tags:
+          type: array
+          items:
+            allOf:
+              - nullable: false
+              - $ref: '#/components/schemas/Tags'
+        link:
+          type: string
+          example: 'https://console.aws.amazon.com/ec2/home?region=us-east-1#ElasticIpDetails:AllocationId=eipalloc-0b2a1808368aa6d10'
+          nullable: false
+      required:
+        - id
+        - ip
+        - allocation_id
+        - association_id
+        - instance_id
+        - domain
+        - price_per_month
+        - created_at
+        - region
+        - tags
+        - link
+    Ec2:
+      type: object
+      description: AWS Ec2 Instance
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          example: 829eeb09-a9be-40d3-93b5-dd12534a3090
+          nullable: false
+        image_id:
+          type: string
+          example: ami-0b93ce03dcbcb10f6
+          nullable: false
+        instance_id:
+          type: string
+          nullable: false
+          example: i-0a5ff2749d14ec42c
+        is_spot_instance:
+          type: boolean
+          nullable: false
+        type:
+          type: string
+          example: t2.micro
+          nullable: false
+        cpu:
+          type: array
+          format: double
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        cpu_by_hours:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        network_in:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        network_in_by_hours:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        network_out:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        network_out_by_hours:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        created_at:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Date'
+        price_per_month:
+          nullable: false
+          type: number
+          example: 8.35
+        availability_zone:
+          type: string
+          nullable: false
+          example: us-east-1b
+        region:
+          type: string
+          nullable: false
+          example: us-east-1
+        tags:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Tags'
+        link:
+          nullable: false
+          type: string
+      required:
+        - id
+        - image_id
+        - instance_id
+        - is_spot_instance
+        - type
+        - cpu
+        - network_in
+        - network_out
+        - cpu_by_hours
+        - network_in_by_hours
+        - network_out_by_hours
+        - created_at
+        - price_per_month
+        - availability_zone
+        - region
+        - tags
+        - link
+    Elc:
+      type: object
+      description: AWS elasticache cache
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: false
+          example: 000e374e-f395-4bce-91a3-2f431dd7ad45
+        cluster_id:
+          type: string
+          nullable: false
+          example: redis-cluster
+        price_per_month:
+          type: number
+          format: double
+          nullable: false
+          example: 444.96
+        instance_type:
+          type: string
+          nullable: false
+          example: cache.r6g.large
+        cache_type:
+          type: string
+          nullable: false
+          example: redis
+          enum:
+            - redis
+            - memcached
+        nodes_count:
+          type: number
+          nullable: false
+          example: 3
+        connections:
+          type: array
+          format: double
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        connections_by_hours:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        cpu:
+          type: array
+          format: double
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        cpu_by_hours:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        created_at:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Date'
+        region:
+          type: string
+          example: us-east-1
+          nullable: false
+        tags:
+          allOf:
+            - $ref: '#/components/schemas/Tags'
+            - nullable: false
+        link:
+          nullable: false
+          example: 'https://console.aws.amazon.com/elasticache/home?region=us-east-1#/redis/redis-cluster'
+          type: string
+      required:
+        - id
+        - cluster_id
+        - price_per_month
+        - instance_type
+        - cache_type
+        - nodes_count
+        - connections
+        - connections_by_hours
+        - cpu
+        - created_at
+        - region
+        - tags
+        - link
+    Elb:
+      type: object
+      description: AWS Elastic load balancer
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: false
+          example: 00018acc-a66f-4747-9670-fadc3a2ead87
+        type:
+          type: string
+          nullable: false
+          example: classic
+        load_balancer_name:
+          type: string
+          nullable: false
+          example: aefa65ba0b5984a288a5b362d364cf05
+        load_balancer_arn:
+          type: string
+          nullable: true
+        price_per_month:
+          type: number
+          example: 18
+          format: double
+          nullable: false
+        dns_name:
+          type: string
+          example: aefa65ba0b5984a288a5b362d364cf05-10405585a988f0cx.elb.us-west-2.amazonaws.com
+          nullable: false
+        created_at:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Date'
+        region:
+          type: string
+          example: us-west-2
+          nullable: false
+        has_attachments:
+          type: boolean
+          example: true
+          nullable: false
+        tags:
+          allOf:
+            - $ref: '#/components/schemas/Tags'
+            - nullable: false
+        link:
+          nullable: false
+          type: string
+      required:
+        - id
+        - type
+        - load_balancer_name
+        - load_balancer_arn
+        - price_per_month
+        - dns_name
+        - created_at
+        - region
+        - has_attachments
+        - tags
+        - link
+    Rds:
+      type: object
+      description: AWS Rds instance
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: false
+          example: 06e5e3ed-bfb4-4c9b-a500-4cfbee0d83fc
+        db_id:
+          type: string
+          nullable: false
+          example: mysql-rds
+        price_per_month:
+          type: number
+          format: double
+          nullable: false
+          example: 195.84
+        instance_type:
+          type: string
+          example: db.t2.large
+          nullable: false
+        storage_type:
+          type: string
+          nullable: false
+          example: gp2
+        connections_by_hours:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        cpu:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        cpu_by_hours:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        connections:
+          type: array
+          format: double
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        db_type:
+          nullable: false
+          type: string
+          example: mysql
+        created_at:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Date'
+        availability_zone:
+          type: string
+          example: us-west-2b
+          nullable: false
+        status:
+          type: string
+          nullable: false
+          example: available
+        region:
+          type: string
+          nullable: false
+          example: us-west-2
+        tags:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Tags'
+        cluster_id:
+          type: string
+          nullable: true
+        nodes_count:
+          type: integer
+          example: 3
+          nullable: true
+        link:
+          type: string
+          nullable: false
+          example: 'https://console.aws.amazon.com/rds/home?region=$region#database:id=$dbId;is-cluster=false'
+      required:
+        - id
+        - db_id
+        - price_per_month
+        - instance_type
+        - storage_type
+        - connections_by_hours
+        - cpu
+        - cpu_by_hours
+        - connections
+        - db_type
+        - created_at
+        - availability_zone
+        - region
+        - tags
+        - link
+        - status
+        - cluster_id
+        - nodes_count
+    Sql:
+      type: object
+      description: GCP Sql instance
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 696629a1-a09a-4d89-9315-2a80ce722062
+          readOnly: true
+          nullable: false
+        multi_az:
+          type: boolean
+          nullable: false
+        price_per_month:
+          type: number
+          format: double
+          nullable: false
+          example: 547.29
+        cpu_size:
+          type: string
+          nullable: false
+          example: '4'
+        ram_size:
+          type: string
+          nullable: false
+          example: '26624'
+        storage:
+          nullable: false
+          type: string
+        connections_by_hours:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        cpu:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        cpu_by_hours:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        connections:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        type:
+          type: string
+          nullable: false
+          example: MYSQL_8_0
+        created_at:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Date'
+        region:
+          type: string
+          nullable: false
+          example: us-central1
+        tags:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Tags'
+        link:
+          nullable: false
+          example: 'https://console.cloud.google.com/sql/instances/test-instance/overview?project=my-project'
+          type: string
+      required:
+        - id
+        - multi_az
+        - price_per_month
+        - cpu_size
+        - ram_size
+        - storage
+        - connections_by_hours
+        - cpu_by_hours
+        - cpu
+        - connections
+        - type
+        - created_at
+        - region
+        - tags
+        - link
+    Disk:
+      type: object
+      description: GCP disk
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: c1c9d9bc-74ab-478c-9083-d9238bcfa516
+          readOnly: true
+          nullable: false
+        name:
+          type: string
+          example: disk-1
+          nullable: false
+        price_per_month:
+          type: number
+          format: double
+          example: 3.2
+          nullable: false
+        type:
+          type: string
+          example: pd-standard
+          nullable: false
+        size:
+          type: number
+          example: 10737418240
+          nullable: false
+        state:
+          format: double
+          type: string
+          example: READY
+          nullable: false
+        availability_zone:
+          type: string
+          example: us-central1-a
+          nullable: false
+        region:
+          type: string
+          example: us-central1
+          nullable: true
+        tags:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Tags'
+        has_attachments:
+          type: boolean
+          nullable: false
+        link:
+          nullable: false
+          example: /compute/disksDetail/zones/us-central1-a/disks/disk-1?project=my-project
+          type: string
+      required:
+        - id
+        - name
+        - price_per_month
+        - type
+        - size
+        - state
+        - availability_zone
+        - region
+        - tags
+        - link
+        - has_attachments
+    Ip:
+      type: object
+      description: GCP Ip address
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: false
+          example: 05c5c3f5-60ee-43f1-af1d-0723fe440ab2
+        ip:
+          type: string
+          nullable: false
+          example: 34.120.161.211
+        name:
+          type: string
+          nullable: false
+          example: ip-address
+        is_in_use:
+          type: boolean
+          nullable: false
+        price_per_month:
+          type: number
+          example: 7.3
+          format: double
+          nullable: false
+        region:
+          type: string
+          example: us-central1
+          nullable: false
+        tags:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Tags'
+        created_at:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Date'
+        link:
+          nullable: false
+          type: string
+          example: 'https://console.cloud.google.com/networking/addresses/list?project=my-project'
+      required:
+        - id
+        - ip
+        - is_in_use
+        - price_per_month
+        - region
+        - tags
+        - created_at
+        - link
+        - name
+    Lb:
+      type: object
+      description: GCP load balancer
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: false
+          example: 05c5c3f5-60ee-43f1-af1d-0723fe440ab2
+        load_balancer_name:
+          type: string
+          example: test-backend-load-balancer-forwarding-rule
+          nullable: false
+        price_per_month:
+          type: number
+          nullable: false
+          format: double
+        type:
+          type: string
+          nullable: false
+          enum:
+            - TCP
+        global:
+          type: boolean
+          nullable: false
+        created_at:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Date'
+        has_attachments:
+          type: boolean
+          nullable: false
+        tags:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Tags'
+        region:
+          type: string
+          nullable: true
+          example: us-central1
+        link:
+          nullable: false
+          type: string
+          example: 'https://console.cloud.google.com/net-services/loadbalancing/advanced/forwardingRules/details/regions/us-central1/forwardingRules/test-backend-load-balancer-forwarding-rule?project=my-project'
+      required:
+        - id
+        - load_balancer_name
+        - price_per_month
+        - global
+        - created_at
+        - has_attachments
+        - tags
+        - link
+        - type
+    Vm:
+      type: object
+      description: GCP Vm Instance
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 829eeb09-a9be-40d3-93b5-dd12534a3090
+          readOnly: true
+          nullable: false
+        image_id:
+          type: string
+          example: instance-1
+          nullable: false
+        type:
+          type: string
+          example: e2-medium
+          nullable: false
+        cpu:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        cpu_by_hours:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        network_in:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        network_in_by_hours:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        network_out:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        network_out_by_hours:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/Metric'
+        created_at:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Date'
+        price_per_month:
+          nullable: false
+          type: number
+        availability_zone:
+          nullable: false
+          type: string
+        region:
+          type: string
+          nullable: true
+        tags:
+          allOf:
+            - nullable: false
+            - $ref: '#/components/schemas/Tags'
+        link:
+          nullable: false
+          type: string
+          example: 'https://console.cloud.google.com/compute/instancesDetail/zones/us-central1-a/instances/instance-1?project=my-project'
+      required:
+        - id
+        - image_id
+        - type
+        - cpu
+        - network_in
+        - network_out
+        - cpu_by_hours
+        - network_in_by_hours
+        - network_out_by_hours
+        - created_at
+        - price_per_month
+        - availability_zone
+        - tags
+        - link
+        - region
+    FilterKeyType:
+      type: string
+      title: FilterKeyType
+      x-stoplight:
+        id: 1svtkfi62ljs0
+      enum:
+        - launch_time
+        - cpu
+        - network_in
+        - network_out
+        - tag
+        - attachments
+        - volume_age
+        - database_connections
+        - instances
+        - instance_ids
+        - association_ids
+        - region
+        - in_use
+        - total_connections
+        - cloudchipr_ttl
+        - provider_unique_identifier
+    FilterOperatorType:
+      type: string
+      title: FilterOperatorType
+      enum:
+        - equal
+        - not_equal
+        - greater_than
+        - greater_than_equal_to
+        - less_than
+        - less_than_equal_to
+        - exists
+        - does_not_exist
+        - contains
+        - does_not_contain
+        - is_empty
+        - is_not_empty
+        - is_absent
+        - is_not_absent
+        - in
+        - is_true
+        - is_false
+        - is_expired
+        - is_invalid
+        - does_never_expire
+        - not_in
+    FilterStatisticsType:
+      type: string
+      title: FilterStatisticsType
+      enum:
+        - sum
+        - maximum
+        - minimum
+        - average
+    FilterMetric:
+      type: object
+      description: Object to filter with metrics
+      properties:
+        statistics_type:
+          $ref: '#/components/schemas/FilterStatisticsType'
+        since:
+          type: object
+          properties:
+            value:
+              type: number
+            unit:
+              type: string
+              enum:
+                - hours
+                - days
+    ResourceType:
+      type: string
+      title: ResourceType
+      x-stoplight:
+        id: um3kbkmvmspec
+      enum:
+        - ec2
+        - ebs
+        - elb
+        - eip
+        - rds
+        - vm
+        - disk
+        - lb
+        - ip
+        - sql
+        - elc
+      description: All providers resources
+    Date:
+      type: string
+      description: ISO 8601
+      example: '2022-09-11T21:14:49.691823'
+    Tags:
+      title: Tags
+      type: object
+      x-examples:
+        example-1:
+          key: env
+          value: production
+      description: Provider resource tag
+      properties:
+        key:
+          type: string
+          example: env
+        value:
+          type: string
+          example: production
+      required:
+        - key
+        - value
+    Metric:
+      title: Metric
+      type: object
+      x-examples:
+        example-1:
+          timestamp: '2022-02-05T17:20:00Z'
+          average: 0.11278171781244677
+          minimum: 0
+          maximum: 8.64406779661002
+          sum: 162.40567364992333
+          unit: Percent
+      properties:
+        timestamp:
+          type: string
+          example: '2022-02-06T17:20:00Z'
+        average:
+          type: number
+          format: double
+        maximum:
+          type: number
+          format: double
+        minimum:
+          type: number
+          format: double
+        sum:
+          type: number
+          format: double
+        unit:
+          type: string
+          example: Percent
+      required:
+        - timestamp
+        - average
+        - maximum
+        - minimum
+        - sum
+        - unit
+    FilterItemTemplate:
+      title: FilterItemTemplate
+      type: object
+      x-examples:
+        example-1:
+          key: cpu
+          value_type: number
+          min_value: 0
+          max_value: 100
+          allowed_operators:
+            - not_equal
+            - greater_than
+            - greater_than_equal_to
+            - less_than
+            - less_than_equal_to
+        example-2:
+          key: tag
+          value_type: string
+          min_value: null
+          max_value: null
+          allowed_operators:
+            - equal
+            - exists
+            - contains
+      properties:
+        key:
+          $ref: '#/components/schemas/FilterKeyType'
+        value_type:
+          type: string
+          nullable: true
+          enum:
+            - number
+            - percentage
+            - boolean
+            - string
+        min_value:
+          type: number
+          nullable: true
+        max_value:
+          type: number
+          nullable: true
+        allowed_operators:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterOperatorType'
+      required:
+        - key
+        - min_value
+        - max_value
+        - allowed_operators
+    ProviderType:
+      type: string
+      enum:
+        - aws
+        - gcp
+    Account:
+      title: Account
+      x-stoplight:
+        id: 7f6438e1c6e5c
+      type: object
+      x-examples:
+        Example 1:
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          type: aws
+          access_type: read_write
+          provider_account_id: '389986441234'
+          provider_account_name: string
+          provider_details:
+            aws:
+              is_root: true
+              organisation_id: string
+          is_sub_account: false
+          status: connected
+          created_at: '2019-08-24T14:15:22Z'
+          outdated: false
+          last_resource_updated_date: '2019-08-24T14:15:22Z'
+          estimated_monthly_savings: 0
+          total_monthly_saved_costs: 10
+          total_costs: 9.15
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        access_type:
+          type: string
+        provider_account_id:
+          type: string
+        provider_account_name:
+          type: string
+          nullable: true
+        provider_details:
+          allOf:
+            - $ref: '#/components/schemas/AccountProviderDetailsResponse'
+            - nullable: true
+        is_sub_account:
+          type: boolean
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        outdated:
+          type: boolean
+        last_resource_updated_date:
+          type: string
+          format: date-time
+          nullable: true
+        estimated_monthly_savings:
+          type: number
+        total_monthly_saved_costs:
+          type: number
+        total_costs:
+          type: number
+      required:
+        - id
+        - type
+        - access_type
+        - provider_account_id
+        - is_sub_account
+        - status
+        - created_at
+        - outdated
+        - estimated_monthly_savings
+        - total_monthly_saved_costs
+        - total_costs
+        - provider_account_name
+        - provider_details
+        - last_resource_updated_date
+    Regions:
+      type: array
+      items:
+        $ref: '#/components/schemas/Region'
+    Region:
+      title: Region
+      type: object
+      x-examples:
+        example-1:
+          name: US West (N. California)
+          key: us-west-1
+      properties:
+        name:
+          type: string
+        key:
+          type: string
+      required:
+        - name
+        - key
+    AwsAccountDetails:
+      title: AwsAccountDetails
+      x-stoplight:
+        id: i9deb75f9cmm8
+      type: object
+      properties:
+        is_root:
+          type: boolean
+          nullable: true
+        organisation_id:
+          type: string
+          nullable: true
+      required:
+        - is_root
+        - organisation_id
+      x-examples:
+        Example 1:
+          is_root: true
+          organisation_id: a91df8f5-161f-4ea3-bcf6-070c8dccbb14
+    GcpAccountDetails:
+      title: GcpAccountDetails
+      x-stoplight:
+        id: qkdebgwg6tndg
+      type: object
+      properties:
+        project_id:
+          type: string
+          nullable: true
+        service_account:
+          type: string
+      required:
+        - project_id
+        - service_account
+      x-examples:
+        Example 1:
+          project_id: string
+          service_account: string
+    AccountProviderDetailsResponse:
+      title: AccountProviderDetailsResponse
+      x-stoplight:
+        id: sbupmpj07kp8b
+      type: object
+      properties:
+        aws:
+          allOf:
+            - nullable: true
+            - $ref: '#/components/schemas/AwsAccountDetails'
+        gcp:
+          allOf:
+            - nullable: true
+            - $ref: '#/components/schemas/GcpAccountDetails'
+      required:
+        - aws
+        - gcp
+    DashboardWidgetCostBreakdown:
+      title: DashboardWidgetCostBreakdown
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/WidgetType'
+        layout:
+          $ref: '#/components/schemas/LayoutNullable'
+        created_by:
+          type: string
+          format: uuid
+          nullable: true
+        view_id:
+          type: string
+          format: uuid
+          nullable: true
+        date_from:
+          $ref: '#/components/schemas/NullableDate'
+        date_to:
+          $ref: '#/components/schemas/NullableDate'
+        date_label:
+          $ref: '#/components/schemas/DateLabelNullable'
+        date_granularity:
+          $ref: '#/components/schemas/DateDataPointNullable'
+        grouping:
+          $ref: '#/components/schemas/ResourceExplorerGrouping'
+        group_values:
+          type: array
+          items:
+            type: string
+        chart_type:
+          $ref: '#/components/schemas/ChartType'
+        trend_type:
+          $ref: '#/components/schemas/TrendType'
+        filter:
+          type: array
+          items:
+            type: string
+        aws_filter:
+          type: array
+          items:
+            type: string
+        gcp_filter:
+          type: array
+          items:
+            type: string
+        azure_filter:
+          type: array
+          items:
+            type: string
+        forecast_option:
+          $ref: '#/components/schemas/ForecastOption'
+        dates:
+          $ref: '#/components/schemas/Dates'
+      required:
+        - id
+        - name
+        - type
+        - layout
+        - created_by
+        - date_from
+        - date_to
+        - date_label
+        - date_granularity
+        - grouping
+        - chart_type
+        - filter
+        - aws_filter
+        - gcp_filter
+        - azure_filter
+        - forecast_option
+    DashboardWidgetCostAndUsageSummary:
+      title: DashboardWidgetCostAndUsageSummary
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/WidgetType'
+        layout:
+          $ref: '#/components/schemas/LayoutNullable'
+        created_by:
+          type: string
+          format: uuid
+          nullable: true
+        view_id:
+          type: string
+          format: uuid
+          nullable: true
+        trend_type:
+          $ref: '#/components/schemas/TrendType'
+        date_label:
+          $ref: '#/components/schemas/DateLabelNullable'
+        date_from:
+          $ref: '#/components/schemas/NullableDate'
+        date_to:
+          $ref: '#/components/schemas/NullableDate'
+        filter:
+          type: array
+          items:
+            type: string
+        date_granularity:
+          $ref: '#/components/schemas/DateDataPointNullable'
+        grouping:
+          $ref: '#/components/schemas/ResourceExplorerGrouping'
+        group_values:
+          type: array
+          items:
+            type: string
+        dates:
+          $ref: '#/components/schemas/Dates'
+      required:
+        - id
+        - name
+        - type
+        - layout
+        - created_by
+        - date_label
+        - date_from
+        - date_to
+        - filter
+        - date_granularity
+        - grouping
+        - dates
+    DashboardWidgetLargestCostChanges:
+      title: DashboardWidgetLargestCostChanges
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/WidgetType'
+        layout:
+          $ref: '#/components/schemas/LayoutNullable'
+        created_by:
+          type: string
+          format: uuid
+        view_id:
+          type: string
+          format: uuid
+          nullable: true
+        date_label:
+          $ref: '#/components/schemas/DateLabelNullable'
+        date_from:
+          $ref: '#/components/schemas/NullableDate'
+        date_to:
+          $ref: '#/components/schemas/NullableDate'
+        date_granularity:
+          $ref: '#/components/schemas/DateDataPointNullable'
+        grouping:
+          $ref: '#/components/schemas/ResourceExplorerGrouping'
+        group_values:
+          type: array
+          items:
+            type: string
+        filter:
+          type: array
+          nullable: true
+          items:
+            type: string
+        price_direction:
+          $ref: '#/components/schemas/PriceDirection'
+        sort_by:
+          $ref: '#/components/schemas/sortByNullable'
+        items_count:
+          type: number
+        min_cost_change:
+          type: number
+          nullable: true
+        min_percentage_change:
+          type: number
+          nullable: true
+        dates:
+          $ref: '#/components/schemas/Dates'
+      required:
+        - id
+        - name
+        - type
+        - layout
+        - created_by
+        - date_label
+        - date_from
+        - date_to
+        - date_granularity
+        - grouping
+        - group_values
+        - filter
+        - price_direction
+        - sort_by
+        - items_count
+        - min_cost_change
+        - min_percentage_change
+        - dates
+    ResourceExplorerGridTotal:
+      title: Resource Explorer Grid Total
+      type: object
+      properties:
+        field:
+          type: string
+        label:
+          type: string
+          nullable: true
+        total_cost:
+          type: number
+          format: float
+        previous_period_total_cost:
+          type: number
+          format: float
+          nullable: true
+        period_total_cost_difference:
+          type: number
+          format: float
+          nullable: true
+        trend:
+          type: number
+          format: float
+          nullable: true
+        cloud_provider:
+          $ref: '#/components/schemas/ProviderType'
+        metadata:
+          $ref: '#/components/schemas/ResourceExplorerGridMetadata'
+        live_usage_cost:
+          type: number
+          nullable: true
+        monthly_forecast:
+          $ref: '#/components/schemas/NullableForecastedCost'
+        quarterly_forecast:
+          $ref: '#/components/schemas/NullableForecastedCost'
+      required:
+        - cloud_provider
+        - field
+        - total_cost
+        - previous_period_total_cost
+        - period_total_cost_difference
+        - trend
+        - metadata
+        - monthly_forecast
+        - quarterly_forecast
+    ResourceExplorerGridMetadata:
+      title: A flexible key-value map containing metadata about the row.
+      type: object
+      additionalProperties:
+        type: string
+    ResourceExplorerGridGranularDateDate:
+      title: Resource Explorer Grid Granular Date Data
+      type: object
+      properties:
+        date:
+          $ref: '#/components/schemas/Date'
+        total_cost:
+          type: number
+          nullable: true
+          format: float
+        trend:
+          type: number
+          nullable: true
+          format: float
+      required:
+        - date
+        - total_cost
+        - trend
+    ResourceExplorerChartData:
+      title: Resource Explorer Chart Data
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceExplorerChartDataItem'
+    ResourceExplorerChartDataItem:
+      title: Resource Explorer Chart Data Item
+      type: object
+      properties:
+        field:
+          type: string
+        label:
+          type: string
+          nullable: true
+        cost:
+          type: number
+          format: float
+    WidgetType:
+      type: string
+      title: WidgetType
+      enum:
+        - resource_explorer
+        - costs_by_category
+        - accounts_live_usage
+        - cost_comparison
+        - cost_breakdown
+        - cost_and_usage_summary
+        - largest_cost_changes
+        - costs_by_category_v2
+    LayoutNullable:
+      title: Layout Nullable
+      type: object
+      nullable: true
+    NullableDate:
+      type: string
+      description: ISO 8601
+      example: '2022-06-11T21:14:49.691823'
+      title: ''
+      nullable: true
+    DateLabel:
+      type: string
+      title: DateLabel
+      enum:
+        - year_to_date
+        - month_to_date
+        - last_one_month
+        - last_three_months
+        - last_six_months
+        - past_fourteen_days
+        - past_seven_days
+        - past_thirty_days
+        - past_forty_five_days
+        - past_ninety_days
+        - past_one_hundred_eighty_days
+        - last_twelve_months
+        - quarter_to_date
+        - last_quarter
+    DateLabelNullable:
+      title: DateLabelNullable
+      nullable: true
+      allOf:
+        - $ref: '#/components/schemas/DateLabel'
+    DateDataPoint:
+      type: string
+      title: DateDataPoint
+      enum:
+        - daily
+        - monthly
+        - weekly
+    DateDataPointNullable:
+      title: DateDataPointNullable
+      nullable: true
+      allOf:
+        - $ref: '#/components/schemas/DateDataPoint'
+    ResourceExplorerFilterProvider:
+      type: string
+      title: ResourceExplorerFilterProvider
+      enum:
+        - aws
+        - gcp
+        - azure
+        - confluent
+        - mongo
+        - dimensions
+        - kubernetes
+        - eks
+        - global
+    ResourceExplorerGroupingLabel:
+      type: object
+      properties:
+        singular:
+          type: string
+          nullable: true
+        plural:
+          type: string
+          nullable: true
+    ResourceExplorerDynamicFilterItemType:
+      type: string
+      enum:
+        - account
+        - region
+        - service
+        - charge_type
+        - product_family
+        - instance_family
+        - instance_type
+        - tag
+        - resource_id
+        - credit
+        - credit_type
+        - marketplace_service
+        - cloud_provider
+        - dimension_id
+        - environment
+        - cluster
+        - namespace
+        - node
+        - namespace
+        - usage_type
+        - pricing_term
+        - description
+        - parent_resource_id
+        - type
+        - deployment
+        - workload_name
+        - workload_type
+        - organisation
+        - group
+        - resource_group
+    ResourceExplorerGrouping:
+      type: string
+      title: ResourceExplorerGrouping
+      nullable: true
+      enum:
+        - service
+        - marketplace_service
+        - cost_allocation_tag
+        - charge_type
+        - account
+        - region
+        - resource
+        - product_family
+        - instance_family
+        - instance_type
+        - credit_type
+        - cloud_provider
+        - cost_allocation_tag_value
+        - category
+        - none
+    ResourceExplorerPossibleGroupings:
+      type: array
+      items:
+        $ref: '#/components/schemas/ResourceExplorerPossibleGrouping'
+    ResourceExplorerPossibleGrouping:
+      title: ResourceExplorerPossibleGrouping
+      type: object
+      properties:
+        key:
+          $ref: '#/components/schemas/ResourceExplorerGrouping'
+        filter_provider:
+          $ref: '#/components/schemas/ResourceExplorerFilterProvider'
+        parent_label:
+          type: string
+        next_grouping:
+          $ref: '#/components/schemas/ResourceExplorerGrouping'
+        label:
+          $ref: '#/components/schemas/ResourceExplorerGroupingLabel'
+        filter_key:
+          $ref: '#/components/schemas/ResourceExplorerDynamicFilterItemType'
+        filter_type:
+          type: string
+        possible_groupings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceExplorerGrouping'
+        has_nested:
+          type: boolean
+    ChartType:
+      type: string
+      enum:
+        - stack
+        - line
+        - bar
+        - pie
+        - table
+        - numeral
+    TrendType:
+      type: string
+      enum:
+        - period_over_period
+        - month_over_month
+    CostType:
+      type: string
+      enum:
+        - unblended
+        - blended
+        - amortized
+        - net_unblended
+        - net_amortized
+    ForecastOption:
+      type: string
+      enum:
+        - month
+        - quarter
+    ForecastedCostRE:
+      type: array
+      items:
+        $ref: '#/components/schemas/ForecastedCost'
+    Dates:
+      type: object
+      title: Dates
+      properties:
+        from:
+          $ref: '#/components/schemas/NullableDate'
+        to:
+          $ref: '#/components/schemas/NullableDate'
+        label:
+          $ref: '#/components/schemas/DateLabelNullable'
+        type:
+          $ref: '#/components/schemas/DateType'
+        value:
+          type: integer
+        unit:
+          $ref: '#/components/schemas/DateUnit'
+    DateType:
+      type: string
+      title: DateType
+      enum:
+        - past
+        - last
+    DateUnit:
+      type: string
+      title: DateUnit
+      enum:
+        - day
+        - week
+        - month
+    PriceDirection:
+      title: PriceDirection
+      type: string
+      enum:
+        - increasing
+        - decreasing
+    SortBy:
+      title: SortBy
+      type: string
+      enum:
+        - sort_by_percentage
+        - sort_by_amount
+    sortByNullable:
+      title: sortByNullable
+      type: string
+      enum:
+        - sort_by_percentage
+        - sort_by_amount
+      nullable: true
+    NullableForecastedCost:
+      allOf:
+        - nullable: true
+        - $ref: '#/components/schemas/ForecastedCost'
+    ForecastedCost:
+      type: object
+      properties:
+        cost:
+          type: number
+        forecast_option:
+          $ref: '#/components/schemas/ForecastOption'
+        trend:
+          type: number
+          nullable: true
+        date_from:
+          $ref: '#/components/schemas/Date'
+        date_to:
+          $ref: '#/components/schemas/Date'
+        previous_period_from:
+          $ref: '#/components/schemas/Date'
+        previous_period_to:
+          $ref: '#/components/schemas/Date'
+      required:
+        - cost
+        - forecast_option
+        - trend
+        - date_from
+        - date_to
+        - previous_period_from
+        - previous_period_to
+    ResourceExplorerCostsDateDetails:
+      title: ResourceExplorerCostsDateDetails
+      type: object
+      properties:
+        from_date:
+          $ref: '#/components/schemas/Date'
+        to_date:
+          $ref: '#/components/schemas/Date'
+      required:
+        - from_date
+        - to_date
+    AverageDailyCostDetails:
+      title: AverageDailyCostDetails
+      type: object
+      properties:
+        from_date:
+          $ref: '#/components/schemas/Date'
+        to_date:
+          $ref: '#/components/schemas/Date'
+        average_daily_cost:
+          type: number
+          nullable: true
+        trend:
+          type: number
+          nullable: true
+      required:
+        - from_date
+        - to_date
+        - average_daily_cost
+        - trend
+    AverageMonthlyCostDetails:
+      title: AverageMonthlyCostDetails
+      type: object
+      properties:
+        from_date:
+          $ref: '#/components/schemas/Date'
+        to_date:
+          $ref: '#/components/schemas/Date'
+        average_monthly_cost:
+          type: number
+          nullable: true
+        trend:
+          type: number
+          nullable: true
+      required:
+        - from_date
+        - to_date
+        - average_monthly_cost
+        - trend
+    DimensionWithCategoriesResponse:
+      type: object
+      properties:
+        key:
+          type: string
+          description: The dimension name
+          example: "Department"
+        value:
+          type: string
+          description: The category name
+          example: "Engineering"
+        filter:
+          $ref: '#/components/schemas/FilterTreeResponse'
+        sharedCosts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SharedCostResponse'
+          description: List of shared costs for this category
+
+    SharedCostResponse:
+      type: object
+      properties:
+        filter:
+          $ref: '#/components/schemas/FilterTreeResponse'
+        amount:
+          type: integer
+          description: The amount of the shared cost
+          example: 25
+
+    FilterTreeResponse:
+      type: object
+      discriminator:
+        propertyName: nodeType
+        mapping:
+          group: '#/components/schemas/FilterGroupNodeResponse'
+          item: '#/components/schemas/FilterItemNodeResponse'
+      oneOf:
+        - $ref: '#/components/schemas/FilterGroupNodeResponse'
+        - $ref: '#/components/schemas/FilterItemNodeResponse'
+
+    FilterGroupNodeResponse:
+      type: object
+      properties:
+        nodeType:
+          type: string
+          enum: [ group ]
+          example: "group"
+        operator:
+          type: string
+          description: The operator for the filter group
+          example: "and"
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterTreeResponse'
+          description: List of filter items in this group
+
+    FilterItemNodeResponse:
+      type: object
+      properties:
+        nodeType:
+          type: string
+          enum: [ item ]
+          example: "item"
+        type:
+          type: string
+          description: The type of the filter item
+          example: "tag"
+        filterProvider:
+          type: string
+          description: The provider of the filter
+          example: "aws"
+        value:
+          type: object
+          description: The value of the filter
+          example: { "key": "Environment", "value": "Production" }
+        operator:
+          type: string
+          description: The operator for the filter item
+          example: "equals"
+
+    BillingAggregateResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingAggregateItemsResponse'
+        total:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingAggregateTotalResponse'
+        totalCost:
+          type: number
+          format: decimal
+        previousPeriodTotalCost:
+          type: number
+          format: decimal
+          nullable: true
+        averageDailyCostDetails:
+          $ref: '#/components/schemas/AverageDailyCostDetailsResponse'
+        averageMonthlyCostDetails:
+          $ref: '#/components/schemas/AverageMonthlyCostDetailsResponse'
+        liveUsageTotalCost:
+          type: number
+          format: decimal
+        totalCostDateDetails:
+          $ref: '#/components/schemas/BillingAggregateCostsDateDetails'
+        previousPeriodCostDateDetails:
+          $ref: '#/components/schemas/BillingAggregateCostsDateDetails'
+        forecastedCosts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ForecastedCostResponse'
+        trendType:
+          type: string
+        costType:
+          type: string
+
+    BillingAggregateItemsResponse:
+      type: object
+      properties:
+        value:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingAggregateItemResponse'
+
+    BillingAggregateItemResponse:
+      type: object
+      properties:
+        field:
+          type: string
+        fields:
+          type: object
+          additionalProperties:
+            type: string
+        label:
+          type: string
+          nullable: true
+        cost:
+          type: number
+          format: decimal
+
+    BillingAggregateTotalResponse:
+      type: object
+      properties:
+        field:
+          type: string
+        fields:
+          type: object
+          additionalProperties:
+            type: string
+        label:
+          type: string
+          nullable: true
+        cloudProvider:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+        totalCost:
+          type: number
+          format: decimal
+        periodTotalCostDifference:
+          type: number
+          format: decimal
+          nullable: true
+        previousPeriodTotalCost:
+          type: number
+          format: decimal
+          nullable: true
+        trend:
+          type: number
+          format: decimal
+          nullable: true
+        liveUsageCost:
+          type: number
+          format: decimal
+          nullable: true
+        monthlyForecast:
+          $ref: '#/components/schemas/ForecastedCostResponse'
+          nullable: true
+        quarterlyForecast:
+          $ref: '#/components/schemas/ForecastedCostResponse'
+          nullable: true
+
+    AverageDailyCostDetailsResponse:
+      type: object
+      properties:
+        averageDailyCost:
+          type: number
+          format: decimal
+        previousPeriodAverageDailyCost:
+          type: number
+          format: decimal
+          nullable: true
+        trend:
+          type: number
+          format: decimal
+          nullable: true
+
+    AverageMonthlyCostDetailsResponse:
+      type: object
+      properties:
+        averageMonthlyCost:
+          type: number
+          format: decimal
+        previousPeriodAverageMonthlyCost:
+          type: number
+          format: decimal
+          nullable: true
+        trend:
+          type: number
+          format: decimal
+          nullable: true
+
+    BillingAggregateCostsDateDetails:
+      type: object
+      properties:
+        dateFrom:
+          type: string
+          format: date
+        dateTo:
+          type: string
+          format: date
+        days:
+          type: integer
+
+    ForecastedCostResponse:
+      type: object
+      properties:
+        forecastedCost:
+          type: number
+          format: decimal
+        forecastedDate:
+          type: string
+          format: date
+        trend:
+          type: number
+          format: decimal
+          nullable: true
+
+    UpdateCategoryStructureRequest:
+      type: object
+      required:
+        - dimensions
+        - categories
+      properties:
+        dimensions:
+          type: array
+          items:
+            type: string
+          description: List of dimension names
+          example: [ "Department", "Environment" ]
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryRequest'
+          description: List of categories
+        sharedCosts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SharedCostRequest'
+          description: List of shared costs
+
+    CategoryRequest:
+      type: object
+      required:
+        - value
+        - key
+        - filter
+      properties:
+        value:
+          type: string
+          description: The category name
+          example: "Engineering"
+        key:
+          type: string
+          description: The dimension name
+          example: "Department"
+        filter:
+          $ref: '#/components/schemas/FilterTreeNodeRequest'
+          description: The filter for the category
+
+    SharedCostRequest:
+      type: object
+      required:
+        - name
+        - dimensionName
+        - filter
+        - distributionType
+      properties:
+        name:
+          type: string
+          description: The shared cost name
+          example: "AWS Shared Cost"
+        dimensionName:
+          type: string
+          description: The dimension name
+          example: "Department"
+        filter:
+          $ref: '#/components/schemas/FilterTreeNodeRequest'
+          description: The filter tree for the shared cost
+        distributionType:
+          type: string
+          enum: [ EVEN, MANUAL ]
+          description: The distribution type for the shared cost
+          example: "EVEN"
+        shareAmounts:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Map of category names to share amounts (required when distributionType is MANUAL)
+          example: { "Engineering": 50, "Marketing": 50 }
+
+    FilterTreeNodeRequest:
+      type: object
+      discriminator:
+        propertyName: node_type
+        mapping:
+          group: '#/components/schemas/FilterGroupNodeRequest'
+          item: '#/components/schemas/FilterItemNodeRequest'
+      oneOf:
+        - $ref: '#/components/schemas/FilterGroupNodeRequest'
+        - $ref: '#/components/schemas/FilterItemNodeRequest'
+
+    FilterGroupNodeRequest:
+      type: object
+      required:
+        - node_type
+        - operator
+        - items
+      properties:
+        node_type:
+          type: string
+          enum: [ group ]
+          example: "group"
+        operator:
+          type: string
+          enum: [ and, or ]
+          description: The operator for the filter group
+          example: "and"
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterTreeNodeRequest'
+          description: List of filter items in this group
+
+    FilterItemNodeRequest:
+      type: object
+      required:
+        - node_type
+        - type
+        - filter_provider
+        - operator
+      properties:
+        node_type:
+          type: string
+          enum: [ item ]
+          example: "item"
+        type:
+          type: string
+          description: The type of the filter item
+          example: "tag"
+        filter_provider:
+          type: string
+          description: The provider of the filter
+          example: "aws"
+        value:
+          type: object
+          description: The value of the filter
+          example: { "key": "Environment", "value": "Production" }
+        operator:
+          type: string
+          description: The operator for the filter item
+          example: "in"
+    SavingsOpportunityFilteredRequest:
+      type: object
+      properties:
+        filterTree:
+          $ref: '#/components/schemas/FilterTreeNodeRequest'
+        oneRecommendationPerResource:
+          type: boolean
+          default: false
+          description: When true, returns only one recommendation per resource
+        getMetrics:
+          type: boolean
+          default: false
+          description: When true, includes CPU/memory metrics in the response
+        include_dimensions:
+          type: boolean
+          default: false
+          description: When true, each opportunity carries its dimension category assignments in the `dimensions` field
+    SavingsOpportunityResponse:
+      type: object
+      required:
+        - id
+        - action_type
+        - source
+        - opportunity_unique_identifier
+      properties:
+        id:
+          type: string
+          format: uuid
+        action_type:
+          type: string
+          description: The type of saving action (e.g. terminate, rightsize, stop)
+        service:
+          type: string
+          description: The cloud service name
+        resource_type:
+          type: string
+          description: The resource type
+        recommended_type:
+          type: string
+          description: The recommended instance/resource type
+        resource_id:
+          type: string
+          description: The cloud provider resource identifier
+        resource_name:
+          type: string
+        resource_namespace:
+          type: string
+        implementation_effort:
+          type: string
+          description: Effort required to implement the saving (e.g. low, medium, high)
+        based_on_past:
+          type: integer
+          description: Number of days the recommendation is based on
+        region:
+          type: string
+        account_id:
+          type: string
+          format: uuid
+        tags:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+        current_monthly_price:
+          type: number
+        estimated_monthly_price:
+          type: number
+        monthly_savings:
+          type: number
+        forecasted_end_of_month:
+          type: number
+        currency_code:
+          type: string
+        cloud_provider:
+          type: string
+        source:
+          type: string
+        opportunity_unique_identifier:
+          type: string
+        description:
+          type: string
+        resource_arn:
+          type: string
+        recommendation_id:
+          type: string
+        is_stopped:
+          type: boolean
+        policy_id:
+          type: string
+          format: uuid
+        service_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        cpu_max:
+          type: number
+        current_vcpus:
+          type: integer
+        recommended_vcpus:
+          type: integer
+        current_memory_requests:
+          type: integer
+        recommended_memory_requests:
+          type: integer
+        current_node_count:
+          type: integer
+        recommended_node_count:
+          type: integer
+        current_replica_count:
+          type: integer
+        recommended_replica_count:
+          type: integer
+        dimensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpportunityDimension'
+          description: >-
+            The opportunity's dimension category assignments (team attribution). Present only when the
+            request sets `include_dimensions` to true; an empty array means the opportunity's resource is
+            not attributed to any dimension category.
+
+    ResourceDetails:
+      type: object
+      description: >-
+        A live resource's data. Additional type-specific fields (e.g. instance type, volume size)
+        are present depending on the resource type.
+      additionalProperties: true
+      properties:
+        resource_type:
+          type: string
+        id:
+          type: string
+          format: uuid
+        provider_unique_identifier:
+          type: string
+        name:
+          type: string
+        region:
+          type: string
+        price_per_month:
+          type: number
+        created_at:
+          type: string
+        tags:
+          type: array
+          description: The resource's cloud tags, including any creator/owner tag
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+        creation_data:
+          type: object
+          nullable: true
+          description: Who created the resource and when, where CloudChipr could determine it
+          properties:
+            creator:
+              type: string
+            timestamp:
+              type: string
+        account:
+          type: object
+          description: The CloudChipr account owning the resource
+        billing_cost:
+          type: object
+          nullable: true
+        listing_price:
+          type: object
+          nullable: true
+        forecasted_end_of_month:
+          type: number
+          nullable: true
+        billing_explorer_resource_identifier:
+          type: array
+          items:
+            type: string
+    OpportunityDimension:
+      type: object
+      required:
+        - dimension_name
+        - category_value
+        - share_percentage
+      properties:
+        dimension_name:
+          type: string
+          description: The dimension the resource is attributed to
+          example: "Team"
+        category_value:
+          type: string
+          description: The category (e.g. team name) within the dimension
+          example: "payments"
+        share_percentage:
+          type: number
+          description: The percentage of the resource's cost attributed to this category
+          example: 100.00
+    Budget:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - period
+        - amount
+        - actual_to_date
+        - progress
+        - thresholds
+        - start_date
+        - is_expired
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          description: Budget type
+          enum:
+            - fixed
+            - planned
+        period:
+          type: string
+          description: Budget period
+          enum:
+            - daily
+            - monthly
+            - quarterly
+            - annually
+            - custom
+        amount:
+          type: number
+          description: The budget amount in force for the current period
+        planned_amounts:
+          type: array
+          items:
+            type: number
+          description: For planned budgets, the amount planned per period starting from start_date
+        actual_to_date:
+          type: number
+          description: Actual spend accumulated in the current period
+        forecast:
+          type: number
+          nullable: true
+          description: Forecasted end-of-period spend (monthly and quarterly budgets only)
+        progress:
+          type: integer
+          description: Actual spend as a percentage of the current amount
+        thresholds:
+          type: array
+          items:
+            $ref: '#/components/schemas/BudgetThreshold'
+        filter_tree:
+          $ref: '#/components/schemas/FilterTreeResponse'
+        view:
+          type: object
+          nullable: true
+          description: The saved billing report the budget is scoped to, when not scoped by filter_tree
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        is_expired:
+          type: boolean
+    BudgetThreshold:
+      type: object
+      required:
+        - percent
+        - amount
+        - trigger
+      properties:
+        percent:
+          type: number
+          description: The threshold as a percentage of the budget amount
+          example: 80.0
+        amount:
+          type: number
+          description: The threshold amount derived from the percentage
+        trigger:
+          type: string
+          description: Whether the threshold fires on actual or forecasted spend
+          enum:
+            - actual
+            - forecasted
+    BudgetHistoryEntry:
+      type: object
+      required:
+        - period_start
+        - period_end
+        - amount
+        - actual
+      properties:
+        period_start:
+          type: string
+          format: date
+        period_end:
+          type: string
+          format: date
+        amount:
+          type: number
+          description: The budget amount that was in force during this period
+        actual:
+          type: number
+          description: The period's actual spend
+        forecast:
+          type: number
+          nullable: true
+          description: Forecasted end-of-period spend; null for closed periods
+    Dimension:
+      type: object
+      required:
+        - name
+        - categories
+      properties:
+        name:
+          type: string
+          description: The dimension name
+          example: "Team"
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/DimensionCategory'
+    DimensionCategory:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: string
+          description: The category name
+          example: "payments"
+        filter:
+          $ref: '#/components/schemas/FilterTreeResponse'
+        source:
+          type: string
+          nullable: true
+          description: Where the category comes from (CLASSIC for manual/dynamic dimensions, RULE for rule-derived entries)
+    BillingDataRequest:
+      type: object
+      required:
+        - dataPoint
+      properties:
+        dataPoint:
+          type: string
+          description: The data point to analyze
+          enum:
+            - daily
+            - weekly
+            - monthly
+            - quarterly
+            - yearly
+        dates:
+          $ref: '#/components/schemas/Dates'
+        groupBy:
+          $ref: '#/components/schemas/GroupingType'
+        axisGranularity:
+          $ref: '#/components/schemas/AxisGranularity'
+        groupValues:
+          type: array
+          items:
+            type: string
+          description: Values to group by
+        startMonthOfQuarter:
+          type: integer
+          minimum: 1
+          maximum: 12
+          default: 1
+          description: The starting month of the quarter
+        propertiesToLoad:
+          $ref: '#/components/schemas/PropertiesToLoadRequest'
+        filterTree:
+          $ref: '#/components/schemas/FilterTreeNodeRequest'
+        trendType:
+          $ref: '#/components/schemas/TrendType'
+        costType:
+          $ref: '#/components/schemas/CostType'
+        series:
+          type: integer
+          description: Number of series to return
+    GroupingType:
+      type: string
+      enum:
+        - service
+        - marketplace_service
+        - tag_key
+        - charge_type
+        - account
+        - region
+        - resource
+        - product_family
+        - cost_type
+        - credit_type
+        - instance_family
+        - instance_type
+        - cloud_provider
+        - tag_value
+        - none
+        - environment
+        - usage_type
+        - pricing_term
+        - description
+        - parent_resource_id
+        - cluster
+        - node
+        - type
+        - namespace
+        - deployment
+        - workload_name
+        - workload_type
+        - organisation
+        - group
+        - mongo_cluster
+        - resource_group
+        - service_type
+        - warehouse
+        - category_v2
+        - platform
+      description: Type of grouping for the billing data
+    AxisGranularity:
+      type: string
+      enum:
+        - date
+        - account
+        - service
+        - region
+        - product_family
+        - charge_type
+        - instance_family
+        - instance_type
+        - environment
+        - marketplace_service
+      description: Granularity of the time axis
+    PropertiesToLoadRequest:
+      type: object
+      properties:
+        detailedCurrentPeriodData:
+          type: boolean
+          default: true
+        detailedPreviousPeriodData:
+          type: boolean
+          default: true
+        currentPeriodTotalCost:
+          type: boolean
+          default: true
+        previousPeriodTotalCost:
+          type: boolean
+          default: true
+        averageCost:
+          type: boolean
+          default: true
+        forecastedMonthEndCost:
+          type: boolean
+          default: true
+        forecastedQuarterEndCost:
+          type: boolean
+          default: true
+        liveFilteredTotal:
+          type: boolean
+          default: true
+        forecastedMonthEndCostForGroupingItems:
+          type: boolean
+          default: true
+        forecastedQuarterEndCostForGroupingItems:
+          type: boolean
+          default: false
+        showUncategorizedOption:
+          type: boolean
+          default: false
+  requestBodies:
+    GetResourcesWithFilters:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: The resource type to which filters will be applied
+                  enum:
+                    - ec2
+                    - ebs
+                    - eip
+                    - elb
+                    - rds
+                    - elc
+                    - vm
+                    - disk
+                    - ip
+                    - lb
+                    - sql
+                  nullable: false
+                filters:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        allOf:
+                          - nullable: false
+                          - $ref: '#/components/schemas/FilterKeyType'
+                      value:
+                        oneOf:
+                          - type: string
+                          - type: integer
+                          - type: number
+                          - type: boolean
+                        nullable: true
+                      operator:
+                        allOf:
+                          - nullable: false
+                          - $ref: '#/components/schemas/FilterOperatorType'
+                      metric:
+                        allOf:
+                          - nullable: false
+                          - $ref: '#/components/schemas/FilterMetric'
+                    required:
+                      - key
+                      - operator
+              required:
+                - type
+                - filters
+          examples:
+            aws-example:
+              value:
+                - type: ec2
+                  filters: []
+                - type: eip
+                  filters:
+                    - key: instance_ids
+                      operator: is_absent
+                    - key: association_ids
+                      operator: is_absent
+                - type: ebs
+                  filters:
+                    - key: attachments
+                      operator: is_empty
+                - type: elb
+                  filters:
+                    - key: instances
+                      operator: is_empty
+                - type: rds
+                  filters:
+                    - key: database_connections
+                      value: 1
+                      operator: less_than_equal_to
+                      metric:
+                        statistics_type: maximum
+                        since:
+                          value: 7
+                          unit: days
+                - type: elc
+                  filters:
+                    - key: launch_time
+                      value: 604800
+                      operator: less_than_equal_to
+            gcp-example:
+              value:
+                - type: vm
+                  filters: []
+                - type: ip
+                  filters:
+                    - key: instance_ids
+                      operator: is_absent
+                    - key: association_ids
+                      operator: is_absent
+                - type: disk
+                  filters:
+                    - key: attachments
+                      operator: is_empty
+                - type: lb
+                  filters:
+                    - key: instances
+                      operator: is_empty
+                - type: sql
+                  filters:
+                    - key: database_connections
+                      value: 1
+                      operator: less_than_equal_to
+                      metric:
+                        statistics_type: maximum
+                        since:
+                          value: 7
+                          unit: days
+      description: ''
+  examples:
+    FilteredResourcesResponseExample:
+      value:
+        ebs:
+          - id: d74d45ff-f686-4b2f-86c0-54d3801a236c
+            volume_id: vol-02d58dce2f4667172
+            size: '1073741824'
+            state: available
+            type: gp2
+            price_per_month: 0.1
+            availability_zone: us-east-1a
+            has_attachments: false
+            created_at: '2023-01-30T07:40:15.188'
+            tags: []
+            region: us-east-1
+            link: 'https://console.aws.amazon.com/ec2/home?region=us-east-1#VolumeDetails:volumeId=vol-02d58dce2f4667172'
+        ec2: []
+        eip:
+          - id: b8414855-8b25-436f-9364-16c5df2e960d
+            ip: 44.199.21.179
+            allocation_id: eipalloc-0d32941e0f777d5aa
+            association_id: null
+            instance_id: null
+            domain: vpc
+            price_per_month: 3.6
+            created_at: '2023-01-30T07:45:26.347834'
+            region: us-east-1
+            tags: []
+            link: 'https://console.aws.amazon.com/ec2/home?region=us-east-1#ElasticIpDetails:AllocationId=eipalloc-0d32941e0f777d5aa'
+        elb:
+          - id: 6827374e-f877-4a17-802e-a7662ef9a600
+            load_balancer_name: lb-test
+            load_balancer_arn: 'arn:aws:elasticloadbalancing:us-east-1:197857533772:loadbalancer/app/lb-test/9ea3b42ce6167896'
+            dns_name: lb-test-1842671261.us-east-1.elb.amazonaws.com
+            price_per_month: 16.2
+            has_attachments: false
+            created_at: '2023-01-30T07:41:46.78'
+            tags: []
+            type: application
+            region: us-east-1
+            link: 'https://console.aws.amazon.com/ec2/home?region=us-east-1#LoadBalancer:loadBalancerArn=arn:aws:elasticloadbalancing:us-east-1:197857533772:loadbalancer/app/lb-test/9ea3b42ce6167896;tab=listeners'
+        rds:
+          - id: ac07400b-e3c3-465c-a138-6d8943a18a3c
+            db_id: test-single
+            price_per_month: 12.24
+            instance_type: db.t3.micro
+            storage_type: gp2
+            cpu:
+              - timestamp: '2023-01-29T07:45:00Z'
+                average: 3.556635830430985
+                minimum: 2.6
+                maximum: 24.725
+                sum: 366.33349053439144
+                unit: Percent
+            connections:
+              - timestamp: '2023-01-29T07:45:00Z'
+                average: 0
+                minimum: 0
+                maximum: 0
+                sum: 0
+                unit: Count
+            cpu_by_hours: []
+            connections_by_hours: []
+            db_type: mysql
+            created_at: '2023-01-30T06:01:04.957'
+            availability_zone: us-east-1a
+            status: available
+            tags: []
+            region: us-east-1
+            cluster_id: null
+            nodes_count: 1
+            link: 'https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=test-single;is-cluster=false;tab=connectivity'
+        elc:
+          - id: 55349e79-f74a-476a-a947-795e8d2f4b25
+            cluster_id: mem-test
+            instance_type: cache.r6g.large
+            cache_type: memcached
+            nodes_count: 1
+            cpu: []
+            connections: []
+            cpu_by_hours: []
+            connections_by_hours: []
+            created_at: '2023-01-30T07:45:26.347834'
+            price_per_month: 148.32
+            region: us-east-1
+            tags: []
+            link: 'https://console.aws.amazon.com/elasticache/home?region=us-east-1#/memcached/mem-test'
+          - id: e111fff7-62ff-432a-ae11-d94e1020c984
+            cluster_id: redis-test
+            instance_type: cache.r6g.large
+            cache_type: redis
+            nodes_count: 3
+            cpu: []
+            connections: []
+            cpu_by_hours: []
+            connections_by_hours: []
+            created_at: '2023-01-30T07:42:42.101'
+            price_per_month: 444.96
+            region: us-east-1
+            tags: []
+            link: 'https://console.aws.amazon.com/elasticache/home?region=us-east-1#/redis/redis-test'
+        vm: []
+        lb: []
+        ip: []
+        disk: []
+        sql: []
+  responses:
+    Filters:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                type:
+                  $ref: '#/components/schemas/ResourceType'
+                filters:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/FilterItemTemplate'
+          examples:
+            example-1:
+              value:
+                - type: vm
+                  filters:
+                    - key: launch_time
+                      value_type: number
+                      min_value: 0
+                      max_value: 315569520
+                      allowed_operators:
+                        - equal
+                        - not_equal
+                        - greater_than
+                        - greater_than_equal_to
+                        - less_than
+                        - less_than_equal_to
+                    - key: cpu
+                      value_type: number
+                      min_value: 0
+                      max_value: 100
+                      allowed_operators:
+                        - equal
+                        - greater_than
+                        - greater_than_equal_to
+                        - less_than
+                        - less_than_equal_to
+                    - key: network_in
+                      value_type: number
+                      min_value: 0
+                      max_value: 1099511627776
+                      allowed_operators:
+                        - equal
+                        - not_equal
+                        - greater_than
+                        - greater_than_equal_to
+                        - less_than
+                        - less_than_equal_to
+                    - key: network_out
+                      value_type: number
+                      min_value: 0
+                      max_value: 1099511627776
+                      allowed_operators:
+                        - equal
+                        - not_equal
+                        - greater_than
+                        - greater_than_equal_to
+                        - less_than
+                        - less_than_equal_to
+                    - key: tag
+                      value_type: string
+                      min_value: null
+                      max_value: null
+                      allowed_operators:
+                        - equal
+                        - not_equal
+                        - exists
+                        - does_not_exist
+                        - contains
+                        - does_not_contain
+    DashboardDetails:
+      description: Dashboard Details
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              name:
+                type: string
+              created_at:
+                $ref: '#/components/schemas/Date'
+              layout:
+                $ref: '#/components/schemas/LayoutNullable'
+              visibility:
+                nullable: false
+                enum:
+                  - visible_to_everyone
+                  - visible_only_to_me
+              widgets:
+                type: array
+                items:
+                  anyOf:
+                    - $ref: '#/components/schemas/DashboardWidgetCostBreakdown'
+                    - $ref: '#/components/schemas/DashboardWidgetCostAndUsageSummary'
+                    - $ref: '#/components/schemas/DashboardWidgetLargestCostChanges'
+            required:
+              - id
+              - name
+              - created_at
+              - widgets
+    LargestCostChangesWidgetResponse:
+      description: Largest Cost Changes Widget Response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResourceExplorerGridTotal'
+              previous_period_cost_date_details:
+                $ref: '#/components/schemas/ResourceExplorerCostsDateDetails'
+              current_period_cost_date_details:
+                $ref: '#/components/schemas/ResourceExplorerCostsDateDetails'
+            required:
+              - total
+              - previous_period_cost_date_details
+              - current_period_cost_date_details
+    CostAndUsageSummaryWidgetResponse:
+      description: Cost And Usage Summary Widget Response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total_cost:
+                type: number
+              previous_period_total_cost:
+                type: number
+              average_daily_cost_details:
+                $ref: '#/components/schemas/AverageDailyCostDetails'
+              average_monthly_cost_details:
+                $ref: '#/components/schemas/AverageMonthlyCostDetails'
+              live_usage_total_cost:
+                type: number
+              total_cost_date_details:
+                $ref: '#/components/schemas/ResourceExplorerCostsDateDetails'
+              previous_period_cost_date_details:
+                $ref: '#/components/schemas/ResourceExplorerCostsDateDetails'
+              forecasted_costs:
+                $ref: '#/components/schemas/ForecastedCostRE'
+              trend_type:
+                $ref: '#/components/schemas/TrendType'
+            required:
+              - total_cost
+              - previous_period_total_cost
+              - average_daily_cost_details
+              - average_monthly_cost_details
+              - live_usage_total_cost
+              - total_cost_date_details
+              - previous_period_cost_date_details
+              - forecasted_costs
+    CostBreakdownWidgetResponse:
+      description: Cost Breakdown Widget Response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResourceExplorerChartData'
+              total:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResourceExplorerGridTotal'
+              total_cost:
+                type: number
+              previous_period_total_cost:
+                type: number
+              average_daily_cost_details:
+                $ref: '#/components/schemas/AverageDailyCostDetails'
+              average_monthly_cost_details:
+                $ref: '#/components/schemas/AverageMonthlyCostDetails'
+              live_usage_total_cost:
+                type: number
+              total_cost_date_details:
+                $ref: '#/components/schemas/ResourceExplorerCostsDateDetails'
+              previous_period_cost_date_details:
+                $ref: '#/components/schemas/ResourceExplorerCostsDateDetails'
+              forecasted_costs:
+                $ref: '#/components/schemas/ForecastedCostRE'
+              trend_type:
+                $ref: '#/components/schemas/TrendType'
+              cost_type:
+                $ref: '#/components/schemas/CostType'
+            required:
+              - data
+              - total
+              - total_cost
+              - previous_period_total_cost
+              - average_daily_cost_details
+              - average_monthly_cost_details
+              - live_usage_total_cost
+              - total_cost_date_details
+              - previous_period_cost_date_details
+              - forecasted_costs
+              - cost_type
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Some business domain specific validation message
+    NotFound:
+      description: Resource was not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
+    MethodNotAllowed:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    InternalServerError:
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Internal Server Error.

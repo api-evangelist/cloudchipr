@@ -1,0 +1,145 @@
+generated: '2026-09-05'
+method: searched
+source: >-
+  Registry sweeps of npm (registry.npmjs.org search + package metadata), PyPI, RubyGems, crates.io,
+  pkg.go.dev/proxy.golang.org and the Terraform Registry, plus the GitHub organization
+  https://github.com/cloudchipr and the CloudChipr docs.
+summary:
+  first_party_sdk_count: 0
+  first_party_package_count: 2
+  third_party_package_count: 0
+  note: >-
+    CloudChipr publishes NO client SDK for its Enterprise API in any language or registry. The two
+    first-party packages that do exist are infrastructure artifacts, not API clients: a Terraform
+    module that connects a customer's cloud account to CloudChipr, and an abandoned npm engine
+    library. The documented integration story is raw REST with an `x-api-key` header, plus the
+    hosted MCP server for agents.
+  sdk_pointer_basis: >-
+    An `SDKs` pointer IS emitted because two first-party packages are published and current in the
+    registries. It should not be read as "a client library exists" - see sdk_gap below.
+
+sdk_gap:
+  client_library_for_the_api: none
+  languages_covered: []
+  note: >-
+    There is no first-party or third-party client for https://api.cloudchipr.com in npm, PyPI,
+    RubyGems, crates.io, Go or Maven. An integrator writes HTTP by hand from
+    openapi/cloudchipr-enterprise-api-openapi.yml.
+
+packages:
+  - language: hcl
+    registry: terraform
+    name: cloudchipr/connect-c8r/cloudchipr
+    url: https://registry.terraform.io/modules/cloudchipr/connect-c8r/cloudchipr
+    install: 'module "cloudchipr" { source = "cloudchipr/connect-c8r/cloudchipr" version = "1.1.9" }'
+    official: true
+    version: 1.1.9
+    published: '2026-05-23'
+    downloads: 207
+    verified_publisher: false
+    repository: https://github.com/cloudchipr/terraform-cloudchipr-connect-c8r
+    description: >-
+      Terraform module that provisions the read-only role/permissions CloudChipr needs in a
+      customer's cloud account - the onboarding path, not an API client.
+    source: https://registry.terraform.io/v1/modules/search?q=cloudchipr
+    currency: current
+  - language: javascript
+    registry: npm
+    name: '@cloudchipr/cloudchipr-engine'
+    url: https://www.npmjs.com/package/@cloudchipr/cloudchipr-engine
+    install: npm install @cloudchipr/cloudchipr-engine
+    official: true
+    version: 0.2.34
+    published: '2023-01-06'
+    license: ISC
+    repository: https://github.com/cloudchipr/cloudchipr-engine
+    description: >-
+      "Cloudchipr engine" - the internal resource-collection engine behind the original CLI-era
+      product. Published under the company's own npm scope.
+    source: https://registry.npmjs.org/@cloudchipr/cloudchipr-engine
+    currency: abandoned
+    currency_note: >-
+      DECAY SIGNAL. Last published 2023-01-06 - more than three and a half years before this
+      profile, and long before the Enterprise API spec, the Kubernetes surface and the MCP server
+      existed. The repository it names, github.com/cloudchipr/cloudchipr-engine, is not among the
+      seven public repos in the CloudChipr GitHub organization, so the source is gone (private,
+      renamed or deleted) while the package remains installable. Do not treat this as a supported
+      client library.
+
+github_organization:
+  url: https://github.com/cloudchipr
+  found: true
+  public_repos: 7
+  checked: '2026-09-05'
+  first_party_repos:
+    - name: terraform-cloudchipr-connect-c8r
+      language: JavaScript
+      pushed: '2026-05-23'
+      description: Terraform module to connect your infrastructure to Cloudchipr.
+      archived: false
+    - name: cloudchipr-resources
+      language: Shell
+      pushed: '2026-09-02'
+      description: Cloudchipr resources
+      archived: false
+      note: Most recently updated public repo in the org.
+    - name: cloudchipr.github.io
+      language: TypeScript
+      pushed: '2024-01-16'
+      description: Documentation website for cloudchipr
+      archived: false
+      note: >-
+        THIS IS WHERE THE OPENAPI LIVES. https://cloudchipr.github.io/api-service/ is a Swagger UI
+        whose swagger-config.json names api.yaml - the 26-operation OpenAPI 3.0.3 captured to
+        openapi/. The docs API Reference page and the cloudchipr.com homepage both link to it.
+    - name: helm-charts
+      language: Go Template
+      pushed: '2026-04-21'
+      description: CloudChipr Helm charts
+      archived: true
+      note: ARCHIVED by CloudChipr. Not a supported distribution channel.
+  forks_not_products:
+    - opencost
+    - litellm
+    - Figma-Context-MCP
+  forks_note: >-
+    Three of the seven public repos are forks of third-party projects (OpenCost, LiteLLM,
+    Figma-Context-MCP). They are not CloudChipr products and must not be recorded as packages.
+
+negative_probes:
+  - registry: pypi
+    names: [cloudchipr, c8r, cloudchipr-sdk]
+    result: 404 on every name
+    checked: '2026-09-05'
+  - registry: npm
+    query: cloudchipr
+    result: 'search total = 1 (only @cloudchipr/cloudchipr-engine)'
+    checked: '2026-09-05'
+    note: >-
+      The npm package `c8r` (200) is NOT CloudChipr - it is flibustier/compressor, "Encode/decode
+      array of numbers into optimized Base 64 URL compatible", last published 2020-04-24. Recorded
+      so a future round does not mis-attribute it.
+  - registry: crates.io
+    query: cloudchipr
+    result: 0 crates
+    checked: '2026-09-05'
+  - registry: rubygems
+    query: cloudchipr
+    result: empty
+    checked: '2026-09-05'
+  - registry: go
+    path: github.com/cloudchipr/
+    result: 404 from proxy.golang.org
+    checked: '2026-09-05'
+  - registry: postman
+    query: cloudchipr
+    result: 0 collections, 0 workspaces, 0 APIs
+    checked: '2026-09-05'
+    note: No public Postman collection or workspace exists. NO Postman pointer is emitted.
+
+distribution_channels:
+  - name: AWS Marketplace
+    url: https://aws.amazon.com/marketplace/pp/prodview-enwub346vrmva
+    status: 200
+    checked: '2026-09-05'
+    note: Procurement channel for the SaaS product, not a code artifact.

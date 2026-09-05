@@ -1,0 +1,126 @@
+generated: '2026-09-05'
+method: searched
+source: >-
+  openapi/cloudchipr-enterprise-api-openapi.yml + https://docs.cloudchipr.com/docs/api-keys +
+  https://docs.cloudchipr.com/docs/cloudchipr-mcp-server +
+  https://mcp.cloudchipr.com/.well-known/oauth-protected-resource +
+  https://auth0.cloudchipr.com/.well-known/openid-configuration
+summary:
+  types: [apiKey, oauth2]
+  api_key_in: [header]
+  surfaces: 2
+  note: >-
+    Two surfaces, two different auth models. The REST Enterprise API is apiKey-only
+    (`x-api-key` header, single securityScheme applied per-operation). The hosted MCP server is
+    OAuth 2.0 against an Auth0 tenant, with an API-key-as-bearer alternative for headless use.
+
+schemes:
+  - name: ApiKey
+    type: apiKey
+    in: header
+    parameter: x-api-key
+    surface: https://api.cloudchipr.com
+    applied_to: 'all 26 operations (per-operation security, no global security block)'
+    sources:
+      - openapi/cloudchipr-enterprise-api-openapi.yml
+      - https://docs.cloudchipr.com/docs/api-keys
+  - name: OAuth2Bearer
+    type: oauth2
+    surface: https://mcp.cloudchipr.com/mcp
+    in: header
+    parameter: Authorization
+    format: 'Bearer <token>'
+    authorization_server: https://auth0.cloudchipr.com
+    issuer: https://auth0.cloudchipr.com/
+    audience: https://api-bff.cloudchipr.com
+    scopes: [openid, profile, email, offline_access]
+    pkce: S256
+    grant_types: [authorization_code, refresh_token, client_credentials, urn:ietf:params:oauth:grant-type:device_code]
+    dynamic_client_registration: https://auth0.cloudchipr.com/oidc/register
+    jwks_uri: https://auth0.cloudchipr.com/.well-known/jwks.json
+    sources:
+      - well-known/cloudchipr-mcp-oauth-protected-resource.json
+      - well-known/cloudchipr-auth0-openid-configuration.json
+  - name: ApiKeyBearer
+    type: http
+    scheme: bearer
+    surface: https://mcp.cloudchipr.com/mcp
+    parameter: Authorization
+    format: 'Bearer <C8R_TOKEN>'
+    env: C8R_TOKEN
+    note: The same in-app CloudChipr API key, presented as a bearer token to the MCP server for headless/CI clients.
+    sources:
+      - https://docs.cloudchipr.com/docs/cloudchipr-mcp-server
+
+api_key_lifecycle:
+  issued_in: CloudChipr app -> Settings -> API Keys
+  docs: https://docs.cloudchipr.com/docs/api-keys
+  docs_last_updated: '2025-10-15'
+  max_keys_per_account: 2
+  expiry: '1 to 365 days (minimum 1 day, maximum 365 days)'
+  expiry_superseded: true
+  expiry_superseded_by: https://cloudchipr.com/blog/product-updates-july-1
+  expiry_superseded_note: >-
+    The 2026-07-01 release notes state "The expiration requirement has also been removed, giving
+    teams more flexibility in how they manage long-lived API credentials", and that a "Last Used"
+    column was added. The docs page still states a mandatory expiry. The provider has not
+    reconciled the two; both are recorded.
+  rotation_guidance: >-
+    CloudChipr publishes rotation guidance in the docs ("Regularly updating and rotating your API
+    keys ... Consider setting an expiration date that aligns with your security policies") and
+    secure-storage guidance ("Treat your API keys as sensitive as Read access to cloud accounts and
+    resources").
+  documented_access_level: read-only
+  documented_access_contradiction: >-
+    The docs state "API keys provide read-only access to the Cloudchipr API and your cloud
+    resources", yet the spec secures three MUTATING operations with the same ApiKey scheme:
+    createDataSource (POST /data-sources, 201), updateCategoryStructure
+    (PUT /dimensions/category-structure, 204) and ingestCustomData (POST /ingest/{destinationId}).
+    Recorded, not resolved. An integrator must confirm write capability empirically.
+
+end_user_authentication:
+  mfa: https://docs.cloudchipr.com/docs/multi-factor-authentication-mfa
+  sso:
+    - provider: Okta
+      docs: https://docs.cloudchipr.com/docs/single-sign-on-sso-using-okta
+    - provider: Azure AD / Entra ID
+      docs: https://docs.cloudchipr.com/docs/single-sign-on-sso-using-azure
+  entitlement: 'Organization SSO is a Pro-tier-and-above entitlement (https://cloudchipr.com/pricing).'
+
+cloud_account_authentication:
+  model: RBAC / role assumption
+  source: https://docs.cloudchipr.com/docs/security-compliance
+  statement: >-
+    "Cloudchipr does not use Access Key or Secret Key authentication. Connections with customer
+    accounts are mainly done through Role Based Access Control (RBAC)."
+  provisioning: >-
+    The first-party Terraform module cloudchipr/connect-c8r/cloudchipr (v1.1.9) provisions the
+    read-only role CloudChipr assumes in a customer account. See packages/cloudchipr-packages.yml.
+  docs:
+    - https://docs.cloudchipr.com/docs/read-only-access-requirements
+    - https://docs.cloudchipr.com/docs/create-custom-roles-and-permissions
+    - https://docs.cloudchipr.com/docs/create-custom-roles-and-permissions-in-sub-accounts
+
+observed:
+  - url: https://api.cloudchipr.com/
+    status: 401
+    body: empty
+    www_authenticate: none
+    checked: '2026-09-05'
+    note: >-
+      The REST host returns a bare 401 with no body and NO WWW-Authenticate header, so an
+      unauthenticated client gets no machine-readable hint about which scheme to use.
+  - url: https://mcp.cloudchipr.com/mcp
+    status: 401
+    body: '{"error":"unauthorized","message":"Bearer token required"}'
+    www_authenticate: 'Bearer realm="cloudchipr", error="invalid_token", error_description="No bearer token provided"'
+    checked: '2026-09-05'
+    note: >-
+      The MCP host does it properly - a WWW-Authenticate Bearer challenge, which combined with the
+      RFC 9728 protected-resource document is enough for an MCP client to discover the
+      authorization server and self-register without human help.
+
+see_also:
+  scopes: scopes/cloudchipr-scopes.yml
+  conventions: conventions/cloudchipr-conventions.yml
+  well_known: well-known/cloudchipr-well-known.yml

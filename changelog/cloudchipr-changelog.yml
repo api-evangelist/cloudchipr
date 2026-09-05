@@ -1,0 +1,87 @@
+generated: '2026-09-05'
+method: searched
+source: https://cloudchipr.com/blog
+summary: >-
+  CloudChipr publishes no /changelog and no docs release-notes section. Product releases are
+  published as dated "Product Updates" posts on the marketing blog under a "Release Notes" tag.
+  That is a real, dated change record - it is just not at a changelog URL and it is not API-scoped.
+scheme: dated-release-notes
+url: https://cloudchipr.com/blog
+tag: Release Notes
+api_scoped: false
+machine_readable: false
+probed:
+  - url: https://cloudchipr.com/changelog
+    status: 404
+    checked: '2026-09-05'
+  - url: https://docs.cloudchipr.com/changelog
+    status: 404
+    checked: '2026-09-05'
+    note: ReadMe soft-404 - returns the docs SPA shell with a generic title.
+  - url: https://cloudchipr.com/tags/product-updates
+    status: 404
+    checked: '2026-09-05'
+current_version:
+  api_spec_version: 0.1.0
+  source: info.version in openapi/cloudchipr-enterprise-api-openapi.yml
+  note: The spec has carried 0.1.0 since capture; the release notes are not versioned.
+
+entries:
+  - title: 'Cloudchipr Now Works With Your AI Assistant: Query Your Cloud Costs in Plain English'
+    date: '2026-07-08'
+    url: https://cloudchipr.com/blog/cloudchipr-mcp-server-announcement
+    tags: [Release Notes, News, AI]
+    breaking: false
+    api_relevant: true
+    highlights:
+      - Launch of the hosted CloudChipr MCP server for Claude, Claude Code, Codex, Cursor and any MCP-compatible assistant.
+      - >-
+        Names the surfaces behind the endpoint: multi-cloud billing explorer with validated
+        dimensions and exact filter values, live resource intelligence with CPU/memory/network
+        metrics, savings-opportunity engine rated by implementation effort, Kubernetes cost split
+        into total/idle/reserved, team-scoped views and custom sources.
+  - title: 'Product Updates: July 1, 2026'
+    date: '2026-07-01'
+    url: https://cloudchipr.com/blog/product-updates-july-1
+    tags: [Release Notes]
+    breaking: false
+    api_relevant: true
+    additions:
+      - MCP Server - natural-language access to Billing Explorer and other capabilities from AI tools.
+      - GitHub Copilot billing integration, surfaced in Billing Explorer and groupable by repository.
+      - Savings Opportunities shareable to Slack and email.
+      - Anomaly Alerts gain a full detection history.
+      - Filters on the Tasks view.
+      - VM attachment visibility for GCP and Azure in Live Resources.
+      - Duplicate Dimensions from the Dimensions page.
+      - Budget messages editable after creation, with teammate mentions.
+    api_key_change:
+      summary: >-
+        API Keys gain a "Last Used" column, and THE EXPIRATION REQUIREMENT WAS REMOVED - long-lived
+        API credentials are now permitted.
+      supersedes: >-
+        https://docs.cloudchipr.com/docs/api-keys (last updated 2025-10-15) still states a mandatory
+        1-365 day expiry. The docs page is stale on this point as of 2026-07-01. Recorded here
+        because an agent reading only the docs would wrongly assume every key expires.
+  - title: 'Product Updates: May 29, 2026'
+    date: '2026-05-29'
+    url: https://cloudchipr.com/blog/product-updates-may-29-2026
+    tags: [Release Notes]
+    breaking: false
+    api_relevant: false
+    additions:
+      - Databricks integration with a guided connection flow that generates Savings Opportunities.
+      - Suggested next steps on Savings Opportunities, with actions (stop, off-hours workflow, delete) executable from CloudChipr.
+      - Infrastructure Architecture sync status and manual re-sync.
+      - Azure subscriptions managed from the Integrations page.
+      - Save/Reset controls for dashboard filters and date ranges.
+      - Expanded Kubernetes metrics (cores, MiB, Request and Limit values) in resource drawers.
+      - Customizable metric units in filters (KB, MB, GB).
+      - Multiple contracts per New Relic integration.
+      - Instance Library expanded to AWS, Azure and GCP.
+      - Redesigned Explain AI experience in Billing Explorer.
+
+gaps:
+  - No API-specific changelog. Release notes describe the product UI; breaking API changes would not obviously appear here.
+  - No RSS/Atom feed and no machine-readable release feed.
+  - No version numbers on releases - entries are identified only by date.

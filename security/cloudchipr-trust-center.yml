@@ -1,0 +1,12 @@
+generated: '2026-09-05'
+method: searched
+probe: true
+source: https://cloudchipr.com/security
+url: https://cloudchipr.com/security
+certifications:
+- SOC 2
+evidence:
+- source: https://cloudchipr.com/security
+  keywords:
+  - soc 2
+  - soc2

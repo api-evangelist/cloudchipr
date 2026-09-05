@@ -1,0 +1,1 @@
+{"audience":"https://api-bff.cloudchipr.com","authorization_servers":["https://auth0.cloudchipr.com"],"bearer_methods_supported":["header"],"resource":"https://mcp.cloudchipr.com/mcp","scopes_supported":["openid","profile","email","offline_access"]}

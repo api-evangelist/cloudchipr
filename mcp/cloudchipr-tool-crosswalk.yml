@@ -1,0 +1,192 @@
+generated: '2026-09-05'
+method: derived
+source: >-
+  mcp/cloudchipr-mcp.yml (25 provider-published MCP tools) bound against
+  openapi/cloudchipr-enterprise-api-openapi.yml (26 operations, OpenAPI 3.0.3)
+summary: >-
+  The MCP server and the Enterprise REST API are overlapping-but-non-identical projections of the
+  same CloudChipr data core. 11 of 25 MCP tools have a public REST operation behind them; 14 are
+  MCP-only, and 15 REST operations have no tool. The two surfaces diverge in opposite directions:
+  MCP is where savings detail, resource metrics, tags and the whole Kubernetes surface live, and
+  REST is where budgets, dashboards, widgets, dimension administration and custom-data ingestion
+  live. Neither is a superset.
+confidence_basis: >-
+  The live MCP tools/list is auth-gated (HTTP 401, see mcp/cloudchipr-mcp.yml#introspection), so no
+  tool inputSchema was observable. Every binding below is by published tool description against
+  published operation summary/requestBody, and confidence is set accordingly - high only where the
+  tool description and the operation describe the same call in the same words. Nothing here asserts
+  a schema that was not read.
+
+surfaces:
+  openapi:
+    file: openapi/cloudchipr-enterprise-api-openapi.yml
+    source: https://cloudchipr.github.io/api-service/api.yaml
+    base_url: https://api.cloudchipr.com
+    operations: 26
+    auth: 'apiKey header x-api-key'
+    gated: false
+    note: The spec document itself is public; the API host 401s every unauthenticated request.
+  mcp:
+    url: https://mcp.cloudchipr.com/mcp
+    tools: 25
+    auth: 'OAuth 2.0 (auth0.cloudchipr.com) or API key as bearer'
+    gated: true
+    note: tools/list returns 401 without a bearer token; schemas require authenticated introspection.
+  graphql:
+    present: false
+
+coverage:
+  mcp_tools: 25
+  rest_operations: 26
+  bound_tools: 11
+  mcp_only_tools: 14
+  rest_only_operations: 15
+
+crosswalk:
+  - tool: get_cloud_accounts
+    category: accounts-and-organizations
+    rest: [get-accounts]
+    binding: 'GET /accounts'
+    confidence: high
+  - tool: get_cloud_account
+    category: accounts-and-organizations
+    rest: [get-accounts-accountId]
+    binding: 'GET /accounts/{accountId}'
+    confidence: high
+  - tool: get_billing_data
+    category: billing-explorer
+    rest: [billingDataByOrganisation]
+    binding: 'POST /billing-explorer'
+    confidence: high
+    note: >-
+      The operation's BillingDataRequest carries the grouping, filter and date-range inputs the tool
+      description advertises; the tool's real inputSchema is unread but almost certainly projects
+      this body.
+  - tool: validate_billing_query
+    category: billing-explorer
+    rest: [validate-billing-explorer]
+    binding: 'POST /billing-explorer/validate'
+    confidence: high
+  - tool: get_billing_groupings
+    category: billing-explorer
+    rest: [get-resource-explorer-possible-groupings]
+    binding: 'GET /resource-explorer/possible-groupings'
+    confidence: high
+  - tool: get_billing_filters
+    category: billing-explorer
+    rest: [get-resource-explorer-possible-filters]
+    binding: 'GET /resource-explorer/possible-filters'
+    confidence: high
+  - tool: get_billing_filter_values
+    category: billing-explorer
+    rest: [get-resource-explorer-filter-values]
+    binding: 'GET /resource-explorer/filters/{filterProvider}/{filterType}/values'
+    confidence: high
+  - tool: get_custom_sources
+    category: billing-explorer
+    rest: [listCustomSources]
+    binding: 'GET /custom-sources'
+    confidence: high
+  - tool: filter_opportunities
+    category: savings-opportunities
+    rest: [filterSavingsOpportunities]
+    binding: 'POST /savings-opportunities'
+    confidence: high
+  - tool: filter_live_resources
+    category: live-resources
+    rest: [get-resources]
+    binding: 'POST /accounts/{accountId}/resources'
+    confidence: medium
+    note: >-
+      The REST operation is scoped to one accountId; the tool is described as listing "across your
+      accounts", so the tool is either a fan-out over this operation or a different internal call.
+      Recorded medium for that reason.
+  - tool: get_live_resource
+    category: live-resources
+    rest: [lookupResource]
+    binding: 'GET /resources/lookup'
+    confidence: medium
+    note: >-
+      "Get a resource by its identifier" matches the tool's single-resource detail semantics, but the
+      tool additionally returns a cloud-console link that the REST response schema does not name.
+
+mcp_only:
+  - tool: get_provider_organizations
+    reason: No REST operation exposes AWS Organizations / GCP Organizations / Azure Tenants or their commitments.
+  - tool: get_billing_providers
+    reason: No REST operation lists which providers/data sources have billing data.
+  - tool: get_savings_summary
+    reason: The organization-wide headline savings figure has no REST operation; POST /savings-opportunities returns the filtered list, not the summary.
+  - tool: get_provider_total_saved_amount
+    reason: No REST operation returns amount-already-saved per provider.
+  - tool: get_opportunity
+    reason: No REST operation returns all recommendations for a single resource.
+  - tool: get_opportunity_filters
+    reason: No REST filter-discovery operation exists for the savings-opportunities surface (only for resource-explorer).
+  - tool: list_opportunity_views
+    reason: Saved opportunity views are not exposed over REST.
+  - tool: get_opportunity_view
+    reason: Saved opportunity views are not exposed over REST.
+  - tool: get_resource_metrics
+    reason: Per-resource CPU/memory/network utilization metrics have no REST operation.
+  - tool: get_resource_tag_keys
+    reason: Resource tag-key discovery has no REST operation.
+  - tool: get_resource_tag_values
+    reason: Resource tag-value discovery has no REST operation.
+  - tool: get_k8s_clusters
+    reason: The entire Kubernetes surface is absent from the Enterprise API spec.
+  - tool: filter_k8s_resources
+    reason: The entire Kubernetes surface is absent from the Enterprise API spec.
+  - tool: get_k8s_resource_utilization
+    reason: The entire Kubernetes surface is absent from the Enterprise API spec.
+
+rest_only:
+  - operation: listBudgets
+    binding: 'GET /budgets'
+    reason: Budgets are not exposed as MCP tools.
+  - operation: getBudget
+    binding: 'GET /budgets/{budgetId}'
+    reason: Budgets are not exposed as MCP tools.
+  - operation: getBudgetHistory
+    binding: 'GET /budgets/{budgetId}/history'
+    reason: Budgets are not exposed as MCP tools.
+  - operation: createDataSource
+    binding: 'POST /data-sources'
+    reason: Write operation; the MCP server is read-only ("Write Actions - coming soon").
+  - operation: ingestCustomData
+    binding: 'POST /ingest/{destinationId}'
+    reason: Write operation; custom-data ingestion is a pipeline concern, not an assistant one.
+  - operation: updateCategoryStructure
+    binding: 'PUT /dimensions/category-structure'
+    reason: Write operation; the MCP server is read-only.
+  - operation: listTelemetries
+    binding: 'GET /telemetry'
+    reason: No MCP tool covers telemetry listing.
+  - operation: listDimensions
+    binding: 'GET /dimensions'
+    reason: >-
+      Dimension/category administration has no tool. get_billing_groupings surfaces dimensions as
+      groupings but is bound to the resource-explorer operation, not this one.
+  - operation: get-filters
+    binding: 'GET /providers/{provider}/filters'
+    reason: >-
+      Live-resource filter discovery per provider. No tool is described in these terms; the
+      opportunity/billing filter-discovery tools bind to different operations.
+  - operation: get-regions
+    binding: 'GET /providers/{provider}/regions'
+    reason: No region-listing tool is published.
+  - operation: get-dashboard-dashboardId
+    binding: 'GET /dashboards/{dashboardId}'
+    reason: Dashboards are not exposed as MCP tools.
+  - operation: get-users-me-organisations-current-widgets-largest-cost-changes
+    binding: 'GET /widgets/largest-cost-changes/{widgetId}'
+    reason: Dashboard widgets are not exposed as MCP tools.
+  - operation: get-widgets-cost-and-usage-summary
+    binding: 'GET /widgets/cost-and-usage-summary/{widgetId}'
+    reason: Dashboard widgets are not exposed as MCP tools.
+  - operation: get-users-me-organisations-current-widgets-cost-breakdown
+    binding: 'GET /widgets/cost-breakdown/{widgetId}'
+    reason: Dashboard widgets are not exposed as MCP tools.
+  - operation: get-billing-explorer-report-billing-data
+    binding: 'GET /billing-explorer/reports/{reportId}'
+    reason: Saved billing reports are not addressable by id from any published tool.

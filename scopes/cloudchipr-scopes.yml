@@ -1,0 +1,82 @@
+generated: '2026-09-05'
+method: probed
+source: >-
+  https://mcp.cloudchipr.com/.well-known/oauth-protected-resource +
+  https://auth0.cloudchipr.com/.well-known/openid-configuration
+summary: >-
+  CloudChipr's OAuth surface is the MCP server only; the REST API is apiKey-authenticated and has
+  no oauth2 securityScheme, so derive-oauth-scopes.py correctly found nothing in the spec. The
+  scopes recorded here were read from the two live discovery documents, not from the contract.
+  They are IDENTITY scopes, not API-permission scopes: the MCP protected-resource document
+  advertises exactly openid, profile, email and offline_access. There is no read/write or
+  per-resource scope vocabulary anywhere.
+
+surfaces:
+  - name: CloudChipr MCP Server
+    endpoint: https://mcp.cloudchipr.com/mcp
+    auth: oauth2
+    resource: https://mcp.cloudchipr.com/mcp
+    audience: https://api-bff.cloudchipr.com
+    authorization_server: https://auth0.cloudchipr.com
+    issuer: https://auth0.cloudchipr.com/
+    bearer_methods_supported: [header]
+  - name: CloudChipr Enterprise API
+    base_url: https://api.cloudchipr.com
+    auth: apiKey
+    scopes: none
+    note: >-
+      Single `ApiKey` securityScheme (x-api-key header) applied per-operation. No oauth2 flow, no
+      scope vocabulary. Authorization is coarse: the docs state API keys grant "read-only access to
+      the Cloudchipr API and your cloud resources" - though the spec declares three mutating
+      operations under that same scheme, which is an unresolved contradiction (see notes).
+
+scopes:
+  - name: openid
+    source: mcp-protected-resource
+    type: identity
+    description: OIDC - request an ID token identifying the CloudChipr user.
+    required: true
+  - name: profile
+    source: mcp-protected-resource
+    type: identity
+    description: OIDC - basic profile claims (name, nickname, picture, updated_at).
+  - name: email
+    source: mcp-protected-resource
+    type: identity
+    description: OIDC - email and email_verified claims.
+  - name: offline_access
+    source: mcp-protected-resource
+    type: identity
+    description: Issue a refresh token so the MCP client can hold a long-lived session.
+
+authorization_server_scopes_supported:
+  source: https://auth0.cloudchipr.com/.well-known/openid-configuration
+  note: >-
+    The Auth0 tenant advertises the full standard OIDC claim-scope set below. This is Auth0's
+    default advertisement for the tenant, NOT a CloudChipr-defined permission model - only the four
+    scopes in `scopes:` above are the ones the MCP resource actually declares.
+  values: [openid, profile, offline_access, name, given_name, family_name, nickname, email, email_verified, picture, created_at, identities, phone, address]
+
+authorization_model:
+  style: role-based, server-side
+  scope_granularity: none
+  notes: >-
+    Neither surface exposes a per-resource or per-action scope. What an OAuth-authenticated MCP
+    session may see is decided by the user's CloudChipr role and organization membership
+    ("scoped to their permissions" - https://cloudchipr.com/mcp), not by a scope granted at consent
+    time. An agent therefore cannot request a reduced permission set: it gets whatever its human's
+    account can see.
+  agent_risk: >-
+    There is no way to grant an agent read access to Billing Explorer while withholding Live
+    Resources, and no way to down-scope a token below the user's own role.
+
+unresolved:
+  - issue: 'API keys are documented as read-only, but the spec declares three mutating operations under the same ApiKey scheme.'
+    detail: >-
+      https://docs.cloudchipr.com/docs/api-keys states "API keys provide read-only access to the
+      Cloudchipr API and your cloud resources", while
+      openapi/cloudchipr-enterprise-api-openapi.yml declares POST /data-sources (201 create),
+      PUT /dimensions/category-structure (204) and POST /ingest/{destinationId} - all secured by
+      `ApiKey: []`. Either the docs statement predates the custom-data write surface or those
+      operations require an entitlement the contract does not name. Recorded, not resolved.
+    checked: '2026-09-05'

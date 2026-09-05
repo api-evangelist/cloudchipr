@@ -1,0 +1,92 @@
+generated: '2026-09-05'
+method: searched
+source: https://docs.cloudchipr.com/docs/integrations
+summary: >-
+  CloudChipr advertises an outbound custom-webhook integration and publishes NO AsyncAPI document,
+  no event catalog, no payload schema, no signature scheme and no delivery/retry semantics. The
+  entire published surface is one sentence on the Tools Integrations page. This artifact records
+  that advertisement and, deliberately, everything that is missing from it.
+asyncapi:
+  published: false
+  probed:
+    - url: https://docs.cloudchipr.com/asyncapi.yaml
+      status: 404
+      checked: '2026-09-05'
+  note: >-
+    No AsyncAPI document exists and none is derivable - deriving one would require inventing the
+    event names and payloads CloudChipr has not published. NO AsyncAPI pointer is emitted.
+
+webhooks:
+  advertised: true
+  direction: outbound
+  style: user-configured destination URL
+  configured_in: CloudChipr app, Integrations
+  docs: https://docs.cloudchipr.com/docs/integrations
+  published_text: 'Webhook - "Tailor your integration with Cloudchipr using custom webhooks."'
+  pointer_basis: >-
+    A `Webhooks` pointer IS emitted: CloudChipr genuinely offers webhooks as a first-class
+    notification integration alongside Email, Slack and Jira, and says so on its own docs. The
+    pointer asserts the surface exists; it does not assert that it is documented well.
+
+  triggering_surfaces:
+    note: >-
+      The integrations page states that notification integrations are used "in different areas of
+      the Cloudchipr platform, such as workflow automations, budget alerts, etc." The four product
+      surfaces below are the ones CloudChipr documents as emitting notifications. Which of them a
+      webhook destination can actually be bound to is NOT stated per-surface, so this is the
+      documented context, not a verified binding list.
+    surfaces:
+      - name: Workflow automations
+        docs: https://docs.cloudchipr.com/docs/workflows
+      - name: Budget alerts
+        docs: https://docs.cloudchipr.com/docs/budget
+      - name: Anomaly alerts
+        docs: https://docs.cloudchipr.com/docs/anomaly-alerts
+      - name: Commitment alerts
+        docs: https://docs.cloudchipr.com/docs/commitment-alerts
+
+  events: []
+  events_note: >-
+    ZERO named events are published. No event-type vocabulary, no event catalog page, and no event
+    names appear anywhere in the 60-page documentation index. Nothing is invented here.
+
+  undocumented:
+    payload_schema: false
+    event_type_names: false
+    signature_verification: false
+    signing_secret: false
+    replay_protection: false
+    delivery_guarantees: false
+    retry_policy: false
+    timeout: false
+    ip_allowlist: false
+    delivery_log: false
+    test_send: false
+  undocumented_note: >-
+    Every field above is `false` meaning NOT PUBLISHED. A consumer building a webhook receiver
+    cannot, from CloudChipr's public documentation, learn what JSON it will receive, how to verify
+    the request came from CloudChipr, whether a failed delivery is retried, or how to test one.
+
+  related_delivery_channels:
+    - name: Email
+      status: available
+    - name: Slack
+      status: available
+      docs: https://docs.cloudchipr.com/docs/slack
+    - name: Jira
+      status: available
+      note: Automates ticket creation for identified resources.
+    - name: Microsoft Teams
+      status: coming-soon
+
+api_surface_note: >-
+  The Enterprise API contract itself declares no `webhooks:` block (it is OpenAPI 3.0.3, which has
+  no webhooks keyword) and no callbacks on any of the 26 operations. Webhook destinations are
+  configured in the app UI only; there is no operation to create, list or delete one over the API.
+
+gaps_for_the_provider:
+  - Publish the event-type names and a payload schema per event.
+  - Publish a signature header and verification recipe.
+  - State the retry policy and delivery timeout.
+  - Expose webhook destinations as API resources so an agent can register one.
+  - An AsyncAPI 3.0 document would carry all of the above in one file.

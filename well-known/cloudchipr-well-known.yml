@@ -1,0 +1,170 @@
+generated: '2026-09-05'
+method: probed
+source: live probes of /.well-known/ on every CloudChipr host named by apis.yml, the OpenAPI servers[] block, the docs host, and the authorization server named by the MCP protected-resource document
+summary: >-
+  Three real documents are served, none of them on the primary domain. mcp.cloudchipr.com publishes
+  RFC 9728 protected-resource metadata for the hosted MCP server, and that document names
+  https://auth0.cloudchipr.com as the authorization server — which publishes both RFC 8414
+  oauth-authorization-server metadata and OIDC discovery. That is a genuine WellKnown hit and the
+  pointer is earned. Nothing else is served: no security.txt on any host (so NO SecurityTxt
+  pointer), no api-catalog, no ai-plugin.json, and no A2A agent card anywhere.
+pointer_basis: >-
+  WellKnown pointer emitted on the strength of the three 200s carrying real JSON documents on
+  mcp.cloudchipr.com and auth0.cloudchipr.com. SecurityTxt pointer NOT emitted — RFC 9116 is
+  unimplemented on every CloudChipr host probed. AgentCard pointer NOT emitted — see
+  false_positive_watch.
+false_positive_watch: >-
+  app.cloudchipr.com answers HTTP 200 with the same 898-byte React SPA shell for EVERY
+  /.well-known/* path, including paths that cannot exist. Those eight 200s are recorded below as
+  misses, not hits, and specifically the 200 on /.well-known/agent-card.json is NOT an A2A agent
+  card. Any future round that treats an app.cloudchipr.com /.well-known/ 200 as a served document
+  is wrong.
+hosts:
+  - host: mcp.cloudchipr.com
+    documents:
+      - path: /.well-known/oauth-protected-resource   # RFC 9728
+        status: 200
+        file: cloudchipr-mcp-oauth-protected-resource.json
+      - path: /.well-known/oauth-protected-resource/mcp
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+    note: >-
+      The protected-resource document declares audience https://api-bff.cloudchipr.com, resource
+      https://mcp.cloudchipr.com/mcp, authorization_servers [https://auth0.cloudchipr.com],
+      bearer_methods_supported [header] and scopes_supported [openid, profile, email,
+      offline_access].
+  - host: auth0.cloudchipr.com
+    documents:
+      - path: /.well-known/openid-configuration        # OIDC Discovery
+        status: 200
+        file: cloudchipr-auth0-openid-configuration.json
+      - path: /.well-known/oauth-authorization-server  # RFC 8414
+        status: 200
+        file: cloudchipr-auth0-oauth-authorization-server.json
+    note: >-
+      Auth0 tenant on a CloudChipr-owned CNAME. Discovered ONLY by following authorization_servers[]
+      out of the MCP protected-resource document — probing cloudchipr.com alone would have scored
+      this provider zero on documents it actually publishes (roadmap#244).
+  - host: cloudchipr.com
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+      - path: /.well-known/oauth-protected-resource
+        status: 404
+    note: Webflow-hosted marketing site; returns an 88-byte 404 page on every path.
+  - host: www.cloudchipr.com
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+      - path: /.well-known/oauth-protected-resource
+        status: 404
+  - host: docs.cloudchipr.com
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+      - path: /.well-known/oauth-protected-resource
+        status: 404
+    note: ReadMe-hosted docs. Serves /llms.txt (200) but no /.well-known/ documents.
+  - host: api.cloudchipr.com
+    documents:
+      - path: /.well-known/security.txt
+        status: 401
+      - path: /.well-known/openid-configuration
+        status: 401
+      - path: /.well-known/oauth-authorization-server
+        status: 401
+      - path: /.well-known/api-catalog
+        status: 401
+      - path: /.well-known/ai-plugin.json
+        status: 401
+      - path: /.well-known/agent-card.json
+        status: 401
+      - path: /.well-known/agent.json
+        status: 401
+      - path: /.well-known/oauth-protected-resource
+        status: 401
+    note: >-
+      The OpenAPI servers[] host. Every unauthenticated request 401s with an empty body before any
+      /.well-known/ handler is reached, so these are "unreachable", not "confirmed absent".
+  - host: app.cloudchipr.com
+    documents:
+      - path: /.well-known/security.txt
+        status: 200
+        result: miss
+        body_note: 898-byte SPA shell (HTML), not a document
+      - path: /.well-known/openid-configuration
+        status: 200
+        result: miss
+        body_note: 898-byte SPA shell (HTML), not a document
+      - path: /.well-known/oauth-authorization-server
+        status: 200
+        result: miss
+        body_note: 898-byte SPA shell (HTML), not a document
+      - path: /.well-known/api-catalog
+        status: 200
+        result: miss
+        body_note: 898-byte SPA shell (HTML), not a document
+      - path: /.well-known/ai-plugin.json
+        status: 200
+        result: miss
+        body_note: 898-byte SPA shell (HTML), not a document
+      - path: /.well-known/agent-card.json
+        status: 200
+        result: miss
+        body_note: 898-byte SPA shell (HTML) — NOT an A2A agent card
+      - path: /.well-known/agent.json
+        status: 200
+        result: miss
+        body_note: 898-byte SPA shell (HTML) — NOT an A2A agent card
+      - path: /.well-known/oauth-protected-resource
+        status: 200
+        result: miss
+        body_note: 898-byte SPA shell (HTML), not a document
+agent_card:
+  found: false
+  checked: '2026-09-05'
+  note: >-
+    No A2A agent card on any host. /.well-known/agent-card.json and the legacy
+    /.well-known/agent.json were probed on all six hosts; the only 200s came from the
+    app.cloudchipr.com SPA catch-all and carried HTML. No a2a/ artifact and no AgentCard pointer
+    are emitted — this pipeline never authors an agent card on a provider's behalf.
+security_txt:
+  found: false
+  checked: '2026-09-05'

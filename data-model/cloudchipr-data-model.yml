@@ -1,0 +1,177 @@
+generated: '2026-09-05'
+method: derived
+source: openapi/cloudchipr-enterprise-api-openapi.yml
+summary: >-
+  Entity-relationship graph derived from the 103 component schemas by following $ref edges and
+  id-reference fields. The graph is shallow and hub-shaped: Account is the root every cost and
+  resource record hangs off, and the composition is done through a shared FilterTree rather than
+  through foreign keys. There is no top-level Organization entity in the contract even though the
+  MCP surface exposes one.
+
+id_conventions:
+  primary_key: 'id'
+  format: uuid (RFC 4122), string
+  provider_key: >-
+    Cloud-provider identifiers are carried in separate string fields, never in `id` -
+    Account.provider_account_id, ResourceDetails.provider_unique_identifier,
+    SavingsOpportunityResponse.resource_id. An agent must not conflate the two: `id` is
+    CloudChipr's key, the provider field is AWS/GCP/Azure's.
+  prefixes: none
+  note: >-
+    No id-prefix scheme (no `acct_`/`res_` style). A bare uuid carries no type information, so an
+    id cannot be routed to the right operation without out-of-band knowledge of where it came from.
+
+entities:
+  - name: Account
+    schema: Account
+    description: A connected cloud provider account or subscription. The hub of the model.
+    key: id (uuid)
+    fields: [id, type, access_type, provider_account_id, provider_account_name, provider_details, is_sub_account, status, created_at, outdated, last_resource_updated_date, estimated_monthly_savings, total_monthly_saved_costs, total_costs]
+    operations: [get-accounts, get-accounts-accountId, get-resources]
+    relationships:
+      - has_one: AccountProviderDetailsResponse
+        via: provider_details
+        note: Polymorphic - AwsAccountDetails | GcpAccountDetails per ProviderType.
+      - has_many: ResourceDetails
+        via: 'POST /accounts/{accountId}/resources'
+      - self_reference: Account
+        via: is_sub_account
+        note: >-
+          The parent/child relationship between an organization payer account and its sub-accounts
+          is signalled only by the boolean `is_sub_account`. NO parent id field exists, so the
+          hierarchy is not reconstructable from the contract.
+  - name: ResourceDetails
+    schema: ResourceDetails
+    description: A live cloud resource. Open-shaped - additionalProperties true, with type-specific fields per resource type.
+    key: id (uuid)
+    operations: [get-resources, lookupResource]
+    relationships:
+      - belongs_to: Account
+        via: account_id query parameter on GET /resources/lookup
+      - has_many: Tags
+        via: tags
+      - has_one: ResourceType
+        via: resource_type
+    typed_variants: [Ec2, Ebs, Eip, Elb, Elc, Rds, Ip, Lb, Disk, Sql, Vm]
+    note: >-
+      Eleven concrete resource schemas exist alongside the open ResourceDetails. An agent should
+      read `resource_type` before assuming any type-specific field is present.
+  - name: SavingsOpportunityResponse
+    schema: SavingsOpportunityResponse
+    description: A single cost-saving recommendation against one cloud resource.
+    key: id (uuid)
+    required: [id, action_type, source, opportunity_unique_identifier]
+    operations: [filterSavingsOpportunities]
+    relationships:
+      - belongs_to: Account
+        via: account_id
+      - references: ResourceDetails
+        via: resource_id
+        note: Carries the CLOUD-PROVIDER resource identifier, not CloudChipr's ResourceDetails.id.
+      - references: recommendation
+        via: recommendation_id
+      - references: policy
+        via: policy_id
+        note: No policy entity is defined in the contract; the id dangles.
+      - has_many: OpportunityDimension
+        via: dimensions
+    fields_of_note: [action_type, implementation_effort, based_on_past, recommended_type]
+  - name: Budget
+    schema: Budget
+    description: A cost budget with thresholds, planned amounts and a forecast.
+    key: id (uuid)
+    operations: [listBudgets, getBudget, getBudgetHistory]
+    relationships:
+      - has_many: BudgetThreshold
+        via: thresholds
+      - has_many: BudgetHistoryEntry
+        via: 'GET /budgets/{budgetId}/history'
+      - has_one: FilterTreeResponse
+        via: filter_tree
+  - name: Dimension
+    schema: Dimension
+    description: A cost-allocation dimension (e.g. "Team") made of rule-based categories.
+    key: name (string) - NOT a uuid
+    operations: [listDimensions, updateCategoryStructure]
+    relationships:
+      - has_many: DimensionCategory
+        via: categories
+    note: >-
+      Dimension has NO id field. It is keyed by `name`, which makes rename a destructive operation
+      and makes PUT /dimensions/category-structure a whole-taxonomy replace rather than a patch.
+  - name: DimensionCategory
+    schema: DimensionCategory
+    description: One category inside a dimension, defined by a filter tree.
+    relationships:
+      - belongs_to: Dimension
+      - has_one: FilterTreeResponse
+        via: filter_tree
+  - name: CustomSource
+    schema: CustomSource
+    description: A user-defined billing/cost data source with a declared column set.
+    key: id (uuid)
+    operations: [listCustomSources, createDataSource, ingestCustomData]
+    relationships:
+      - has_many: CustomSourceColumnResponse
+        via: columns
+      - audit: [created_by, created_at, modified_by, modified_at]
+        note: created_by / modified_by are uuids of users; no User entity is defined in the contract.
+  - name: Telemetry
+    schema: Telemetry
+    description: A telemetry destination - the non-cost sibling of CustomSource, same shape.
+    key: id (uuid)
+    operations: [listTelemetries, ingestCustomData]
+  - name: BillingAggregateResponse
+    schema: BillingAggregateResponse
+    description: The billing-explorer aggregation result. A computed projection, not a stored entity.
+    operations: [billingDataByOrganisation, get-billing-explorer-report-billing-data]
+    relationships:
+      - has_many: BillingAggregateItemsResponse
+      - has_one: BillingAggregateTotalResponse
+      - has_one: ForecastedCostResponse
+      - has_one: AverageDailyCostDetailsResponse
+      - has_one: AverageMonthlyCostDetailsResponse
+      - has_one: BillingAggregateCostsDateDetails
+  - name: FilterTree
+    schema: FilterTreeResponse / FilterTreeNodeRequest
+    description: >-
+      The shared recursive filter expression - FilterGroupNode (boolean group) containing
+      FilterItemNode (key/operator/value), typed by FilterKeyType, FilterOperatorType,
+      FilterMetric and FilterStatisticsType.
+    role: shared-composition
+    used_by: [Budget, DimensionCategory, BillingDataRequest, SavingsOpportunityFilteredRequest, get-resources]
+    note: >-
+      This is the real centre of the data model. Six unrelated surfaces compose the same filter
+      grammar, and its valid keys/values are discoverable at runtime via
+      GET /resource-explorer/possible-filters and .../values. Learn it once and it applies
+      everywhere.
+  - name: Dashboard
+    schema: DashboardDetails (component response)
+    description: A dashboard with a layout and a set of widgets.
+    key: id (uuid)
+    operations: [get-dashboard-dashboardId]
+    relationships:
+      - has_one: LayoutNullable
+        via: layout
+      - has_many: widget
+        via: layout
+        note: >-
+          Widgets are fetched by their own widgetId through three separate typed operations
+          (largest-cost-changes, cost-and-usage-summary, cost-breakdown). There is no generic
+          widget entity and no operation that lists a dashboard's widgets as data.
+
+relationships_summary:
+  has_one: 12
+  has_many: 9
+  belongs_to: 3
+  dangling_references: [policy_id, recommendation_id, created_by, modified_by]
+
+gaps:
+  - >-
+    No Organization / Tenant entity in the contract, although the MCP surface exposes
+    get_provider_organizations for AWS Organizations, GCP Organizations and Azure Tenants.
+  - No User entity, though created_by/modified_by carry user uuids.
+  - No Kubernetes entities at all (cluster, namespace, workload, pod) despite a full MCP Kubernetes surface.
+  - No Workflow / Off-hours / Task / Anomaly Alert entities, though all four are core product objects.
+  - Account hierarchy is not reconstructable - is_sub_account is a boolean with no parent pointer.
+  - No subway/ ERD render exists in this repo.

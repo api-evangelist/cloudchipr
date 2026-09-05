@@ -1,0 +1,15 @@
+generated: '2026-09-05'
+method: searched
+source: https://docs.cloudchipr.com/llms.txt
+http_status: 200
+bytes: 7050
+verbatim: true
+subject: CloudChipr documentation (docs.cloudchipr.com)
+note: >-
+  Saved verbatim from the provider's own docs host. CloudChipr's ReadMe-hosted documentation also
+  serves a markdown twin of every page (append .md to any docs URL), which is how the docs pages
+  cited across this repo's artifacts were read. The llms.txt indexes 60 guide pages plus a single
+  API Reference entry, and that API Reference entry is the thread that led to the real OpenAPI:
+  it links to https://cloudchipr.github.io/api-service/, whose swagger-config.json names api.yaml.
+  No llms-full.txt is published, and none is committed.
+refreshed_from: '2026-08-17 capture (6,680 bytes) -> 2026-09-05 capture (7,050 bytes)'

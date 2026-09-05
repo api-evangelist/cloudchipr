@@ -1,0 +1,182 @@
+generated: '2026-09-05'
+method: searched
+source: >-
+  https://docs.cloudchipr.com/docs/security-compliance + https://cloudchipr.com/security +
+  https://mcp.cloudchipr.com/.well-known/oauth-protected-resource +
+  https://auth0.cloudchipr.com/.well-known/openid-configuration +
+  openapi/cloudchipr-enterprise-api-openapi.yml
+summary: >-
+  Strong on the OAuth/OIDC/MCP axis (the MCP server publishes RFC 9728 metadata and its Auth0
+  authorization server publishes RFC 8414 + OIDC discovery with PKCE and dynamic client
+  registration) and weak on the HTTP-semantics axis (no RFC 9457, no RFC 8594, no RFC 9116).
+  SOC 2 Type II is published as a claim on CloudChipr's own docs.
+
+standards:
+  - id: openapi-3.0
+    conforms: true
+    evidence: >-
+      CloudChipr publishes a valid OpenAPI 3.0.3 document at
+      https://cloudchipr.github.io/api-service/api.yaml (200, 123,184 bytes, 26 paths / 26
+      operations / 103 component schemas), linked from its own homepage and from its docs API
+      Reference page. Captured 2026-09-05 to openapi/_original/cloudchipr-enterprise-api.yaml.
+  - id: oauth2
+    conforms: true
+    evidence: >-
+      The MCP server is OAuth 2.0 protected. https://mcp.cloudchipr.com/.well-known/oauth-protected-resource
+      (200) names authorization_servers [https://auth0.cloudchipr.com] and bearer_methods_supported [header].
+  - id: oauth2-pkce
+    conforms: true
+    evidence: 'code_challenge_methods_supported includes S256 in the auth0.cloudchipr.com metadata.'
+  - id: rfc8414-authorization-server-metadata
+    conforms: true
+    evidence: 'https://auth0.cloudchipr.com/.well-known/oauth-authorization-server returns valid metadata (200).'
+  - id: rfc9728-protected-resource-metadata
+    conforms: true
+    evidence: 'https://mcp.cloudchipr.com/.well-known/oauth-protected-resource returns valid metadata (200).'
+  - id: oidc-discovery
+    conforms: true
+    evidence: >-
+      https://auth0.cloudchipr.com/.well-known/openid-configuration returns valid OIDC discovery
+      metadata (200) with issuer https://auth0.cloudchipr.com/ and jwks_uri
+      https://auth0.cloudchipr.com/.well-known/jwks.json.
+  - id: oauth2-dynamic-client-registration
+    conforms: true
+    evidence: >-
+      registration_endpoint https://auth0.cloudchipr.com/oidc/register is advertised (RFC 7591),
+      which is what lets an arbitrary MCP client self-onboard without a manual app request.
+  - id: oauth2-device-authorization-grant
+    conforms: true
+    evidence: >-
+      device_authorization_endpoint and grant type urn:ietf:params:oauth:grant-type:device_code are
+      advertised - the grant a headless CLI MCP client needs.
+  - id: mcp
+    conforms: true
+    evidence: >-
+      Hosted remote Model Context Protocol server at https://mcp.cloudchipr.com/mcp (HTTP
+      transport), 25 published tools, documented for Claude, Claude Code, ChatGPT, Cursor and
+      Codex. Probed 2026-09-05: tools/list returns 401 with a Bearer challenge, confirming a live
+      MCP endpoint behind auth.
+  - id: saml2-sso
+    conforms: true
+    evidence: >-
+      Organization SSO documented for Okta and Azure AD
+      (https://docs.cloudchipr.com/docs/single-sign-on-sso-using-okta,
+      .../single-sign-on-sso-using-azure); Organization SSO is a Pro-and-above pricing entitlement.
+  - id: soc2-type-ii
+    conforms: true
+    verification: claim-only
+    evidence: >-
+      "We are SOC 2 Type II certified, affirming our commitment to data security and privacy."
+      published on https://docs.cloudchipr.com/docs/security-compliance with a SOC badge image. No
+      report, audit period, auditor name, scope statement or NDA request flow is published, and
+      there is no trust center from which to request one.
+  - id: rfc9457-problem-details
+    conforms: false
+    evidence: >-
+      Zero `application/problem+json` media types in the spec. All five shared error responses
+      carry a bespoke `{ "message": string }` object. See errors/cloudchipr-problem-types.yml.
+  - id: rfc8594-sunset-header
+    conforms: false
+    evidence: No Deprecation/Sunset headers, no deprecation policy, and zero operations marked deprecated.
+  - id: rfc9116-security-txt
+    conforms: false
+    evidence: >-
+      /.well-known/security.txt returns 404 on cloudchipr.com, www.cloudchipr.com and
+      docs.cloudchipr.com, 401 on api.cloudchipr.com, and an HTML SPA shell on app.cloudchipr.com.
+      See well-known/cloudchipr-well-known.yml.
+  - id: a2a-agent-card
+    conforms: false
+    evidence: >-
+      /.well-known/agent-card.json and the legacy /.well-known/agent.json miss on every host; the
+      only 200s are the app.cloudchipr.com SPA catch-all serving HTML.
+  - id: rfc9110-idempotency
+    conforms: partial
+    evidence: >-
+      A required `Idempotency-Key` header (uuid) on POST /ingest/{destinationId} only - 1 of 3
+      mutating operations. See conventions/cloudchipr-conventions.yml#idempotency (coverage: partial).
+  - id: rate-limit-headers
+    conforms: false
+    evidence: >-
+      No RateLimit-* / X-RateLimit-* / Retry-After header documented and no 429 declared on any of
+      the 26 operations.
+  - id: pagination
+    conforms: false
+    evidence: >-
+      No pagination vocabulary anywhere in the 123KB spec - no page/offset/cursor/limit parameter
+      and no pagination envelope. Collection operations return unbounded arrays.
+  - id: graphql
+    conforms: false
+    evidence: No /graphql surface is documented or discoverable; the API is REST-only plus MCP.
+  - id: asyncapi
+    conforms: false
+    evidence: >-
+      Webhooks are offered as an outbound notification integration but no AsyncAPI document,
+      event catalog or payload schema is published. See asyncapi/cloudchipr-webhooks.yml.
+
+domain_standard:
+  market: FinOps / cloud cost management
+  candidate_standard: FOCUS (FinOps Open Cost and Usage Specification)
+  declared_in_contract: false
+  evidence: >-
+    PROBED AND ABSENT. Zero occurrences of FOCUS, BilledCost, EffectiveCost, ListCost,
+    ChargeCategory, BillingPeriod, ServiceCategory or ProviderName in the 123KB OpenAPI. The
+    billing-explorer response schemas (BillingAggregateResponse, ResourceExplorerGridTotal,
+    ForecastedCost) use CloudChipr's own cost vocabulary; the only FOCUS-adjacent terms present are
+    the AWS-native "unblended" and "amortized" cost types (2 occurrences each), which are the AWS
+    CUR vocabulary, not FOCUS.
+  membership:
+    organization: FinOps Foundation
+    url: https://www.finops.org/members/cloudchipr/
+    status: 200
+    checked: '2026-09-05'
+    note: >-
+      Membership is real and independently verifiable, but membership is not conformance. No FOCUS
+      column mapping, no FOCUS version declaration, and no FOCUS-shaped export is published in the
+      contract or the docs.
+  scored: false
+  note: >-
+    REWARD-ONLY dimension - recorded as an honest absence, not a penalty. If CloudChipr later
+    declares FOCUS column mappings on its billing-explorer responses or ships a FOCUS export, this
+    is the single highest-value contract change available to it in its own market.
+  see: finops/cloudchipr-finops.yml
+
+certifications:
+  - name: SOC 2 Type II
+    status: claimed
+    source: https://docs.cloudchipr.com/docs/security-compliance
+    verification: claim-only
+    checked: '2026-09-05'
+  - name: AWS Qualified Software
+    status: claimed
+    source: https://docs.cloudchipr.com/docs/security-compliance
+    verification: claim-only
+    note: >-
+      "Cloudchipr is qualified by Amazon Web Services (AWS)." Corroborated by a live AWS
+      Marketplace listing (https://aws.amazon.com/marketplace/pp/prodview-enwub346vrmva, 200).
+
+security_posture_claims:
+  source: https://docs.cloudchipr.com/docs/security-compliance
+  published:
+    - Information Security Policy, reviewed and updated regularly
+    - Regular risk assessment and treatment
+    - Vendor risk management with periodic audits
+    - Encryption in transit and at rest
+    - Least-privilege access controls with enforced MFA
+    - Regular security audits and assessments
+    - Documented incident response plan
+    - Workstation protection
+    - Personnel background checks
+    - Recurring employee security awareness training
+    - Physical security delegated to AWS as infrastructure provider
+  data_handling:
+    - >-
+      "Cloudchipr does not use Access Key or Secret Key authentication. Connections with customer
+      accounts are mainly done through Role Based Access Control (RBAC)."
+    - >-
+      "Cloudchipr does not gather or access any data on cloud storage or compute machines. It
+      solely collects resource usage metrics and identifiers from the Cloud APIs."
+  note: >-
+    These are a published, itemized security programme - unusually specific for a company of this
+    size - but they are self-attested prose, not certificates. No trust center, no report request
+    flow, and no vulnerability disclosure policy (probed: none found). See
+    security/cloudchipr-trust-center.yml.

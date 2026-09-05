@@ -1,0 +1,143 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enrichment overlay for the CloudChipr Enterprise API
+  version: 1.0.0
+x-provenance:
+  generated: '2026-09-05'
+  method: generated
+  source: openapi/cloudchipr-enterprise-api-openapi.yml
+  extends: openapi/cloudchipr-enterprise-api-openapi.yml
+  upstream: https://cloudchipr.github.io/api-service/api.yaml
+  note: >-
+    Non-destructive. Records what API Evangelist observed and derived about this contract without
+    mutating the provider's document. Every action below either adds an x- annotation or a
+    description that is grounded in a published CloudChipr source; nothing invents behaviour.
+actions:
+  - target: $.info
+    description: Record the contract's provenance and the surfaces that accompany it.
+    update:
+      x-apievangelist-source: https://cloudchipr.github.io/api-service/api.yaml
+      x-apievangelist-captured: '2026-09-05'
+      x-apievangelist-docs: https://docs.cloudchipr.com/reference
+      x-apievangelist-companion-mcp: https://mcp.cloudchipr.com/mcp
+      x-apievangelist-ownership-check: >-
+        info.title "CloudChipr Enterprise API", info.contact info@cloudchipr.com, license
+        "Cloudchipr 1.0" -> https://cloudchipr.com, servers[0] https://api.cloudchipr.com. The
+        spec is served from the company's own GitHub Pages site and is linked from
+        cloudchipr.com and from docs.cloudchipr.com/reference. Ownership confirmed on all four
+        signals.
+
+  - target: $.servers[0]
+    description: Annotate the single production server with its observed unauthenticated behaviour.
+    update:
+      x-apievangelist-probe:
+        checked: '2026-09-05'
+        unauthenticated_status: 401
+        body: empty
+        note: >-
+          Every path on api.cloudchipr.com returns 401 with a zero-length body before routing,
+          including /.well-known/*. No rate-limit or request-id headers are emitted.
+
+  - target: $.components.securitySchemes.ApiKey
+    description: Add the key-lifecycle facts CloudChipr publishes outside the spec.
+    update:
+      x-apievangelist-key-lifecycle:
+        issued_in: CloudChipr app, Settings -> API Keys
+        docs: https://docs.cloudchipr.com/docs/api-keys
+        max_keys_per_account: 2
+        expiry_documented: 1 to 365 days
+        expiry_superseded_note: >-
+          The 2026-07-01 release notes state the expiration requirement was removed and a
+          "Last Used" column added. The docs page (updated 2025-10-15) still states a mandatory
+          expiry. Unresolved by the provider.
+        documented_access: >-
+          The docs state API keys are read-only, yet this scheme secures three mutating operations
+          (createDataSource, updateCategoryStructure, ingestCustomData). Contradiction recorded,
+          not resolved.
+
+  - target: $.paths['/ingest/{destinationId}'].post
+    description: Flag the one operation in the contract with replay protection.
+    update:
+      x-apievangelist-idempotency:
+        mechanism: Idempotency-Key header
+        required: true
+        format: uuid
+        coverage-in-api: 'partial - 1 of 3 mutating operations'
+        retention_documented: false
+        conflict_behaviour_documented: false
+      x-apievangelist-reversibility:
+        reversal: none
+        window: null
+        note: The idempotency key prevents a duplicate ingest; it does not undo a wrong one.
+
+  - target: $.paths['/data-sources'].post
+    description: Flag the unprotected create.
+    update:
+      x-apievangelist-idempotency:
+        mechanism: none
+        agent_risk: >-
+          A retry after a timeout may create a duplicate data-source destination and there is no
+          delete operation to remove it.
+      x-apievangelist-reversibility:
+        reversal: none
+        window: null
+
+  - target: $.paths['/dimensions/category-structure'].put
+    description: Flag the destructive full-replace with no concurrency guard.
+    update:
+      x-apievangelist-idempotency:
+        mechanism: none
+        shape: full-replace (naturally idempotent by shape, but no ETag/If-Match)
+      x-apievangelist-reversibility:
+        reversal: none
+        window: null
+        agent_risk: >-
+          Replaces an organization's entire cost-allocation taxonomy. No version history, no
+          restore operation. GET /dimensions beforehand is the only available rollback artifact.
+
+  - target: $.paths['/billing-explorer/validate'].post
+    description: Mark the dry-run primitive so an agent can find it.
+    update:
+      x-apievangelist-dry-run:
+        for: billingDataByOrganisation
+        semantics: 'Validates the request body without executing the query. 204 = valid.'
+        grade: verified
+
+  - target: $.components.responses
+    description: Record that the error family is not RFC 9457.
+    update:
+      x-apievangelist-error-format:
+        rfc9457: false
+        media_type: application/json
+        envelope: '{ "message": string }'
+        catalog: errors/cloudchipr-problem-types.yml
+        note: >-
+          `message` is declared optional on every error schema, so a client cannot rely on it being
+          present. No error `code` field except the ErrorCode enum on the ingest 400.
+
+  - target: $.paths
+    description: Record the two structural gaps that affect every collection operation.
+    update:
+      x-apievangelist-pagination:
+        supported: false
+        note: >-
+          No page/offset/cursor/limit parameter and no pagination envelope anywhere in the
+          document. Collection operations return unbounded arrays with no truncation signal.
+      x-apievangelist-rate-limit-signal:
+        documented: false
+        note: No 429 response is declared on any operation and no RateLimit-* header is documented.
+
+  - target: $.tags
+    description: Note the surface divergence against the companion MCP server.
+    update:
+      x-apievangelist-crosswalk:
+        artifact: mcp/cloudchipr-tool-crosswalk.yml
+        rest_operations: 26
+        mcp_tools: 25
+        bound: 11
+        rest_only: 15
+        mcp_only: 14
+        note: >-
+          The Kubernetes surface, resource utilization metrics, tag discovery and the savings
+          summary exist ONLY on MCP. Budgets, dashboards, widgets, dimension administration and
+          custom-data ingestion exist ONLY on REST.

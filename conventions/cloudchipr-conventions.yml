@@ -1,0 +1,193 @@
+generated: '2026-09-05'
+method: derived
+source: >-
+  openapi/cloudchipr-enterprise-api-openapi.yml (26 operations) +
+  https://docs.cloudchipr.com/docs/api-keys + https://docs.cloudchipr.com/docs/cloudchipr-mcp-server
+summary: >-
+  Cross-cutting request/response semantics for the CloudChipr Enterprise API and the hosted MCP
+  server. The spec is small, flat and read-heavy: 26 operations, one apiKey security scheme, a
+  single-field error envelope, and no pagination vocabulary at all.
+
+authentication:
+  styles: [api_key_header, oauth2_bearer]
+  api_key_header: x-api-key
+  api_key_surface: REST (api.cloudchipr.com)
+  oauth2_surface: MCP (mcp.cloudchipr.com/mcp, authorization server auth0.cloudchipr.com)
+  see: authentication/cloudchipr-authentication.yml
+
+versioning:
+  scheme: unversioned-path
+  spec_version: 0.1.0
+  notes: >-
+    No version segment in any path and none in the base URL (https://api.cloudchipr.com). The only
+    version identifier CloudChipr publishes is info.version 0.1.0 in the spec itself. There is no
+    documented version-negotiation header and no dated version scheme.
+  see: lifecycle/cloudchipr-lifecycle.yml
+
+pagination:
+  style: none
+  documented: false
+  notes: >-
+    ZERO pagination vocabulary in the entire 123KB spec - no page, offset, cursor, limit, per_page
+    or next_token parameter on any of the 26 operations, and no pagination envelope in any response
+    schema. Collection operations (GET /accounts, GET /budgets, GET /custom-sources, GET /telemetry,
+    GET /dimensions, POST /savings-opportunities, POST /accounts/{accountId}/resources) return
+    unbounded arrays. An agent has no way to page a large result set and no way to know it was
+    truncated.
+  agent_risk: >-
+    An organization with thousands of live resources gets one unbounded array from
+    POST /accounts/{accountId}/resources. There is no documented cap and no continuation token,
+    so an agent cannot bound the response size or resume.
+
+filtering:
+  supported: true
+  style: request-body filter tree
+  notes: >-
+    Filtering is expressed as a nested filter tree in the request body (FilterTreeNodeRequest ->
+    FilterGroupNodeRequest / FilterItemNodeRequest with FilterOperatorType and FilterKeyType), not
+    as query parameters. Valid filter keys and values are themselves discoverable at runtime via
+    GET /resource-explorer/possible-filters and
+    GET /resource-explorer/filters/{filterProvider}/{filterType}/values.
+  discovery_operations:
+    - get-resource-explorer-possible-groupings
+    - get-resource-explorer-possible-filters
+    - get-resource-explorer-filter-values
+    - get-filters
+  agent_note: >-
+    This runtime discovery loop is the strongest agent-affordance in the contract: an agent can ask
+    the API what it is allowed to group and filter by before it composes a query, and
+    POST /billing-explorer/validate lets it check the composed query (204 = valid) before spending
+    a real call. Both surfaces are mirrored as MCP tools.
+
+dry_run_mode:
+  supported: true
+  grade: verified
+  operation: validate-billing-explorer
+  binding: 'POST /billing-explorer/validate'
+  semantics: >-
+    "Validates a billing explorer request body without executing the query. Returns 204 No Content
+    on success." A genuine rehearsal primitive for the single most expensive read in the API.
+  scope: [billingDataByOrganisation]
+  note: >-
+    Scoped to the billing-explorer query surface only. No dry-run exists for the three write
+    operations.
+  mcp_equivalent: validate_billing_query
+
+idempotency:
+  coverage: partial
+  scope:
+    - ingestCustomData
+  mechanism: 'Required `Idempotency-Key` request header (string, format uuid)'
+  header: Idempotency-Key
+  documented: true
+  documented_in: openapi/cloudchipr-enterprise-api-openapi.yml
+  retention_documented: false
+  conflict_behaviour_documented: false
+  notes: >-
+    Exactly one of the three mutating operations carries replay protection, and on that one the
+    header is REQUIRED rather than optional: POST /ingest/{destinationId} (NDJSON custom-data
+    ingestion). The other two writes - POST /data-sources (createDataSource, 201) and
+    PUT /dimensions/category-structure (204) - document no idempotency key, no ETag/If-Match, and
+    no conditional-request support. Neither the key retention window nor the behaviour on a
+    replayed key with a different body is documented anywhere.
+    coverage is therefore `partial`, not `full`: 1 of 3 writes.
+  agent_risk: >-
+    An agent that retries POST /data-sources after a timeout may create a duplicate data-source
+    destination, and there is no list-then-match operation to detect it (GET /custom-sources and
+    GET /telemetry list sources but the spec does not state that they include newly created
+    destinations by name). PUT /dimensions/category-structure is a full-structure replace, which is
+    naturally idempotent by shape but offers no optimistic-concurrency guard: two agents writing
+    concurrently silently last-write-wins over an organization's whole cost-allocation taxonomy.
+
+reversibility:
+  grade: none
+  coverage: none
+  write_operations: 3
+  reversal_operations: 0
+  surfaces:
+    - operation: createDataSource
+      binding: 'POST /data-sources'
+      reversal: none
+      window: null
+      note: >-
+        No DELETE /data-sources/{id} and no archive/disable operation exists in the spec. Once an
+        agent creates a data-source destination over the API it cannot remove it over the API.
+    - operation: ingestCustomData
+      binding: 'POST /ingest/{destinationId}'
+      reversal: none
+      window: null
+      note: >-
+        No delete/purge/rollback operation for ingested rows. The required Idempotency-Key prevents
+        a DUPLICATE ingest; it does not undo a WRONG one.
+    - operation: updateCategoryStructure
+      binding: 'PUT /dimensions/category-structure'
+      reversal: none
+      window: null
+      note: >-
+        Full-replace of an organization's dimension/category structure with no versioning, no
+        restore endpoint and no history operation. An agent that writes a bad structure can only
+        recover by re-sending a correct one it saved beforehand - and the spec offers no
+        read-before-write pairing beyond GET /dimensions.
+  notes: >-
+    NOT `na`: the API has a real write surface (3 mutating operations, one of them a 201 create).
+    It simply publishes no reversal path and states no window for any of them. Nothing here is
+    inferred - no cancel, refund, void, reverse, undo, rollback, restore or delete operation exists
+    anywhere in the 26-operation spec.
+  agent_guidance: >-
+    Treat all three writes as one-way. Before PUT /dimensions/category-structure, GET /dimensions
+    and keep the response as the only available rollback artifact.
+
+error_envelope:
+  format: bespoke-json
+  rfc9457: false
+  media_type: application/json
+  shape: '{ "message": "<string>" }'
+  see: errors/cloudchipr-problem-types.yml
+  notes: >-
+    Five shared component responses (UnauthorizedError 401, BadRequest 400, NotFound 404,
+    MethodNotAllowed 405, InternalServerError 500) all carry the same single-field
+    `{ message: string }` object. No `type`, `title`, `status`, `detail` or `instance` member, so
+    this is not RFC 9457 problem+json. POST /ingest/{destinationId} is the one exception: its 400
+    uses a oneOf with a structured `errors[]` array keyed on the ErrorCode enum
+    (MISSING_MANDATORY_FIELD, INVALID_COLUMN_FORMAT, INVALID_JSON).
+
+rate_limit_signaling:
+  documented: false
+  headers_documented: []
+  notes: >-
+    No RateLimit-*, X-RateLimit-* or Retry-After header is documented, no 429 response is declared
+    on any of the 26 operations, and the docs publish no numeric limit. Unauthenticated probes of
+    api.cloudchipr.com return 401 with an empty body and no rate-limit headers, so nothing could be
+    observed either.
+  see: rate-limits/cloudchipr-rate-limits.yml
+
+request_tracing:
+  documented: false
+  observed: false
+  notes: >-
+    No correlation/request-id header is documented, and api.cloudchipr.com 401s with an empty body
+    and no such header on unauthenticated requests, so none could be observed.
+
+metadata_and_expansion:
+  field_expansion: false
+  sparse_fieldsets: partial
+  notes: >-
+    No `expand`/`fields` query convention. The closest thing is PropertiesToLoadRequest, a
+    request-body member on the resource operations that lets a caller name which property groups to
+    load - a body-level sparse-fieldset mechanism rather than a query-parameter one.
+
+media_types:
+  request:
+    - application/json
+    - application/x-ndjson   # POST /ingest/{destinationId} only
+  response:
+    - application/json
+
+cross_links:
+  authentication: authentication/cloudchipr-authentication.yml
+  scopes: scopes/cloudchipr-scopes.yml
+  errors: errors/cloudchipr-problem-types.yml
+  lifecycle: lifecycle/cloudchipr-lifecycle.yml
+  rate_limits: rate-limits/cloudchipr-rate-limits.yml
+  data_model: data-model/cloudchipr-data-model.yml
+  mcp: mcp/cloudchipr-mcp.yml

@@ -1,0 +1,192 @@
+generated: '2026-09-05'
+method: searched
+status: published
+source: https://docs.cloudchipr.com/docs/cloudchipr-mcp-server
+secondary_source: https://cloudchipr.com/mcp
+probe_source: https://mcp.cloudchipr.com/.well-known/oauth-protected-resource
+summary: >-
+  CloudChipr ships a first-party, fully hosted remote MCP server. Nothing is self-hosted and no
+  package is installed: an MCP client points at one HTTPS endpoint and authenticates. The server is
+  read-only today; CloudChipr advertises write actions as "coming soon" on its own MCP page.
+
+deployment:
+  mode: remote
+  endpoint: https://mcp.cloudchipr.com/mcp
+  auth: oauth
+  verified: probed
+  note: >-
+    Endpoint confirmed live by probe on 2026-09-05. POST tools/list returns HTTP 401 with
+    `www-authenticate: Bearer realm="cloudchipr", error="invalid_token",
+    error_description="No bearer token provided"` — i.e. the server exists and is auth-gated, not
+    absent. API-key bearer auth is also supported for headless/CI use, so `auth` is oauth with an
+    api-key alternative (see auth below).
+
+server:
+  name: cloudchipr
+  transport: http
+  url: https://mcp.cloudchipr.com/mcp
+  self_hosted: false
+  install_required: false
+  clients_documented:
+    - Claude
+    - Claude Code
+    - ChatGPT
+    - Cursor
+    - Codex
+  install_commands:
+    - client: Claude Code (OAuth)
+      command: claude mcp add --transport http cloudchipr https://mcp.cloudchipr.com/mcp
+    - client: Codex (OAuth)
+      command: codex mcp add cloudchipr --url https://mcp.cloudchipr.com/mcp
+    - client: Claude Code (API token)
+      command: >-
+        claude mcp add --transport http c8r-prod https://mcp.cloudchipr.com/mcp --header
+        "Authorization: Bearer <YOUR_C8R_TOKEN>" -s local
+    - client: Codex (API token)
+      command: codex mcp add c8r-prod --url https://mcp.cloudchipr.com/mcp --bearer-token-env-var C8R_TOKEN
+  install_commands_note: >-
+    These are remote-server registration commands, NOT a local stdio package. They tell an MCP
+    client which URL to call; nothing is downloaded or run on the user's machine. mode stays
+    `remote`.
+
+auth:
+  methods:
+    - oauth2
+    - apikey
+  oauth2:
+    authorization_server: https://auth0.cloudchipr.com
+    issuer: https://auth0.cloudchipr.com/
+    resource: https://mcp.cloudchipr.com/mcp
+    audience: https://api-bff.cloudchipr.com
+    scopes_supported: [openid, profile, email, offline_access]
+    bearer_methods_supported: [header]
+    grant_types: [authorization_code, refresh_token, client_credentials, urn:ietf:params:oauth:grant-type:device_code]
+    pkce: S256
+    dynamic_client_registration: https://auth0.cloudchipr.com/oidc/register
+    discovery:
+      protected_resource: well-known/cloudchipr-mcp-oauth-protected-resource.json
+      authorization_server: well-known/cloudchipr-auth0-oauth-authorization-server.json
+      openid_configuration: well-known/cloudchipr-auth0-openid-configuration.json
+  apikey:
+    style: bearer
+    header: Authorization
+    format: 'Bearer <C8R_TOKEN>'
+    env: C8R_TOKEN
+    note: >-
+      The same CloudChipr API key issued in-app (Settings -> API Keys). Read-only by CloudChipr's
+      own definition, max two keys per account, expiry 1-365 days.
+      See authentication/cloudchipr-authentication.yml.
+
+introspection:
+  attempted: '2026-09-05'
+  method: 'POST {"jsonrpc":"2.0","id":1,"method":"tools/list"} with Accept: application/json, text/event-stream'
+  result: 401
+  body: '{"error":"unauthorized","message":"Bearer token required"}'
+  note: >-
+    The live tool schemas are auth-gated. The tool list below is the provider-published catalogue
+    from docs.cloudchipr.com, complete with the category counts CloudChipr states on its own MCP
+    page (Billing Explorer 7, Savings Opportunities 7, Live Resources 5, Kubernetes 3, Accounts &
+    Organizations 3 = 25). Tool NAMES and DESCRIPTIONS are provider-published; per-tool
+    inputSchema requires authenticated introspection and is NOT recorded here. Nothing below is
+    invented.
+
+tool_count: 25
+tool_count_source: 'CloudChipr docs: "The server exposes 25 tools across five categories."'
+write_surface:
+  present: false
+  note: >-
+    "The assistant only ever reads your data" (docs). cloudchipr.com/mcp lists a "Write Actions"
+    card marked "Coming soon". No mutating tool is published today.
+
+tools:
+  - name: get_cloud_accounts
+    category: accounts-and-organizations
+    description: Lists connected cloud accounts with cost, waste, and savings totals.
+  - name: get_cloud_account
+    category: accounts-and-organizations
+    description: Full detail for a single account, including missing permissions and who connected it.
+  - name: get_provider_organizations
+    category: accounts-and-organizations
+    description: Lists AWS Organizations, GCP Organizations and Azure Tenants, with their Savings Plans and commitments.
+  - name: get_billing_data
+    category: billing-explorer
+    description: Aggregates spend by time, service, account, region, tag or dimension, with trends and month-end forecasts.
+  - name: get_billing_providers
+    category: billing-explorer
+    description: Lists the providers and data sources that have billing data.
+  - name: get_custom_sources
+    category: billing-explorer
+    description: Lists custom and third-party data sources.
+  - name: get_billing_groupings
+    category: billing-explorer
+    description: Discovery tool - the valid groupings/dimensions a cost query may use.
+  - name: get_billing_filters
+    category: billing-explorer
+    description: Discovery tool - the valid filters a cost query may use.
+  - name: get_billing_filter_values
+    category: billing-explorer
+    description: Discovery tool - the valid values for a given billing filter.
+  - name: validate_billing_query
+    category: billing-explorer
+    description: Checks a complex cost query before it runs, so results are right the first time.
+  - name: get_savings_summary
+    category: savings-opportunities
+    description: The headline potential-savings figure across the whole organization.
+  - name: get_provider_total_saved_amount
+    category: savings-opportunities
+    description: The amount already saved with CloudChipr for one provider.
+  - name: filter_opportunities
+    category: savings-opportunities
+    description: Browses opportunities sorted by monthly savings, with filters for provider, region, savings amount, effort and tags.
+  - name: get_opportunity
+    category: savings-opportunities
+    description: Every recommendation recorded for a single resource, including alternatives.
+  - name: get_opportunity_filters
+    category: savings-opportunities
+    description: Discovers the filters available for opportunities.
+  - name: list_opportunity_views
+    category: savings-opportunities
+    description: Lists saved opportunity views.
+  - name: get_opportunity_view
+    category: savings-opportunities
+    description: Opens a saved view by name to see its filters and columns.
+  - name: filter_live_resources
+    category: live-resources
+    description: Lists resources of one type across accounts, with per-service spend and estimated waste.
+  - name: get_live_resource
+    category: live-resources
+    description: Full detail for a single resource, including its cloud-console link.
+  - name: get_resource_metrics
+    category: live-resources
+    description: Utilization metrics (CPU, memory, network and more) for a single resource.
+  - name: get_resource_tag_keys
+    category: live-resources
+    description: Discovers the tag keys present on resources.
+  - name: get_resource_tag_values
+    category: live-resources
+    description: Discovers the values a given resource tag key takes.
+  - name: get_k8s_clusters
+    category: kubernetes
+    description: Lists clusters with total, idle and reserved cost and CPU/memory utilization.
+  - name: filter_k8s_resources
+    category: kubernetes
+    description: Lists objects at one level (nodes, namespaces, deployments, statefulsets, daemonsets, jobs, pods) with counts and spend.
+  - name: get_k8s_resource_utilization
+    category: kubernetes
+    description: Per-resource CPU and memory usage versus requests and limits - the right-sizing signal.
+
+categories:
+  - id: accounts-and-organizations
+    tool_count: 3
+  - id: billing-explorer
+    tool_count: 7
+  - id: savings-opportunities
+    tool_count: 7
+  - id: live-resources
+    tool_count: 5
+  - id: kubernetes
+    tool_count: 3
+
+support:
+  slack: https://communityinviter.com/apps/cloudchiprcommunity/landing-page
+  email: support@cloudchipr.com

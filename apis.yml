@@ -25,7 +25,7 @@ accessModel:
   generated: '2026-07-22'
   method: derived
 created: '2026-03-27'
-modified: '2026-04-27'
+modified: '2026-09-05'
 specificationVersion: '0.23'
 type: Index
 access: 3rd-Party
@@ -44,14 +44,20 @@ tags:
   - Rightsizing
 description: >-
   CloudChipr is a cloud cost-management and FinOps platform that
-  consolidates AWS, Azure, and GCP spend in a single console and
-  automates resource cleanup, rightsizing, and cost governance. The
-  product surface centres on dashboards, automated workflows, budget
-  alerts, and integrations with email, Slack, Microsoft Teams, Jira,
-  and webhooks. CloudChipr exposes an API Reference at
-  docs.cloudchipr.com/reference for programmatic access; specific
-  endpoints, base URL, and authentication mechanism are documented in
-  that portal.
+  consolidates AWS, Azure, GCP, Kubernetes and AI-vendor spend
+  (OpenAI, Anthropic, Datadog, Snowflake, MongoDB, Confluent) in a
+  single console and automates resource cleanup, rightsizing, and cost
+  governance. The product surface centres on Billing Explorer,
+  dashboards, live resource management, savings opportunities,
+  commitments, budgets and anomaly alerts, no-code automation
+  workflows, and integrations with email, Slack, Jira and webhooks.
+  Two machine surfaces are published: a 26-operation OpenAPI 3.0.3
+  Enterprise API at api.cloudchipr.com, authenticated with an
+  x-api-key header and served as a spec at
+  cloudchipr.github.io/api-service, and a hosted remote MCP server at
+  mcp.cloudchipr.com/mcp exposing 25 read-only tools over OAuth 2.0 or
+  a bearer API key. CloudChipr is a FinOps Foundation member, states
+  SOC 2 Type II certification, and lists on AWS Marketplace.
 apis:
   - aid: cloudchipr:cloudchipr-api
     name: CloudChipr API
@@ -61,46 +67,181 @@ apis:
       - Multi-Cloud
       - Rightsizing
     image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-    humanURL: https://docs.cloudchipr.com/reference
+    humanURL: https://cloudchipr.github.io/api-service/
+    baseURL: https://api.cloudchipr.com
     properties:
+      - url: openapi/cloudchipr-enterprise-api-openapi.yml
+        type: OpenAPI
+      - url: https://cloudchipr.github.io/api-service/
+        type: APIReference
       - url: https://docs.cloudchipr.com/reference
         type: Documentation
       - url: https://docs.cloudchipr.com/
         type: GettingStarted
-      - url: https://docs.cloudchipr.com/docs/aws-supported-services
-        type: Reference
+      - url: https://docs.cloudchipr.com/docs/api-keys
+        type: Authentication
+      - url: authentication/cloudchipr-authentication.yml
+        type: Authentication
+      - url: conventions/cloudchipr-conventions.yml
+        type: Conventions
+      - url: conventions/cloudchipr-conventions.yml
+        type: Idempotency
+      - url: errors/cloudchipr-problem-types.yml
+        type: ErrorCatalog
+      - url: data-model/cloudchipr-data-model.yml
+        type: DataModel
+      - url: overlays/cloudchipr-enterprise-api-overlay.yaml
+        type: Overlay
       - url: https://docs.cloudchipr.com/reference/integrations
         type: Integrations
     description: >-
-      CloudChipr publishes a developer API Reference at
-      docs.cloudchipr.com/reference covering the same multi-cloud
-      cost-management capabilities as the web app: connecting cloud
-      provider accounts, viewing inventoried resources and rightsizing
-      recommendations, running automated workflows, and configuring
-      integrations such as Slack, Jira, and webhooks. Specific endpoint
-      paths and authentication details are maintained in that portal
-      and gated by an account login.
+      The CloudChipr Enterprise API - 26 operations over 26 paths,
+      described by a public OpenAPI 3.0.3 document CloudChipr serves
+      from its own GitHub Pages site and links from its homepage and
+      docs. Covers billing-explorer aggregation with runtime discovery
+      of valid groupings, filters and filter values plus a dry-run
+      validate call; savings opportunities; connected cloud accounts;
+      live resources and resource lookup; budgets with thresholds and
+      period history; cost-allocation dimensions and categories;
+      dashboards and three typed widgets; and custom data sources with
+      NDJSON ingestion. Authentication is a single x-api-key header
+      scheme applied to every operation. Read-heavy: three of the 26
+      operations mutate, only one of those carries an idempotency key,
+      and none is reversible. No pagination and no documented rate
+      limits.
+  - aid: cloudchipr:cloudchipr-mcp-server
+    name: CloudChipr MCP Server
+    tags:
+      - MCP
+      - agent-native
+      - FinOps
+      - Cloud Cost Management
+      - Kubernetes
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+    humanURL: https://docs.cloudchipr.com/docs/cloudchipr-mcp-server
+    baseURL: https://mcp.cloudchipr.com/mcp
+    properties:
+      - url: mcp/cloudchipr-mcp.yml
+        type: MCPServer
+      - url: https://mcp.cloudchipr.com/mcp
+        type: MCPServer
+      - url: mcp/cloudchipr-tool-crosswalk.yml
+        type: ToolCrosswalk
+      - url: https://docs.cloudchipr.com/docs/cloudchipr-mcp-server
+        type: Documentation
+      - url: https://cloudchipr.com/mcp
+        type: GettingStarted
+      - url: scopes/cloudchipr-scopes.yml
+        type: OAuthScopes
+      - url: well-known/cloudchipr-well-known.yml
+        type: WellKnown
+    description: >-
+      Hosted, fully remote Model Context Protocol server at
+      https://mcp.cloudchipr.com/mcp exposing 25 read-only tools across five
+      categories - cloud accounts and organizations, Billing Explorer, savings
+      opportunities, live resources, and Kubernetes. Any MCP client that
+      supports remote servers (Claude, Claude Code, ChatGPT, Cursor, Codex)
+      can connect. Authentication is OAuth 2.0 against auth0.cloudchipr.com,
+      or a CloudChipr API key passed as a bearer token for headless and CI
+      use. Write actions are advertised as "coming soon"; today the server
+      only reads. Nothing is self-hosted and no package is installed.
 common:
+  - type: TrustCenter
+    url: security/cloudchipr-trust-center.yml
+  - type: OpenAPI
+    url: openapi/cloudchipr-enterprise-api-openapi.yml
+  - type: APIReference
+    url: https://cloudchipr.github.io/api-service/
+  - type: MCPServer
+    url: mcp/cloudchipr-mcp.yml
+  - type: ToolCrosswalk
+    url: mcp/cloudchipr-tool-crosswalk.yml
+  - type: AgentSkill
+    url: skills/_index.yml
+  - type: Authentication
+    url: authentication/cloudchipr-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudchipr-scopes.yml
+  - type: Conventions
+    url: conventions/cloudchipr-conventions.yml
+  - type: Idempotency
+    url: conventions/cloudchipr-conventions.yml
+  - type: ErrorCatalog
+    url: errors/cloudchipr-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudchipr-data-model.yml
+  - type: Overlay
+    url: overlays/cloudchipr-enterprise-api-overlay.yaml
+  - type: Conformance
+    url: conformance/cloudchipr-conformance.yml
+  - type: Compliance
+    url: conformance/cloudchipr-conformance.yml
+  - type: Lifecycle
+    url: lifecycle/cloudchipr-lifecycle.yml
+  - type: ChangeLog
+    url: changelog/cloudchipr-changelog.yml
+  - type: Webhooks
+    url: asyncapi/cloudchipr-webhooks.yml
+  - type: Packages
+    url: packages/cloudchipr-packages.yml
+  - type: SDKs
+    url: packages/cloudchipr-packages.yml
+  - type: WellKnown
+    url: well-known/cloudchipr-well-known.yml
+  - type: Plans
+    url: plans/cloudchipr-plans-pricing.yml
+  - type: RateLimits
+    url: rate-limits/cloudchipr-rate-limits.yml
+  - type: FinOps
+    url: finops/cloudchipr-finops.yml
+  - type: LLMsTxt
+    url: llms/cloudchipr-llms.txt
+  - type: DeveloperPortal
+    url: https://docs.cloudchipr.com/
+  - type: GettingStarted
+    url: https://docs.cloudchipr.com/docs/welcome
+  - type: Support
+    url: https://cloudchipr.com/support
+  - type: TermsOfService
+    url: https://cloudchipr.com/terms-conditions
+  - type: PrivacyPolicy
+    url: https://cloudchipr.com/privacy-policy
+  - type: SignUp
+    url: https://app.cloudchipr.com/registration
+  - type: Login
+    url: https://app.cloudchipr.com/
+  - type: GitHubOrganization
+    url: https://github.com/cloudchipr
+  - type: X
+    url: https://x.com/cloudchipr
+  - type: YouTube
+    url: https://www.youtube.com/@cloudchipr
+  - type: X-AWSMarketplace
+    url: https://aws.amazon.com/marketplace/pp/prodview-enwub346vrmva
   - type: DomainSecurity
     url: security/cloudchipr-domain-security.yml
+  - type: TrustCenter
+    url: security/cloudchipr-trust-center.yml
   - type: LinkedIn
     url: https://www.linkedin.com/company/cloudchipr
   - type: Website
     url: https://cloudchipr.com/
-  - type: Portal
-    url: https://docs.cloudchipr.com/
   - type: Documentation
     url: https://docs.cloudchipr.com/reference
   - type: Pricing
     url: https://cloudchipr.com/pricing
   - type: Blog
     url: https://cloudchipr.com/blog
-  - type: GitHubOrg
-    url: https://github.com/cloudchipr
   - type: FinOpsMember
     url: https://www.finops.org/members/cloudchipr/
-  - type: LlmsText
+  - type: LLMsTxt
     url: https://docs.cloudchipr.com/llms.txt
 maintainers:
   - FN: Kin Lane
     email: kin@apievangelist.com
+
+x-enrichment:
+  date: '2026-09-05'
+  status: enriched
+  artifacts_added: 26
+  pass: local-v3
