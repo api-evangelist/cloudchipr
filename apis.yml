@@ -59,92 +59,369 @@ description: >-
   a bearer API key. CloudChipr is a FinOps Foundation member, states
   SOC 2 Type II certification, and lists on AWS Marketplace.
 apis:
-  - aid: cloudchipr:cloudchipr-api
-    name: CloudChipr API
-    tags:
-      - Cloud Cost Management
-      - FinOps
-      - Multi-Cloud
-      - Rightsizing
-    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-    humanURL: https://cloudchipr.github.io/api-service/
-    baseURL: https://api.cloudchipr.com
-    properties:
-      - url: openapi/cloudchipr-enterprise-api-openapi.yml
-        type: OpenAPI
-      - url: https://cloudchipr.github.io/api-service/
-        type: APIReference
-      - url: https://docs.cloudchipr.com/reference
-        type: Documentation
-      - url: https://docs.cloudchipr.com/
-        type: GettingStarted
-      - url: https://docs.cloudchipr.com/docs/api-keys
-        type: Authentication
-      - url: authentication/cloudchipr-authentication.yml
-        type: Authentication
-      - url: conventions/cloudchipr-conventions.yml
-        type: Conventions
-      - url: conventions/cloudchipr-conventions.yml
-        type: Idempotency
-      - url: errors/cloudchipr-problem-types.yml
-        type: ErrorCatalog
-      - url: data-model/cloudchipr-data-model.yml
-        type: DataModel
-      - url: overlays/cloudchipr-enterprise-api-overlay.yaml
-        type: Overlay
-      - url: https://docs.cloudchipr.com/reference/integrations
-        type: Integrations
-    description: >-
-      The CloudChipr Enterprise API - 26 operations over 26 paths,
-      described by a public OpenAPI 3.0.3 document CloudChipr serves
-      from its own GitHub Pages site and links from its homepage and
-      docs. Covers billing-explorer aggregation with runtime discovery
-      of valid groupings, filters and filter values plus a dry-run
-      validate call; savings opportunities; connected cloud accounts;
-      live resources and resource lookup; budgets with thresholds and
-      period history; cost-allocation dimensions and categories;
-      dashboards and three typed widgets; and custom data sources with
-      NDJSON ingestion. Authentication is a single x-api-key header
-      scheme applied to every operation. Read-heavy: three of the 26
-      operations mutate, only one of those carries an idempotency key,
-      and none is reversible. No pagination and no documented rate
-      limits.
-  - aid: cloudchipr:cloudchipr-mcp-server
-    name: CloudChipr MCP Server
-    tags:
-      - MCP
-      - agent-native
-      - FinOps
-      - Cloud Cost Management
-      - Kubernetes
-    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-    humanURL: https://docs.cloudchipr.com/docs/cloudchipr-mcp-server
-    baseURL: https://mcp.cloudchipr.com/mcp
-    properties:
-      - url: mcp/cloudchipr-mcp.yml
-        type: MCPServer
-      - url: https://mcp.cloudchipr.com/mcp
-        type: MCPServer
-      - url: mcp/cloudchipr-tool-crosswalk.yml
-        type: ToolCrosswalk
-      - url: https://docs.cloudchipr.com/docs/cloudchipr-mcp-server
-        type: Documentation
-      - url: https://cloudchipr.com/mcp
-        type: GettingStarted
-      - url: scopes/cloudchipr-scopes.yml
-        type: OAuthScopes
-      - url: well-known/cloudchipr-well-known.yml
-        type: WellKnown
-    description: >-
-      Hosted, fully remote Model Context Protocol server at
-      https://mcp.cloudchipr.com/mcp exposing 25 read-only tools across five
-      categories - cloud accounts and organizations, Billing Explorer, savings
-      opportunities, live resources, and Kubernetes. Any MCP client that
-      supports remote servers (Claude, Claude Code, ChatGPT, Cursor, Codex)
-      can connect. Authentication is OAuth 2.0 against auth0.cloudchipr.com,
-      or a CloudChipr API key passed as a bearer token for headless and CI
-      use. Write actions are advertised as "coming soon"; today the server
-      only reads. Nothing is self-hosted and no package is installed.
+- aid: cloudchipr:cloudchipr-mcp-server
+  name: CloudChipr MCP Server
+  tags:
+  - MCP
+  - agent-native
+  - FinOps
+  - Cloud Cost Management
+  - Kubernetes
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://docs.cloudchipr.com/docs/cloudchipr-mcp-server
+  baseURL: https://mcp.cloudchipr.com/mcp
+  properties:
+  - url: mcp/cloudchipr-mcp.yml
+    type: MCPServer
+  - url: https://mcp.cloudchipr.com/mcp
+    type: MCPServer
+  - url: mcp/cloudchipr-tool-crosswalk.yml
+    type: ToolCrosswalk
+  - url: https://docs.cloudchipr.com/docs/cloudchipr-mcp-server
+    type: Documentation
+  - url: https://cloudchipr.com/mcp
+    type: GettingStarted
+  - url: scopes/cloudchipr-scopes.yml
+    type: OAuthScopes
+  - url: well-known/cloudchipr-well-known.yml
+    type: WellKnown
+  description: >-
+    Hosted, fully remote Model Context Protocol server at https://mcp.cloudchipr.com/mcp exposing 25 read-only
+    tools across five categories - cloud accounts and organizations, Billing Explorer, savings opportunities,
+    live resources, and Kubernetes. Any MCP client that supports remote servers (Claude, Claude Code,
+    ChatGPT, Cursor, Codex) can connect. Authentication is OAuth 2.0 against auth0.cloudchipr.com, or
+    a CloudChipr API key passed as a bearer token for headless and CI use. Write actions are advertised
+    as "coming soon"; today the server only reads. Nothing is self-hosted and no package is installed.
+- aid: cloudchipr:cloudchipr-accounts-api
+  name: CloudChipr Accounts API
+  description: Everything about accounts
+  humanURL: https://cloudchipr.github.io/api-service/
+  baseURL: https://api.cloudchipr.com
+  tags:
+  - Accounts
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudchipr-accounts-api-openapi.yml
+  - type: APIReference
+    url: https://cloudchipr.github.io/api-service/
+  - type: Documentation
+    url: https://docs.cloudchipr.com/reference
+  - type: GettingStarted
+    url: https://docs.cloudchipr.com/
+  - type: Authentication
+    url: https://docs.cloudchipr.com/docs/api-keys
+  - type: Authentication
+    url: authentication/cloudchipr-authentication.yml
+  - type: Conventions
+    url: conventions/cloudchipr-conventions.yml
+  - type: Idempotency
+    url: conventions/cloudchipr-conventions.yml
+  - type: ErrorCatalog
+    url: errors/cloudchipr-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudchipr-data-model.yml
+  - type: Integrations
+    url: https://docs.cloudchipr.com/reference/integrations
+- aid: cloudchipr:cloudchipr-budgets-api
+  name: CloudChipr Budgets API
+  description: Everything about budgets
+  humanURL: https://cloudchipr.github.io/api-service/
+  baseURL: https://api.cloudchipr.com
+  tags:
+  - Budgets
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudchipr-budgets-api-openapi.yml
+  - type: APIReference
+    url: https://cloudchipr.github.io/api-service/
+  - type: Documentation
+    url: https://docs.cloudchipr.com/reference
+  - type: GettingStarted
+    url: https://docs.cloudchipr.com/
+  - type: Authentication
+    url: https://docs.cloudchipr.com/docs/api-keys
+  - type: Authentication
+    url: authentication/cloudchipr-authentication.yml
+  - type: Conventions
+    url: conventions/cloudchipr-conventions.yml
+  - type: Idempotency
+    url: conventions/cloudchipr-conventions.yml
+  - type: ErrorCatalog
+    url: errors/cloudchipr-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudchipr-data-model.yml
+  - type: Integrations
+    url: https://docs.cloudchipr.com/reference/integrations
+- aid: cloudchipr:cloudchipr-categories-api
+  name: CloudChipr Categories API
+  description: Everything about categories
+  humanURL: https://cloudchipr.github.io/api-service/
+  baseURL: https://api.cloudchipr.com
+  tags:
+  - Categories
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudchipr-categories-api-openapi.yml
+  - type: APIReference
+    url: https://cloudchipr.github.io/api-service/
+  - type: Documentation
+    url: https://docs.cloudchipr.com/reference
+  - type: GettingStarted
+    url: https://docs.cloudchipr.com/
+  - type: Authentication
+    url: https://docs.cloudchipr.com/docs/api-keys
+  - type: Authentication
+    url: authentication/cloudchipr-authentication.yml
+  - type: Conventions
+    url: conventions/cloudchipr-conventions.yml
+  - type: Idempotency
+    url: conventions/cloudchipr-conventions.yml
+  - type: ErrorCatalog
+    url: errors/cloudchipr-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudchipr-data-model.yml
+  - type: Integrations
+    url: https://docs.cloudchipr.com/reference/integrations
+- aid: cloudchipr:cloudchipr-custom-data-api
+  name: CloudChipr Custom Data API
+  description: Everything about custom data sources
+  humanURL: https://cloudchipr.github.io/api-service/
+  baseURL: https://api.cloudchipr.com
+  tags:
+  - Custom Data
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudchipr-custom-data-api-openapi.yml
+  - type: APIReference
+    url: https://cloudchipr.github.io/api-service/
+  - type: Documentation
+    url: https://docs.cloudchipr.com/reference
+  - type: GettingStarted
+    url: https://docs.cloudchipr.com/
+  - type: Authentication
+    url: https://docs.cloudchipr.com/docs/api-keys
+  - type: Authentication
+    url: authentication/cloudchipr-authentication.yml
+  - type: Conventions
+    url: conventions/cloudchipr-conventions.yml
+  - type: Idempotency
+    url: conventions/cloudchipr-conventions.yml
+  - type: ErrorCatalog
+    url: errors/cloudchipr-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudchipr-data-model.yml
+  - type: Integrations
+    url: https://docs.cloudchipr.com/reference/integrations
+- aid: cloudchipr:cloudchipr-dashboards-api
+  name: CloudChipr Dashboards API
+  description: Everything about dashboards
+  humanURL: https://cloudchipr.github.io/api-service/
+  baseURL: https://api.cloudchipr.com
+  tags:
+  - Dashboards
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudchipr-dashboards-api-openapi.yml
+  - type: APIReference
+    url: https://cloudchipr.github.io/api-service/
+  - type: Documentation
+    url: https://docs.cloudchipr.com/reference
+  - type: GettingStarted
+    url: https://docs.cloudchipr.com/
+  - type: Authentication
+    url: https://docs.cloudchipr.com/docs/api-keys
+  - type: Authentication
+    url: authentication/cloudchipr-authentication.yml
+  - type: Conventions
+    url: conventions/cloudchipr-conventions.yml
+  - type: Idempotency
+    url: conventions/cloudchipr-conventions.yml
+  - type: ErrorCatalog
+    url: errors/cloudchipr-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudchipr-data-model.yml
+  - type: Integrations
+    url: https://docs.cloudchipr.com/reference/integrations
+- aid: cloudchipr:cloudchipr-filters-api
+  name: CloudChipr Filters API
+  description: Everything about filters
+  humanURL: https://cloudchipr.github.io/api-service/
+  baseURL: https://api.cloudchipr.com
+  tags:
+  - Filters
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudchipr-filters-api-openapi.yml
+  - type: APIReference
+    url: https://cloudchipr.github.io/api-service/
+  - type: Documentation
+    url: https://docs.cloudchipr.com/reference
+  - type: GettingStarted
+    url: https://docs.cloudchipr.com/
+  - type: Authentication
+    url: https://docs.cloudchipr.com/docs/api-keys
+  - type: Authentication
+    url: authentication/cloudchipr-authentication.yml
+  - type: Conventions
+    url: conventions/cloudchipr-conventions.yml
+  - type: Idempotency
+    url: conventions/cloudchipr-conventions.yml
+  - type: ErrorCatalog
+    url: errors/cloudchipr-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudchipr-data-model.yml
+  - type: Integrations
+    url: https://docs.cloudchipr.com/reference/integrations
+- aid: cloudchipr:cloudchipr-regions-api
+  name: CloudChipr Regions API
+  description: The Regions API from CloudChipr — 1 operation(s) for regions.
+  humanURL: https://cloudchipr.github.io/api-service/
+  baseURL: https://api.cloudchipr.com
+  tags:
+  - Regions
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudchipr-regions-api-openapi.yml
+  - type: APIReference
+    url: https://cloudchipr.github.io/api-service/
+  - type: Documentation
+    url: https://docs.cloudchipr.com/reference
+  - type: GettingStarted
+    url: https://docs.cloudchipr.com/
+  - type: Authentication
+    url: https://docs.cloudchipr.com/docs/api-keys
+  - type: Authentication
+    url: authentication/cloudchipr-authentication.yml
+  - type: Conventions
+    url: conventions/cloudchipr-conventions.yml
+  - type: Idempotency
+    url: conventions/cloudchipr-conventions.yml
+  - type: ErrorCatalog
+    url: errors/cloudchipr-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudchipr-data-model.yml
+  - type: Integrations
+    url: https://docs.cloudchipr.com/reference/integrations
+- aid: cloudchipr:cloudchipr-resource-explorer-api
+  name: CloudChipr Resource Explorer API
+  description: Everything about Resource Explorer
+  humanURL: https://cloudchipr.github.io/api-service/
+  baseURL: https://api.cloudchipr.com
+  tags:
+  - Resource Explorer
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudchipr-resource-explorer-api-openapi.yml
+  - type: APIReference
+    url: https://cloudchipr.github.io/api-service/
+  - type: Documentation
+    url: https://docs.cloudchipr.com/reference
+  - type: GettingStarted
+    url: https://docs.cloudchipr.com/
+  - type: Authentication
+    url: https://docs.cloudchipr.com/docs/api-keys
+  - type: Authentication
+    url: authentication/cloudchipr-authentication.yml
+  - type: Conventions
+    url: conventions/cloudchipr-conventions.yml
+  - type: Idempotency
+    url: conventions/cloudchipr-conventions.yml
+  - type: ErrorCatalog
+    url: errors/cloudchipr-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudchipr-data-model.yml
+  - type: Integrations
+    url: https://docs.cloudchipr.com/reference/integrations
+- aid: cloudchipr:cloudchipr-resources-api
+  name: CloudChipr Resources API
+  description: Endpoints for resources
+  humanURL: https://cloudchipr.github.io/api-service/
+  baseURL: https://api.cloudchipr.com
+  tags:
+  - Resources
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudchipr-resources-api-openapi.yml
+  - type: APIReference
+    url: https://cloudchipr.github.io/api-service/
+  - type: Documentation
+    url: https://docs.cloudchipr.com/reference
+  - type: GettingStarted
+    url: https://docs.cloudchipr.com/
+  - type: Authentication
+    url: https://docs.cloudchipr.com/docs/api-keys
+  - type: Authentication
+    url: authentication/cloudchipr-authentication.yml
+  - type: Conventions
+    url: conventions/cloudchipr-conventions.yml
+  - type: Idempotency
+    url: conventions/cloudchipr-conventions.yml
+  - type: ErrorCatalog
+    url: errors/cloudchipr-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudchipr-data-model.yml
+  - type: Integrations
+    url: https://docs.cloudchipr.com/reference/integrations
+- aid: cloudchipr:cloudchipr-savings-opportunities-api
+  name: CloudChipr Savings Opportunities API
+  description: Everything about savings opportunities
+  humanURL: https://cloudchipr.github.io/api-service/
+  baseURL: https://api.cloudchipr.com
+  tags:
+  - Savings Opportunities
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudchipr-savings-opportunities-api-openapi.yml
+  - type: APIReference
+    url: https://cloudchipr.github.io/api-service/
+  - type: Documentation
+    url: https://docs.cloudchipr.com/reference
+  - type: GettingStarted
+    url: https://docs.cloudchipr.com/
+  - type: Authentication
+    url: https://docs.cloudchipr.com/docs/api-keys
+  - type: Authentication
+    url: authentication/cloudchipr-authentication.yml
+  - type: Conventions
+    url: conventions/cloudchipr-conventions.yml
+  - type: Idempotency
+    url: conventions/cloudchipr-conventions.yml
+  - type: ErrorCatalog
+    url: errors/cloudchipr-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudchipr-data-model.yml
+  - type: Integrations
+    url: https://docs.cloudchipr.com/reference/integrations
+- aid: cloudchipr:cloudchipr-widgets-api
+  name: CloudChipr Widgets API
+  description: Everything about widgets
+  humanURL: https://cloudchipr.github.io/api-service/
+  baseURL: https://api.cloudchipr.com
+  tags:
+  - Widgets
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudchipr-widgets-api-openapi.yml
+  - type: APIReference
+    url: https://cloudchipr.github.io/api-service/
+  - type: Documentation
+    url: https://docs.cloudchipr.com/reference
+  - type: GettingStarted
+    url: https://docs.cloudchipr.com/
+  - type: Authentication
+    url: https://docs.cloudchipr.com/docs/api-keys
+  - type: Authentication
+    url: authentication/cloudchipr-authentication.yml
+  - type: Conventions
+    url: conventions/cloudchipr-conventions.yml
+  - type: Idempotency
+    url: conventions/cloudchipr-conventions.yml
+  - type: ErrorCatalog
+    url: errors/cloudchipr-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudchipr-data-model.yml
+  - type: Integrations
+    url: https://docs.cloudchipr.com/reference/integrations
 common:
   - type: TrustCenter
     url: security/cloudchipr-trust-center.yml
