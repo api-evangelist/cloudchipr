@@ -98,6 +98,8 @@ apis:
   humanURL: https://cloudchipr.github.io/api-service/
   baseURL: https://api.cloudchipr.com
   tags:
+  - Account
+  tags_raw:
   - Accounts
   properties:
   - type: OpenAPI
