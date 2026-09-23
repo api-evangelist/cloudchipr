@@ -1,0 +1,513 @@
+openapi: 3.2.0
+info:
+  title: CloudChipr Enterprise Widgets API
+  description: CloudChipr Enterprise API document provides detailed description about how to interact with CloudChipr Enterprise service
+  version: 0.1.0
+  contact:
+    email: info@cloudchipr.com
+  license:
+    name: Cloudchipr 1.0
+    url: https://cloudchipr.com
+servers:
+- url: https://api.cloudchipr.com
+tags:
+- name: Widgets
+  description: Everything about widgets
+paths:
+  /widgets/largest-cost-changes/{widgetId}:
+    parameters:
+    - $ref: '#/components/parameters/PathWidgetId'
+    - $ref: '#/components/parameters/QueryCategoryId'
+    - $ref: '#/components/parameters/QueryDateLabel'
+    - $ref: '#/components/parameters/QueryDateFrom'
+    - $ref: '#/components/parameters/QueryDateTo'
+    - $ref: '#/components/parameters/QueryDateType'
+    - $ref: '#/components/parameters/QueryDateValue'
+    - $ref: '#/components/parameters/QueryDateUnit'
+    get:
+      summary: GET largest cost changes widget
+      tags:
+      - Widgets
+      responses:
+        '200':
+          $ref: '#/components/responses/LargestCostChangesWidgetResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+      operationId: get-users-me-organisations-current-widgets-largest-cost-changes
+      security:
+      - ApiKey: []
+  /widgets/cost-and-usage-summary/{widgetId}:
+    parameters:
+    - $ref: '#/components/parameters/PathWidgetId'
+    - $ref: '#/components/parameters/QueryCategoryId'
+    - $ref: '#/components/parameters/QueryDateLabel'
+    - $ref: '#/components/parameters/QueryDateFrom'
+    - $ref: '#/components/parameters/QueryDateTo'
+    - $ref: '#/components/parameters/QueryDateType'
+    - $ref: '#/components/parameters/QueryDateValue'
+    - $ref: '#/components/parameters/QueryDateUnit'
+    get:
+      summary: GET cost and usage summary widget
+      tags:
+      - Widgets
+      responses:
+        '200':
+          $ref: '#/components/responses/CostAndUsageSummaryWidgetResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+      operationId: get-widgets-cost-and-usage-summary
+      security:
+      - ApiKey: []
+  /widgets/cost-breakdown/{widgetId}:
+    parameters:
+    - $ref: '#/components/parameters/PathWidgetId'
+    - $ref: '#/components/parameters/QueryCategoryId'
+    - $ref: '#/components/parameters/QueryDateLabel'
+    - $ref: '#/components/parameters/QueryDateFrom'
+    - $ref: '#/components/parameters/QueryDateTo'
+    - $ref: '#/components/parameters/QueryDateType'
+    - $ref: '#/components/parameters/QueryDateValue'
+    - $ref: '#/components/parameters/QueryDateUnit'
+    get:
+      summary: GET cost breakdown widget
+      tags:
+      - Widgets
+      responses:
+        '200':
+          $ref: '#/components/responses/CostBreakdownWidgetResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+      operationId: get-users-me-organisations-current-widgets-cost-breakdown
+      security:
+      - ApiKey: []
+components:
+  parameters:
+    QueryCategoryId:
+      name: category_id
+      in: query
+      schema:
+        type: string
+        format: uuid
+    QueryDateLabel:
+      name: date_label
+      in: query
+      schema:
+        $ref: '#/components/schemas/DateLabelNullable'
+    QueryDateType:
+      name: date_type
+      in: query
+      schema:
+        $ref: '#/components/schemas/DateType'
+    QueryDateValue:
+      name: date_value
+      in: query
+      schema:
+        type:
+        - number
+        - 'null'
+    QueryDateTo:
+      name: date_to
+      in: query
+      schema:
+        $ref: '#/components/schemas/NullableDate'
+    QueryDateUnit:
+      name: date_unit
+      in: query
+      schema:
+        $ref: '#/components/schemas/DateUnit'
+    QueryDateFrom:
+      name: date_from
+      in: query
+      schema:
+        $ref: '#/components/schemas/NullableDate'
+    PathWidgetId:
+      name: widgetId
+      schema:
+        type: string
+        format: uuid
+      in: path
+      required: true
+  schemas:
+    DateType:
+      type: string
+      title: DateType
+      enum:
+      - past
+      - last
+    ResourceExplorerGridTotal:
+      title: Resource Explorer Grid Total
+      type: object
+      properties:
+        field:
+          type: string
+        label:
+          type:
+          - string
+          - 'null'
+        total_cost:
+          type: number
+          format: float
+        previous_period_total_cost:
+          type:
+          - number
+          - 'null'
+          format: float
+        period_total_cost_difference:
+          type:
+          - number
+          - 'null'
+          format: float
+        trend:
+          type:
+          - number
+          - 'null'
+          format: float
+        cloud_provider:
+          $ref: '#/components/schemas/ProviderType'
+        metadata:
+          $ref: '#/components/schemas/ResourceExplorerGridMetadata'
+        live_usage_cost:
+          type:
+          - number
+          - 'null'
+        monthly_forecast:
+          $ref: '#/components/schemas/NullableForecastedCost'
+        quarterly_forecast:
+          $ref: '#/components/schemas/NullableForecastedCost'
+      required:
+      - cloud_provider
+      - field
+      - total_cost
+      - previous_period_total_cost
+      - period_total_cost_difference
+      - trend
+      - metadata
+      - monthly_forecast
+      - quarterly_forecast
+    DateUnit:
+      type: string
+      title: DateUnit
+      enum:
+      - day
+      - week
+      - month
+    ProviderType:
+      type: string
+      enum:
+      - aws
+      - gcp
+    DateLabel:
+      type: string
+      title: DateLabel
+      enum:
+      - year_to_date
+      - month_to_date
+      - last_one_month
+      - last_three_months
+      - last_six_months
+      - past_fourteen_days
+      - past_seven_days
+      - past_thirty_days
+      - past_forty_five_days
+      - past_ninety_days
+      - past_one_hundred_eighty_days
+      - last_twelve_months
+      - quarter_to_date
+      - last_quarter
+    TrendType:
+      type: string
+      enum:
+      - period_over_period
+      - month_over_month
+    NullableForecastedCost:
+      allOf:
+      - {}
+      - $ref: '#/components/schemas/ForecastedCost'
+    ForecastOption:
+      type: string
+      enum:
+      - month
+      - quarter
+    AverageMonthlyCostDetails:
+      title: AverageMonthlyCostDetails
+      type: object
+      properties:
+        from_date:
+          $ref: '#/components/schemas/Date'
+        to_date:
+          $ref: '#/components/schemas/Date'
+        average_monthly_cost:
+          type:
+          - number
+          - 'null'
+        trend:
+          type:
+          - number
+          - 'null'
+      required:
+      - from_date
+      - to_date
+      - average_monthly_cost
+      - trend
+    ResourceExplorerCostsDateDetails:
+      title: ResourceExplorerCostsDateDetails
+      type: object
+      properties:
+        from_date:
+          $ref: '#/components/schemas/Date'
+        to_date:
+          $ref: '#/components/schemas/Date'
+      required:
+      - from_date
+      - to_date
+    CostType:
+      type: string
+      enum:
+      - unblended
+      - blended
+      - amortized
+      - net_unblended
+      - net_amortized
+    DateLabelNullable:
+      title: DateLabelNullable
+      allOf:
+      - $ref: '#/components/schemas/DateLabel'
+    ResourceExplorerChartDataItem:
+      title: Resource Explorer Chart Data Item
+      type: object
+      properties:
+        field:
+          type: string
+        label:
+          type:
+          - string
+          - 'null'
+        cost:
+          type: number
+          format: float
+    ForecastedCostRE:
+      type: array
+      items:
+        $ref: '#/components/schemas/ForecastedCost'
+    NullableDate:
+      type:
+      - string
+      - 'null'
+      description: ISO 8601
+      example: '2022-06-11T21:14:49.691823'
+      title: ''
+    Date:
+      type: string
+      description: ISO 8601
+      example: '2022-09-11T21:14:49.691823'
+    ResourceExplorerChartData:
+      title: Resource Explorer Chart Data
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceExplorerChartDataItem'
+    ResourceExplorerGridMetadata:
+      title: A flexible key-value map containing metadata about the row.
+      type: object
+      additionalProperties:
+        type: string
+    ForecastedCost:
+      type: object
+      properties:
+        cost:
+          type: number
+        forecast_option:
+          $ref: '#/components/schemas/ForecastOption'
+        trend:
+          type:
+          - number
+          - 'null'
+        date_from:
+          $ref: '#/components/schemas/Date'
+        date_to:
+          $ref: '#/components/schemas/Date'
+        previous_period_from:
+          $ref: '#/components/schemas/Date'
+        previous_period_to:
+          $ref: '#/components/schemas/Date'
+      required:
+      - cost
+      - forecast_option
+      - trend
+      - date_from
+      - date_to
+      - previous_period_from
+      - previous_period_to
+    AverageDailyCostDetails:
+      title: AverageDailyCostDetails
+      type: object
+      properties:
+        from_date:
+          $ref: '#/components/schemas/Date'
+        to_date:
+          $ref: '#/components/schemas/Date'
+        average_daily_cost:
+          type:
+          - number
+          - 'null'
+        trend:
+          type:
+          - number
+          - 'null'
+      required:
+      - from_date
+      - to_date
+      - average_daily_cost
+      - trend
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    CostBreakdownWidgetResponse:
+      description: Cost Breakdown Widget Response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResourceExplorerChartData'
+              total:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResourceExplorerGridTotal'
+              total_cost:
+                type: number
+              previous_period_total_cost:
+                type: number
+              average_daily_cost_details:
+                $ref: '#/components/schemas/AverageDailyCostDetails'
+              average_monthly_cost_details:
+                $ref: '#/components/schemas/AverageMonthlyCostDetails'
+              live_usage_total_cost:
+                type: number
+              total_cost_date_details:
+                $ref: '#/components/schemas/ResourceExplorerCostsDateDetails'
+              previous_period_cost_date_details:
+                $ref: '#/components/schemas/ResourceExplorerCostsDateDetails'
+              forecasted_costs:
+                $ref: '#/components/schemas/ForecastedCostRE'
+              trend_type:
+                $ref: '#/components/schemas/TrendType'
+              cost_type:
+                $ref: '#/components/schemas/CostType'
+            required:
+            - data
+            - total
+            - total_cost
+            - previous_period_total_cost
+            - average_daily_cost_details
+            - average_monthly_cost_details
+            - live_usage_total_cost
+            - total_cost_date_details
+            - previous_period_cost_date_details
+            - forecasted_costs
+            - cost_type
+    MethodNotAllowed:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    NotFound:
+      description: Resource was not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
+    CostAndUsageSummaryWidgetResponse:
+      description: Cost And Usage Summary Widget Response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total_cost:
+                type: number
+              previous_period_total_cost:
+                type: number
+              average_daily_cost_details:
+                $ref: '#/components/schemas/AverageDailyCostDetails'
+              average_monthly_cost_details:
+                $ref: '#/components/schemas/AverageMonthlyCostDetails'
+              live_usage_total_cost:
+                type: number
+              total_cost_date_details:
+                $ref: '#/components/schemas/ResourceExplorerCostsDateDetails'
+              previous_period_cost_date_details:
+                $ref: '#/components/schemas/ResourceExplorerCostsDateDetails'
+              forecasted_costs:
+                $ref: '#/components/schemas/ForecastedCostRE'
+              trend_type:
+                $ref: '#/components/schemas/TrendType'
+            required:
+            - total_cost
+            - previous_period_total_cost
+            - average_daily_cost_details
+            - average_monthly_cost_details
+            - live_usage_total_cost
+            - total_cost_date_details
+            - previous_period_cost_date_details
+            - forecasted_costs
+    LargestCostChangesWidgetResponse:
+      description: Largest Cost Changes Widget Response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResourceExplorerGridTotal'
+              previous_period_cost_date_details:
+                $ref: '#/components/schemas/ResourceExplorerCostsDateDetails'
+              current_period_cost_date_details:
+                $ref: '#/components/schemas/ResourceExplorerCostsDateDetails'
+            required:
+            - total
+            - previous_period_cost_date_details
+            - current_period_cost_date_details
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      name: x-api-key
+      in: header

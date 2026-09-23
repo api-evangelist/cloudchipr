@@ -1,0 +1,290 @@
+openapi: 3.2.0
+info:
+  title: CloudChipr Enterprise Savings Opportunities API
+  description: CloudChipr Enterprise API document provides detailed description about how to interact with CloudChipr Enterprise service
+  version: 0.1.0
+  contact:
+    email: info@cloudchipr.com
+  license:
+    name: Cloudchipr 1.0
+    url: https://cloudchipr.com
+servers:
+- url: https://api.cloudchipr.com
+tags:
+- name: Savings Opportunities
+  description: Everything about savings opportunities
+paths:
+  /savings-opportunities:
+    post:
+      summary: Filter savings opportunities
+      description: Returns savings opportunities for the organisation associated with the API key, filtered by the provided filter tree.
+      operationId: filterSavingsOpportunities
+      tags:
+      - Savings Opportunities
+      security:
+      - ApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavingsOpportunityFilteredRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SavingsOpportunityResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  schemas:
+    FilterTreeNodeRequest:
+      type: object
+      discriminator:
+        propertyName: node_type
+        mapping:
+          group: '#/components/schemas/FilterGroupNodeRequest'
+          item: '#/components/schemas/FilterItemNodeRequest'
+      oneOf:
+      - $ref: '#/components/schemas/FilterGroupNodeRequest'
+      - $ref: '#/components/schemas/FilterItemNodeRequest'
+    FilterItemNodeRequest:
+      type: object
+      required:
+      - node_type
+      - type
+      - filter_provider
+      - operator
+      properties:
+        node_type:
+          type: string
+          enum:
+          - item
+          example: item
+        type:
+          type: string
+          description: The type of the filter item
+          example: tag
+        filter_provider:
+          type: string
+          description: The provider of the filter
+          example: aws
+        value:
+          type: object
+          description: The value of the filter
+          example:
+            key: Environment
+            value: Production
+        operator:
+          type: string
+          description: The operator for the filter item
+          example: in
+    SavingsOpportunityResponse:
+      type: object
+      required:
+      - id
+      - action_type
+      - source
+      - opportunity_unique_identifier
+      properties:
+        id:
+          type: string
+          format: uuid
+        action_type:
+          type: string
+          description: The type of saving action (e.g. terminate, rightsize, stop)
+        service:
+          type: string
+          description: The cloud service name
+        resource_type:
+          type: string
+          description: The resource type
+        recommended_type:
+          type: string
+          description: The recommended instance/resource type
+        resource_id:
+          type: string
+          description: The cloud provider resource identifier
+        resource_name:
+          type: string
+        resource_namespace:
+          type: string
+        implementation_effort:
+          type: string
+          description: Effort required to implement the saving (e.g. low, medium, high)
+        based_on_past:
+          type: integer
+          description: Number of days the recommendation is based on
+        region:
+          type: string
+        account_id:
+          type: string
+          format: uuid
+        tags:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+        current_monthly_price:
+          type: number
+        estimated_monthly_price:
+          type: number
+        monthly_savings:
+          type: number
+        forecasted_end_of_month:
+          type: number
+        currency_code:
+          type: string
+        cloud_provider:
+          type: string
+        source:
+          type: string
+        opportunity_unique_identifier:
+          type: string
+        description:
+          type: string
+        resource_arn:
+          type: string
+        recommendation_id:
+          type: string
+        is_stopped:
+          type: boolean
+        policy_id:
+          type: string
+          format: uuid
+        service_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        cpu_max:
+          type: number
+        current_vcpus:
+          type: integer
+        recommended_vcpus:
+          type: integer
+        current_memory_requests:
+          type: integer
+        recommended_memory_requests:
+          type: integer
+        current_node_count:
+          type: integer
+        recommended_node_count:
+          type: integer
+        current_replica_count:
+          type: integer
+        recommended_replica_count:
+          type: integer
+        dimensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpportunityDimension'
+          description: The opportunity's dimension category assignments (team attribution). Present only when the request sets `include_dimensions` to true; an empty array means the opportunity's resource is not attributed to any dimension category.
+    FilterGroupNodeRequest:
+      type: object
+      required:
+      - node_type
+      - operator
+      - items
+      properties:
+        node_type:
+          type: string
+          enum:
+          - group
+          example: group
+        operator:
+          type: string
+          enum:
+          - and
+          - or
+          description: The operator for the filter group
+          example: and
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterTreeNodeRequest'
+          description: List of filter items in this group
+    OpportunityDimension:
+      type: object
+      required:
+      - dimension_name
+      - category_value
+      - share_percentage
+      properties:
+        dimension_name:
+          type: string
+          description: The dimension the resource is attributed to
+          example: Team
+        category_value:
+          type: string
+          description: The category (e.g. team name) within the dimension
+          example: payments
+        share_percentage:
+          type: number
+          description: The percentage of the resource's cost attributed to this category
+          example: 100.0
+    SavingsOpportunityFilteredRequest:
+      type: object
+      properties:
+        filterTree:
+          $ref: '#/components/schemas/FilterTreeNodeRequest'
+        oneRecommendationPerResource:
+          type: boolean
+          default: false
+          description: When true, returns only one recommendation per resource
+        getMetrics:
+          type: boolean
+          default: false
+          description: When true, includes CPU/memory metrics in the response
+        include_dimensions:
+          type: boolean
+          default: false
+          description: When true, each opportunity carries its dimension category assignments in the `dimensions` field
+  responses:
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Some business domain specific validation message
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    InternalServerError:
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Internal Server Error.
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      name: x-api-key
+      in: header

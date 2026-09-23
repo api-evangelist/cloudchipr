@@ -1,0 +1,471 @@
+openapi: 3.2.0
+info:
+  title: CloudChipr Enterprise Dashboards API
+  description: CloudChipr Enterprise API document provides detailed description about how to interact with CloudChipr Enterprise service
+  version: 0.1.0
+  contact:
+    email: info@cloudchipr.com
+  license:
+    name: Cloudchipr 1.0
+    url: https://cloudchipr.com
+servers:
+- url: https://api.cloudchipr.com
+tags:
+- name: Dashboards
+  description: Everything about dashboards
+paths:
+  /dashboards/{dashboardId}:
+    parameters:
+    - schema:
+        type: string
+        format: uuid
+        example: 00018acc-a66f-4747-9670-fadc3a2ead87
+      name: dashboardId
+      in: path
+      required: true
+    get:
+      summary: Get dashboard by id
+      tags:
+      - Dashboards
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/DashboardDetails'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      operationId: get-dashboard-dashboardId
+      security:
+      - ApiKey: []
+components:
+  schemas:
+    Dates:
+      type: object
+      title: Dates
+      properties:
+        from:
+          $ref: '#/components/schemas/NullableDate'
+        to:
+          $ref: '#/components/schemas/NullableDate'
+        label:
+          $ref: '#/components/schemas/DateLabelNullable'
+        type:
+          $ref: '#/components/schemas/DateType'
+        value:
+          type: integer
+        unit:
+          $ref: '#/components/schemas/DateUnit'
+    DateType:
+      type: string
+      title: DateType
+      enum:
+      - past
+      - last
+    ChartType:
+      type: string
+      enum:
+      - stack
+      - line
+      - bar
+      - pie
+      - table
+      - numeral
+    DashboardWidgetCostAndUsageSummary:
+      title: DashboardWidgetCostAndUsageSummary
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/WidgetType'
+        layout:
+          $ref: '#/components/schemas/LayoutNullable'
+        created_by:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        view_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        trend_type:
+          $ref: '#/components/schemas/TrendType'
+        date_label:
+          $ref: '#/components/schemas/DateLabelNullable'
+        date_from:
+          $ref: '#/components/schemas/NullableDate'
+        date_to:
+          $ref: '#/components/schemas/NullableDate'
+        filter:
+          type: array
+          items:
+            type: string
+        date_granularity:
+          $ref: '#/components/schemas/DateDataPointNullable'
+        grouping:
+          $ref: '#/components/schemas/ResourceExplorerGrouping'
+        group_values:
+          type: array
+          items:
+            type: string
+        dates:
+          $ref: '#/components/schemas/Dates'
+      required:
+      - id
+      - name
+      - type
+      - layout
+      - created_by
+      - date_label
+      - date_from
+      - date_to
+      - filter
+      - date_granularity
+      - grouping
+      - dates
+    DateUnit:
+      type: string
+      title: DateUnit
+      enum:
+      - day
+      - week
+      - month
+    LayoutNullable:
+      title: Layout Nullable
+      type:
+      - object
+      - 'null'
+    DateLabel:
+      type: string
+      title: DateLabel
+      enum:
+      - year_to_date
+      - month_to_date
+      - last_one_month
+      - last_three_months
+      - last_six_months
+      - past_fourteen_days
+      - past_seven_days
+      - past_thirty_days
+      - past_forty_five_days
+      - past_ninety_days
+      - past_one_hundred_eighty_days
+      - last_twelve_months
+      - quarter_to_date
+      - last_quarter
+    TrendType:
+      type: string
+      enum:
+      - period_over_period
+      - month_over_month
+    DashboardWidgetCostBreakdown:
+      title: DashboardWidgetCostBreakdown
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/WidgetType'
+        layout:
+          $ref: '#/components/schemas/LayoutNullable'
+        created_by:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        view_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        date_from:
+          $ref: '#/components/schemas/NullableDate'
+        date_to:
+          $ref: '#/components/schemas/NullableDate'
+        date_label:
+          $ref: '#/components/schemas/DateLabelNullable'
+        date_granularity:
+          $ref: '#/components/schemas/DateDataPointNullable'
+        grouping:
+          $ref: '#/components/schemas/ResourceExplorerGrouping'
+        group_values:
+          type: array
+          items:
+            type: string
+        chart_type:
+          $ref: '#/components/schemas/ChartType'
+        trend_type:
+          $ref: '#/components/schemas/TrendType'
+        filter:
+          type: array
+          items:
+            type: string
+        aws_filter:
+          type: array
+          items:
+            type: string
+        gcp_filter:
+          type: array
+          items:
+            type: string
+        azure_filter:
+          type: array
+          items:
+            type: string
+        forecast_option:
+          $ref: '#/components/schemas/ForecastOption'
+        dates:
+          $ref: '#/components/schemas/Dates'
+      required:
+      - id
+      - name
+      - type
+      - layout
+      - created_by
+      - date_from
+      - date_to
+      - date_label
+      - date_granularity
+      - grouping
+      - chart_type
+      - filter
+      - aws_filter
+      - gcp_filter
+      - azure_filter
+      - forecast_option
+    DateDataPointNullable:
+      title: DateDataPointNullable
+      allOf:
+      - $ref: '#/components/schemas/DateDataPoint'
+    DashboardWidgetLargestCostChanges:
+      title: DashboardWidgetLargestCostChanges
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/WidgetType'
+        layout:
+          $ref: '#/components/schemas/LayoutNullable'
+        created_by:
+          type: string
+          format: uuid
+        view_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        date_label:
+          $ref: '#/components/schemas/DateLabelNullable'
+        date_from:
+          $ref: '#/components/schemas/NullableDate'
+        date_to:
+          $ref: '#/components/schemas/NullableDate'
+        date_granularity:
+          $ref: '#/components/schemas/DateDataPointNullable'
+        grouping:
+          $ref: '#/components/schemas/ResourceExplorerGrouping'
+        group_values:
+          type: array
+          items:
+            type: string
+        filter:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+        price_direction:
+          $ref: '#/components/schemas/PriceDirection'
+        sort_by:
+          $ref: '#/components/schemas/sortByNullable'
+        items_count:
+          type: number
+        min_cost_change:
+          type:
+          - number
+          - 'null'
+        min_percentage_change:
+          type:
+          - number
+          - 'null'
+        dates:
+          $ref: '#/components/schemas/Dates'
+      required:
+      - id
+      - name
+      - type
+      - layout
+      - created_by
+      - date_label
+      - date_from
+      - date_to
+      - date_granularity
+      - grouping
+      - group_values
+      - filter
+      - price_direction
+      - sort_by
+      - items_count
+      - min_cost_change
+      - min_percentage_change
+      - dates
+    ForecastOption:
+      type: string
+      enum:
+      - month
+      - quarter
+    ResourceExplorerGrouping:
+      type:
+      - string
+      - 'null'
+      title: ResourceExplorerGrouping
+      enum:
+      - service
+      - marketplace_service
+      - cost_allocation_tag
+      - charge_type
+      - account
+      - region
+      - resource
+      - product_family
+      - instance_family
+      - instance_type
+      - credit_type
+      - cloud_provider
+      - cost_allocation_tag_value
+      - category
+      - none
+    DateDataPoint:
+      type: string
+      title: DateDataPoint
+      enum:
+      - daily
+      - monthly
+      - weekly
+    DateLabelNullable:
+      title: DateLabelNullable
+      allOf:
+      - $ref: '#/components/schemas/DateLabel'
+    sortByNullable:
+      title: sortByNullable
+      type:
+      - string
+      - 'null'
+      enum:
+      - sort_by_percentage
+      - sort_by_amount
+    NullableDate:
+      type:
+      - string
+      - 'null'
+      description: ISO 8601
+      example: '2022-06-11T21:14:49.691823'
+      title: ''
+    WidgetType:
+      type: string
+      title: WidgetType
+      enum:
+      - resource_explorer
+      - costs_by_category
+      - accounts_live_usage
+      - cost_comparison
+      - cost_breakdown
+      - cost_and_usage_summary
+      - largest_cost_changes
+      - costs_by_category_v2
+    Date:
+      type: string
+      description: ISO 8601
+      example: '2022-09-11T21:14:49.691823'
+    PriceDirection:
+      title: PriceDirection
+      type: string
+      enum:
+      - increasing
+      - decreasing
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    InternalServerError:
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Internal Server Error.
+    NotFound:
+      description: Resource was not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
+    DashboardDetails:
+      description: Dashboard Details
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              name:
+                type: string
+              created_at:
+                $ref: '#/components/schemas/Date'
+              layout:
+                $ref: '#/components/schemas/LayoutNullable'
+              visibility:
+                enum:
+                - visible_to_everyone
+                - visible_only_to_me
+              widgets:
+                type: array
+                items:
+                  anyOf:
+                  - $ref: '#/components/schemas/DashboardWidgetCostBreakdown'
+                  - $ref: '#/components/schemas/DashboardWidgetCostAndUsageSummary'
+                  - $ref: '#/components/schemas/DashboardWidgetLargestCostChanges'
+            required:
+            - id
+            - name
+            - created_at
+            - widgets
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      name: x-api-key
+      in: header

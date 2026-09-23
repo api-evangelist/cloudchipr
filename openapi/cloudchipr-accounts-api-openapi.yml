@@ -1,0 +1,288 @@
+openapi: 3.2.0
+info:
+  title: CloudChipr Enterprise Accounts API
+  description: CloudChipr Enterprise API document provides detailed description about how to interact with CloudChipr Enterprise service
+  version: 0.1.0
+  contact:
+    email: info@cloudchipr.com
+  license:
+    name: Cloudchipr 1.0
+    url: https://cloudchipr.com
+servers:
+- url: https://api.cloudchipr.com
+tags:
+- name: Accounts
+  description: Everything about accounts
+paths:
+  /accounts/{accountId}:
+    parameters:
+    - schema:
+        type: string
+        format: uuid
+        example: 00018acc-a66f-4747-9670-fadc3a2ead87
+      name: accountId
+      in: path
+      required: true
+    get:
+      summary: Get account by id
+      tags:
+      - Accounts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+              examples:
+                Example 1:
+                  value:
+                    id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                    type: aws
+                    access_type: read_write
+                    provider_account_id: '389986441234'
+                    provider_account_name: string
+                    provider_details:
+                      aws:
+                        is_root: false
+                        organisation_id: c-xtzel6z9g1
+                    is_sub_account: false
+                    status: connected
+                    created_at: '2019-08-24T14:15:22Z'
+                    outdated: false
+                    last_resource_updated_date: '2019-08-24T14:15:22Z'
+                    estimated_monthly_savings: 0
+                    total_monthly_saved_costs: 10
+                    total_costs: 9.15
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+      operationId: get-accounts-accountId
+      security:
+      - ApiKey: []
+  /accounts:
+    get:
+      summary: Get accounts
+      tags:
+      - Accounts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+              examples:
+                Example 1:
+                  value:
+                  - id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                    type: aws
+                    access_type: read_write
+                    provider_account_id: '389986441234'
+                    provider_account_name: string
+                    provider_details:
+                      aws:
+                        is_root: false
+                        organisation_id: c-xtzel6z9g1
+                    is_sub_account: false
+                    status: connected
+                    created_at: '2019-08-24T14:15:22Z'
+                    outdated: false
+                    last_resource_updated_date: '2019-08-24T14:15:22Z'
+                    estimated_monthly_savings: 0
+                    total_monthly_saved_costs: 10
+                    total_costs: 9.15
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+      operationId: get-accounts
+      security:
+      - ApiKey: []
+      parameters:
+      - schema:
+          type: string
+          example: connected,deactivated
+        in: query
+        name: statuses
+      - schema:
+          type: string
+          enum:
+          - aws
+          - gcp
+          example: aws
+        in: query
+        name: provider
+      - schema:
+          type: string
+          enum:
+          - read
+          - read_write
+          example: read_write
+        in: query
+        name: access_type
+components:
+  schemas:
+    GcpAccountDetails:
+      title: GcpAccountDetails
+      x-stoplight:
+        id: qkdebgwg6tndg
+      type: object
+      properties:
+        project_id:
+          type:
+          - string
+          - 'null'
+        service_account:
+          type: string
+      required:
+      - project_id
+      - service_account
+      x-examples:
+        Example 1:
+          project_id: string
+          service_account: string
+    Account:
+      title: Account
+      x-stoplight:
+        id: 7f6438e1c6e5c
+      type: object
+      x-examples:
+        Example 1:
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          type: aws
+          access_type: read_write
+          provider_account_id: '389986441234'
+          provider_account_name: string
+          provider_details:
+            aws:
+              is_root: true
+              organisation_id: string
+          is_sub_account: false
+          status: connected
+          created_at: '2019-08-24T14:15:22Z'
+          outdated: false
+          last_resource_updated_date: '2019-08-24T14:15:22Z'
+          estimated_monthly_savings: 0
+          total_monthly_saved_costs: 10
+          total_costs: 9.15
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        access_type:
+          type: string
+        provider_account_id:
+          type: string
+        provider_account_name:
+          type:
+          - string
+          - 'null'
+        provider_details:
+          allOf:
+          - $ref: '#/components/schemas/AccountProviderDetailsResponse'
+          - {}
+        is_sub_account:
+          type: boolean
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        outdated:
+          type: boolean
+        last_resource_updated_date:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        estimated_monthly_savings:
+          type: number
+        total_monthly_saved_costs:
+          type: number
+        total_costs:
+          type: number
+      required:
+      - id
+      - type
+      - access_type
+      - provider_account_id
+      - is_sub_account
+      - status
+      - created_at
+      - outdated
+      - estimated_monthly_savings
+      - total_monthly_saved_costs
+      - total_costs
+      - provider_account_name
+      - provider_details
+      - last_resource_updated_date
+    AwsAccountDetails:
+      title: AwsAccountDetails
+      x-stoplight:
+        id: i9deb75f9cmm8
+      type: object
+      properties:
+        is_root:
+          type:
+          - boolean
+          - 'null'
+        organisation_id:
+          type:
+          - string
+          - 'null'
+      required:
+      - is_root
+      - organisation_id
+      x-examples:
+        Example 1:
+          is_root: true
+          organisation_id: a91df8f5-161f-4ea3-bcf6-070c8dccbb14
+    AccountProviderDetailsResponse:
+      title: AccountProviderDetailsResponse
+      x-stoplight:
+        id: sbupmpj07kp8b
+      type: object
+      properties:
+        aws:
+          allOf:
+          - {}
+          - $ref: '#/components/schemas/AwsAccountDetails'
+        gcp:
+          allOf:
+          - {}
+          - $ref: '#/components/schemas/GcpAccountDetails'
+      required:
+      - aws
+      - gcp
+  responses:
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Some business domain specific validation message
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      name: x-api-key
+      in: header

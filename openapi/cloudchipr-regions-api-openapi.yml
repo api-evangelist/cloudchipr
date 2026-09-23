@@ -1,0 +1,116 @@
+openapi: 3.2.0
+info:
+  title: CloudChipr Enterprise Regions API
+  description: CloudChipr Enterprise API document provides detailed description about how to interact with CloudChipr Enterprise service
+  version: 0.1.0
+  contact:
+    email: info@cloudchipr.com
+  license:
+    name: Cloudchipr 1.0
+    url: https://cloudchipr.com
+servers:
+- url: https://api.cloudchipr.com
+tags:
+- name: Regions
+paths:
+  /providers/{provider}/regions:
+    parameters:
+    - schema:
+        type: string
+        enum:
+        - aws
+        - gcp
+        - azure
+      name: provider
+      in: path
+      required: true
+    get:
+      summary: Get regions
+      tags:
+      - Regions
+      parameters:
+      - name: provider
+        required: true
+        in: path
+        description: Cloud provider
+        schema:
+          $ref: '#/components/schemas/ProviderType'
+      security:
+      - ApiKey: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Regions'
+              examples:
+                AWSRegions:
+                  value:
+                  - name: US West (N. California)
+                    key: us-west-1
+                  - name: US East (N. Virginia)
+                    key: us-east-1
+                GCPRegions:
+                  value:
+                  - name: asia-east1 (Taiwan)
+                    key: asia-east1
+                  - name: asia-east2 (Hong Kong)
+                    key: asia-east2
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+      operationId: get-regions
+components:
+  schemas:
+    ProviderType:
+      type: string
+      enum:
+      - aws
+      - gcp
+    Region:
+      title: Region
+      type: object
+      x-examples:
+        example-1:
+          name: US West (N. California)
+          key: us-west-1
+      properties:
+        name:
+          type: string
+        key:
+          type: string
+      required:
+      - name
+      - key
+    Regions:
+      type: array
+      items:
+        $ref: '#/components/schemas/Region'
+  responses:
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Some business domain specific validation message
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      name: x-api-key
+      in: header

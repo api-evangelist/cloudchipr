@@ -1,0 +1,334 @@
+openapi: 3.2.0
+info:
+  title: CloudChipr Enterprise Budgets API
+  description: CloudChipr Enterprise API document provides detailed description about how to interact with CloudChipr Enterprise service
+  version: 0.1.0
+  contact:
+    email: info@cloudchipr.com
+  license:
+    name: Cloudchipr 1.0
+    url: https://cloudchipr.com
+servers:
+- url: https://api.cloudchipr.com
+tags:
+- name: Budgets
+  description: Everything about budgets
+paths:
+  /budgets:
+    get:
+      summary: List budgets
+      description: Returns every budget of the organisation associated with the API key, including the current amount, actual spend to date, forecast, thresholds and scope (filter tree or view).
+      operationId: listBudgets
+      tags:
+      - Budgets
+      security:
+      - ApiKey: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Budget'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /budgets/{budgetId}:
+    get:
+      summary: Get a budget
+      description: Returns a single budget of the organisation associated with the API key.
+      operationId: getBudget
+      tags:
+      - Budgets
+      security:
+      - ApiKey: []
+      parameters:
+      - name: budgetId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /budgets/{budgetId}/history:
+    get:
+      summary: Get budget history per period
+      description: Returns one entry per budget period (month, quarter, day or year depending on the budget's period) with the budget amount that was in force during that period, the period's actual spend, and — for the period still in flight — the current forecast. Closed periods have a null forecast because no end-of-period snapshot exists for them. Amount history is recorded from the moment this feature shipped; periods before the first recorded change report the amount known at that time.
+      operationId: getBudgetHistory
+      tags:
+      - Budgets
+      security:
+      - ApiKey: []
+      parameters:
+      - name: budgetId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: '#/components/parameters/QueryDateFrom'
+      - $ref: '#/components/parameters/QueryDateTo'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BudgetHistoryEntry'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  schemas:
+    FilterGroupNodeResponse:
+      type: object
+      properties:
+        nodeType:
+          type: string
+          enum:
+          - group
+          example: group
+        operator:
+          type: string
+          description: The operator for the filter group
+          example: and
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterTreeResponse'
+          description: List of filter items in this group
+    BudgetHistoryEntry:
+      type: object
+      required:
+      - period_start
+      - period_end
+      - amount
+      - actual
+      properties:
+        period_start:
+          type: string
+          format: date
+        period_end:
+          type: string
+          format: date
+        amount:
+          type: number
+          description: The budget amount that was in force during this period
+        actual:
+          type: number
+          description: The period's actual spend
+        forecast:
+          type:
+          - number
+          - 'null'
+          description: Forecasted end-of-period spend; null for closed periods
+    Budget:
+      type: object
+      required:
+      - id
+      - name
+      - type
+      - period
+      - amount
+      - actual_to_date
+      - progress
+      - thresholds
+      - start_date
+      - is_expired
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          description: Budget type
+          enum:
+          - fixed
+          - planned
+        period:
+          type: string
+          description: Budget period
+          enum:
+          - daily
+          - monthly
+          - quarterly
+          - annually
+          - custom
+        amount:
+          type: number
+          description: The budget amount in force for the current period
+        planned_amounts:
+          type: array
+          items:
+            type: number
+          description: For planned budgets, the amount planned per period starting from start_date
+        actual_to_date:
+          type: number
+          description: Actual spend accumulated in the current period
+        forecast:
+          type:
+          - number
+          - 'null'
+          description: Forecasted end-of-period spend (monthly and quarterly budgets only)
+        progress:
+          type: integer
+          description: Actual spend as a percentage of the current amount
+        thresholds:
+          type: array
+          items:
+            $ref: '#/components/schemas/BudgetThreshold'
+        filter_tree:
+          $ref: '#/components/schemas/FilterTreeResponse'
+        view:
+          type:
+          - object
+          - 'null'
+          description: The saved billing report the budget is scoped to, when not scoped by filter_tree
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        is_expired:
+          type: boolean
+    FilterTreeResponse:
+      type: object
+      discriminator:
+        propertyName: nodeType
+        mapping:
+          group: '#/components/schemas/FilterGroupNodeResponse'
+          item: '#/components/schemas/FilterItemNodeResponse'
+      oneOf:
+      - $ref: '#/components/schemas/FilterGroupNodeResponse'
+      - $ref: '#/components/schemas/FilterItemNodeResponse'
+    BudgetThreshold:
+      type: object
+      required:
+      - percent
+      - amount
+      - trigger
+      properties:
+        percent:
+          type: number
+          description: The threshold as a percentage of the budget amount
+          example: 80.0
+        amount:
+          type: number
+          description: The threshold amount derived from the percentage
+        trigger:
+          type: string
+          description: Whether the threshold fires on actual or forecasted spend
+          enum:
+          - actual
+          - forecasted
+    NullableDate:
+      type:
+      - string
+      - 'null'
+      description: ISO 8601
+      example: '2022-06-11T21:14:49.691823'
+      title: ''
+    FilterItemNodeResponse:
+      type: object
+      properties:
+        nodeType:
+          type: string
+          enum:
+          - item
+          example: item
+        type:
+          type: string
+          description: The type of the filter item
+          example: tag
+        filterProvider:
+          type: string
+          description: The provider of the filter
+          example: aws
+        value:
+          type: object
+          description: The value of the filter
+          example:
+            key: Environment
+            value: Production
+        operator:
+          type: string
+          description: The operator for the filter item
+          example: equals
+  parameters:
+    QueryDateTo:
+      name: date_to
+      in: query
+      schema:
+        $ref: '#/components/schemas/NullableDate'
+    QueryDateFrom:
+      name: date_from
+      in: query
+      schema:
+        $ref: '#/components/schemas/NullableDate'
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    NotFound:
+      description: Resource was not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
+    InternalServerError:
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Internal Server Error.
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      name: x-api-key
+      in: header

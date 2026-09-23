@@ -1,0 +1,41 @@
+{
+  "provider": "cloudchipr",
+  "sources": [
+    "_original/cloudchipr-enterprise-api.yaml"
+  ],
+  "outputs": [
+    "cloudchipr-accounts-api-openapi.yml",
+    "cloudchipr-budgets-api-openapi.yml",
+    "cloudchipr-categories-api-openapi.yml",
+    "cloudchipr-custom-data-api-openapi.yml",
+    "cloudchipr-dashboards-api-openapi.yml",
+    "cloudchipr-filters-api-openapi.yml",
+    "cloudchipr-regions-api-openapi.yml",
+    "cloudchipr-resource-explorer-api-openapi.yml",
+    "cloudchipr-resources-api-openapi.yml",
+    "cloudchipr-savings-opportunities-api-openapi.yml",
+    "cloudchipr-widgets-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "cloudchipr-enterprise-api.yaml: upgraded openapi 3.0.3 -> OpenAPI 3.2.0",
+    "cloudchipr-enterprise-api.yaml: declared missing tag: Regions",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "cloudchipr-accounts-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "cloudchipr-budgets-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "cloudchipr-categories-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "cloudchipr-custom-data-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "cloudchipr-dashboards-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "cloudchipr-filters-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "cloudchipr-regions-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "cloudchipr-resource-explorer-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "cloudchipr-resources-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "cloudchipr-savings-opportunities-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "cloudchipr-widgets-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
+}

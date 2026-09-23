@@ -1,0 +1,273 @@
+openapi: 3.2.0
+info:
+  title: CloudChipr Enterprise Filters API
+  description: CloudChipr Enterprise API document provides detailed description about how to interact with CloudChipr Enterprise service
+  version: 0.1.0
+  contact:
+    email: info@cloudchipr.com
+  license:
+    name: Cloudchipr 1.0
+    url: https://cloudchipr.com
+servers:
+- url: https://api.cloudchipr.com
+tags:
+- name: Filters
+  description: Everything about filters
+paths:
+  /providers/{provider}/filters:
+    parameters:
+    - schema:
+        type: string
+        enum:
+        - aws
+        - gcp
+      name: provider
+      in: path
+      required: true
+    get:
+      summary: Get Filters
+      tags:
+      - Filters
+      security:
+      - ApiKey: []
+      parameters:
+      - name: provider
+        required: true
+        in: path
+        description: Cloud provider
+        schema:
+          $ref: '#/components/schemas/ProviderType'
+      responses:
+        '200':
+          $ref: '#/components/responses/Filters'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+      operationId: get-filters
+      description: Get filters
+components:
+  schemas:
+    ProviderType:
+      type: string
+      enum:
+      - aws
+      - gcp
+    FilterOperatorType:
+      type: string
+      title: FilterOperatorType
+      enum:
+      - equal
+      - not_equal
+      - greater_than
+      - greater_than_equal_to
+      - less_than
+      - less_than_equal_to
+      - exists
+      - does_not_exist
+      - contains
+      - does_not_contain
+      - is_empty
+      - is_not_empty
+      - is_absent
+      - is_not_absent
+      - in
+      - is_true
+      - is_false
+      - is_expired
+      - is_invalid
+      - does_never_expire
+      - not_in
+    FilterItemTemplate:
+      title: FilterItemTemplate
+      type: object
+      x-examples:
+        example-1:
+          key: cpu
+          value_type: number
+          min_value: 0
+          max_value: 100
+          allowed_operators:
+          - not_equal
+          - greater_than
+          - greater_than_equal_to
+          - less_than
+          - less_than_equal_to
+        example-2:
+          key: tag
+          value_type: string
+          min_value: null
+          max_value: null
+          allowed_operators:
+          - equal
+          - exists
+          - contains
+      properties:
+        key:
+          $ref: '#/components/schemas/FilterKeyType'
+        value_type:
+          type:
+          - string
+          - 'null'
+          enum:
+          - number
+          - percentage
+          - boolean
+          - string
+        min_value:
+          type:
+          - number
+          - 'null'
+        max_value:
+          type:
+          - number
+          - 'null'
+        allowed_operators:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterOperatorType'
+      required:
+      - key
+      - min_value
+      - max_value
+      - allowed_operators
+    FilterKeyType:
+      type: string
+      title: FilterKeyType
+      x-stoplight:
+        id: 1svtkfi62ljs0
+      enum:
+      - launch_time
+      - cpu
+      - network_in
+      - network_out
+      - tag
+      - attachments
+      - volume_age
+      - database_connections
+      - instances
+      - instance_ids
+      - association_ids
+      - region
+      - in_use
+      - total_connections
+      - cloudchipr_ttl
+      - provider_unique_identifier
+    ResourceType:
+      type: string
+      title: ResourceType
+      x-stoplight:
+        id: um3kbkmvmspec
+      enum:
+      - ec2
+      - ebs
+      - elb
+      - eip
+      - rds
+      - vm
+      - disk
+      - lb
+      - ip
+      - sql
+      - elc
+      description: All providers resources
+  responses:
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Some business domain specific validation message
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    Filters:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                type:
+                  $ref: '#/components/schemas/ResourceType'
+                filters:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/FilterItemTemplate'
+          examples:
+            example-1:
+              value:
+              - type: vm
+                filters:
+                - key: launch_time
+                  value_type: number
+                  min_value: 0
+                  max_value: 315569520
+                  allowed_operators:
+                  - equal
+                  - not_equal
+                  - greater_than
+                  - greater_than_equal_to
+                  - less_than
+                  - less_than_equal_to
+                - key: cpu
+                  value_type: number
+                  min_value: 0
+                  max_value: 100
+                  allowed_operators:
+                  - equal
+                  - greater_than
+                  - greater_than_equal_to
+                  - less_than
+                  - less_than_equal_to
+                - key: network_in
+                  value_type: number
+                  min_value: 0
+                  max_value: 1099511627776
+                  allowed_operators:
+                  - equal
+                  - not_equal
+                  - greater_than
+                  - greater_than_equal_to
+                  - less_than
+                  - less_than_equal_to
+                - key: network_out
+                  value_type: number
+                  min_value: 0
+                  max_value: 1099511627776
+                  allowed_operators:
+                  - equal
+                  - not_equal
+                  - greater_than
+                  - greater_than_equal_to
+                  - less_than
+                  - less_than_equal_to
+                - key: tag
+                  value_type: string
+                  min_value: null
+                  max_value: null
+                  allowed_operators:
+                  - equal
+                  - not_equal
+                  - exists
+                  - does_not_exist
+                  - contains
+                  - does_not_contain
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      name: x-api-key
+      in: header

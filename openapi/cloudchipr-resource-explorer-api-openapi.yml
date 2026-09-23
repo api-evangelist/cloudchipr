@@ -1,0 +1,768 @@
+openapi: 3.2.0
+info:
+  title: CloudChipr Enterprise Resource Explorer API
+  description: CloudChipr Enterprise API document provides detailed description about how to interact with CloudChipr Enterprise service
+  version: 0.1.0
+  contact:
+    email: info@cloudchipr.com
+  license:
+    name: Cloudchipr 1.0
+    url: https://cloudchipr.com
+servers:
+- url: https://api.cloudchipr.com
+tags:
+- name: Resource Explorer
+  description: Everything about Resource Explorer
+paths:
+  /billing-explorer:
+    post:
+      summary: Get billing data aggregation
+      description: Retrieves billing data for an organisation with various filtering and grouping options
+      operationId: billingDataByOrganisation
+      tags:
+      - Resource Explorer
+      security:
+      - ApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BillingDataRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingAggregateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /resource-explorer/possible-groupings:
+    get:
+      summary: Get resource explorer possible groupings
+      tags:
+      - Resource Explorer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceExplorerPossibleGroupings'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      operationId: get-resource-explorer-possible-groupings
+      security:
+      - ApiKey: []
+  /billing-explorer/reports/{reportId}:
+    get:
+      summary: Get billing report data by id
+      description: Retrieves billing aggregation data for a saved billing explorer report using its id.
+      operationId: get-billing-explorer-report-billing-data
+      tags:
+      - Resource Explorer
+      security:
+      - ApiKey: []
+      parameters:
+      - name: reportId
+        in: path
+        required: true
+        description: Billing explorer report id
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingAggregateResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /resource-explorer/possible-filters:
+    get:
+      summary: Get resource explorer possible filters
+      description: Returns the list of available filter types per provider
+      operationId: get-resource-explorer-possible-filters
+      tags:
+      - Resource Explorer
+      security:
+      - ApiKey: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /resource-explorer/filters/{filterProvider}/{filterType}/values:
+    get:
+      summary: Get filter values for a specific filter type
+      description: Returns possible values for a specific filter provider and filter type
+      operationId: get-resource-explorer-filter-values
+      tags:
+      - Resource Explorer
+      security:
+      - ApiKey: []
+      parameters:
+      - name: filterProvider
+        in: path
+        required: true
+        description: The cloud provider for the filter (e.g. aws, gcp, azure)
+        schema:
+          type: string
+      - name: filterType
+        in: path
+        required: true
+        description: The filter type to retrieve values for
+        schema:
+          type: string
+      - name: key
+        in: query
+        required: false
+        description: Optional key to further narrow the filter values
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /billing-explorer/validate:
+    post:
+      summary: Validate billing explorer request
+      description: Validates a billing explorer request body without executing the query. Returns 204 No Content on success.
+      operationId: validate-billing-explorer
+      tags:
+      - Resource Explorer
+      security:
+      - ApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BillingDataRequest'
+      responses:
+        '204':
+          description: Validation successful, no content returned
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  schemas:
+    Dates:
+      type: object
+      title: Dates
+      properties:
+        from:
+          $ref: '#/components/schemas/NullableDate'
+        to:
+          $ref: '#/components/schemas/NullableDate'
+        label:
+          $ref: '#/components/schemas/DateLabelNullable'
+        type:
+          $ref: '#/components/schemas/DateType'
+        value:
+          type: integer
+        unit:
+          $ref: '#/components/schemas/DateUnit'
+    DateType:
+      type: string
+      title: DateType
+      enum:
+      - past
+      - last
+    BillingAggregateItemResponse:
+      type: object
+      properties:
+        field:
+          type: string
+        fields:
+          type: object
+          additionalProperties:
+            type: string
+        label:
+          type:
+          - string
+          - 'null'
+        cost:
+          type: number
+          format: decimal
+    BillingAggregateTotalResponse:
+      type: object
+      properties:
+        field:
+          type: string
+        fields:
+          type: object
+          additionalProperties:
+            type: string
+        label:
+          type:
+          - string
+          - 'null'
+        cloudProvider:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+        totalCost:
+          type: number
+          format: decimal
+        periodTotalCostDifference:
+          type:
+          - number
+          - 'null'
+          format: decimal
+        previousPeriodTotalCost:
+          type:
+          - number
+          - 'null'
+          format: decimal
+        trend:
+          type:
+          - number
+          - 'null'
+          format: decimal
+        liveUsageCost:
+          type:
+          - number
+          - 'null'
+          format: decimal
+        monthlyForecast:
+          $ref: '#/components/schemas/ForecastedCostResponse'
+        quarterlyForecast:
+          $ref: '#/components/schemas/ForecastedCostResponse'
+    DateUnit:
+      type: string
+      title: DateUnit
+      enum:
+      - day
+      - week
+      - month
+    ResourceExplorerGroupingLabel:
+      type: object
+      properties:
+        singular:
+          type:
+          - string
+          - 'null'
+        plural:
+          type:
+          - string
+          - 'null'
+    DateLabel:
+      type: string
+      title: DateLabel
+      enum:
+      - year_to_date
+      - month_to_date
+      - last_one_month
+      - last_three_months
+      - last_six_months
+      - past_fourteen_days
+      - past_seven_days
+      - past_thirty_days
+      - past_forty_five_days
+      - past_ninety_days
+      - past_one_hundred_eighty_days
+      - last_twelve_months
+      - quarter_to_date
+      - last_quarter
+    TrendType:
+      type: string
+      enum:
+      - period_over_period
+      - month_over_month
+    BillingDataRequest:
+      type: object
+      required:
+      - dataPoint
+      properties:
+        dataPoint:
+          type: string
+          description: The data point to analyze
+          enum:
+          - daily
+          - weekly
+          - monthly
+          - quarterly
+          - yearly
+        dates:
+          $ref: '#/components/schemas/Dates'
+        groupBy:
+          $ref: '#/components/schemas/GroupingType'
+        axisGranularity:
+          $ref: '#/components/schemas/AxisGranularity'
+        groupValues:
+          type: array
+          items:
+            type: string
+          description: Values to group by
+        startMonthOfQuarter:
+          type: integer
+          minimum: 1
+          maximum: 12
+          default: 1
+          description: The starting month of the quarter
+        propertiesToLoad:
+          $ref: '#/components/schemas/PropertiesToLoadRequest'
+        filterTree:
+          $ref: '#/components/schemas/FilterTreeNodeRequest'
+        trendType:
+          $ref: '#/components/schemas/TrendType'
+        costType:
+          $ref: '#/components/schemas/CostType'
+        series:
+          type: integer
+          description: Number of series to return
+    ResourceExplorerPossibleGroupings:
+      type: array
+      items:
+        $ref: '#/components/schemas/ResourceExplorerPossibleGrouping'
+    AxisGranularity:
+      type: string
+      enum:
+      - date
+      - account
+      - service
+      - region
+      - product_family
+      - charge_type
+      - instance_family
+      - instance_type
+      - environment
+      - marketplace_service
+      description: Granularity of the time axis
+    ResourceExplorerGrouping:
+      type:
+      - string
+      - 'null'
+      title: ResourceExplorerGrouping
+      enum:
+      - service
+      - marketplace_service
+      - cost_allocation_tag
+      - charge_type
+      - account
+      - region
+      - resource
+      - product_family
+      - instance_family
+      - instance_type
+      - credit_type
+      - cloud_provider
+      - cost_allocation_tag_value
+      - category
+      - none
+    ForecastedCostResponse:
+      type: object
+      properties:
+        forecastedCost:
+          type: number
+          format: decimal
+        forecastedDate:
+          type: string
+          format: date
+        trend:
+          type:
+          - number
+          - 'null'
+          format: decimal
+    ResourceExplorerDynamicFilterItemType:
+      type: string
+      enum:
+      - account
+      - region
+      - service
+      - charge_type
+      - product_family
+      - instance_family
+      - instance_type
+      - tag
+      - resource_id
+      - credit
+      - credit_type
+      - marketplace_service
+      - cloud_provider
+      - dimension_id
+      - environment
+      - cluster
+      - namespace
+      - node
+      - namespace
+      - usage_type
+      - pricing_term
+      - description
+      - parent_resource_id
+      - type
+      - deployment
+      - workload_name
+      - workload_type
+      - organisation
+      - group
+      - resource_group
+    CostType:
+      type: string
+      enum:
+      - unblended
+      - blended
+      - amortized
+      - net_unblended
+      - net_amortized
+    BillingAggregateCostsDateDetails:
+      type: object
+      properties:
+        dateFrom:
+          type: string
+          format: date
+        dateTo:
+          type: string
+          format: date
+        days:
+          type: integer
+    DateLabelNullable:
+      title: DateLabelNullable
+      allOf:
+      - $ref: '#/components/schemas/DateLabel'
+    FilterGroupNodeRequest:
+      type: object
+      required:
+      - node_type
+      - operator
+      - items
+      properties:
+        node_type:
+          type: string
+          enum:
+          - group
+          example: group
+        operator:
+          type: string
+          enum:
+          - and
+          - or
+          description: The operator for the filter group
+          example: and
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterTreeNodeRequest'
+          description: List of filter items in this group
+    NullableDate:
+      type:
+      - string
+      - 'null'
+      description: ISO 8601
+      example: '2022-06-11T21:14:49.691823'
+      title: ''
+    ResourceExplorerFilterProvider:
+      type: string
+      title: ResourceExplorerFilterProvider
+      enum:
+      - aws
+      - gcp
+      - azure
+      - confluent
+      - mongo
+      - dimensions
+      - kubernetes
+      - eks
+      - global
+    PropertiesToLoadRequest:
+      type: object
+      properties:
+        detailedCurrentPeriodData:
+          type: boolean
+          default: true
+        detailedPreviousPeriodData:
+          type: boolean
+          default: true
+        currentPeriodTotalCost:
+          type: boolean
+          default: true
+        previousPeriodTotalCost:
+          type: boolean
+          default: true
+        averageCost:
+          type: boolean
+          default: true
+        forecastedMonthEndCost:
+          type: boolean
+          default: true
+        forecastedQuarterEndCost:
+          type: boolean
+          default: true
+        liveFilteredTotal:
+          type: boolean
+          default: true
+        forecastedMonthEndCostForGroupingItems:
+          type: boolean
+          default: true
+        forecastedQuarterEndCostForGroupingItems:
+          type: boolean
+          default: false
+        showUncategorizedOption:
+          type: boolean
+          default: false
+    GroupingType:
+      type: string
+      enum:
+      - service
+      - marketplace_service
+      - tag_key
+      - charge_type
+      - account
+      - region
+      - resource
+      - product_family
+      - cost_type
+      - credit_type
+      - instance_family
+      - instance_type
+      - cloud_provider
+      - tag_value
+      - none
+      - environment
+      - usage_type
+      - pricing_term
+      - description
+      - parent_resource_id
+      - cluster
+      - node
+      - type
+      - namespace
+      - deployment
+      - workload_name
+      - workload_type
+      - organisation
+      - group
+      - mongo_cluster
+      - resource_group
+      - service_type
+      - warehouse
+      - category_v2
+      - platform
+      description: Type of grouping for the billing data
+    FilterTreeNodeRequest:
+      type: object
+      discriminator:
+        propertyName: node_type
+        mapping:
+          group: '#/components/schemas/FilterGroupNodeRequest'
+          item: '#/components/schemas/FilterItemNodeRequest'
+      oneOf:
+      - $ref: '#/components/schemas/FilterGroupNodeRequest'
+      - $ref: '#/components/schemas/FilterItemNodeRequest'
+    AverageMonthlyCostDetailsResponse:
+      type: object
+      properties:
+        averageMonthlyCost:
+          type: number
+          format: decimal
+        previousPeriodAverageMonthlyCost:
+          type:
+          - number
+          - 'null'
+          format: decimal
+        trend:
+          type:
+          - number
+          - 'null'
+          format: decimal
+    BillingAggregateResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingAggregateItemsResponse'
+        total:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingAggregateTotalResponse'
+        totalCost:
+          type: number
+          format: decimal
+        previousPeriodTotalCost:
+          type:
+          - number
+          - 'null'
+          format: decimal
+        averageDailyCostDetails:
+          $ref: '#/components/schemas/AverageDailyCostDetailsResponse'
+        averageMonthlyCostDetails:
+          $ref: '#/components/schemas/AverageMonthlyCostDetailsResponse'
+        liveUsageTotalCost:
+          type: number
+          format: decimal
+        totalCostDateDetails:
+          $ref: '#/components/schemas/BillingAggregateCostsDateDetails'
+        previousPeriodCostDateDetails:
+          $ref: '#/components/schemas/BillingAggregateCostsDateDetails'
+        forecastedCosts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ForecastedCostResponse'
+        trendType:
+          type: string
+        costType:
+          type: string
+    BillingAggregateItemsResponse:
+      type: object
+      properties:
+        value:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingAggregateItemResponse'
+    FilterItemNodeRequest:
+      type: object
+      required:
+      - node_type
+      - type
+      - filter_provider
+      - operator
+      properties:
+        node_type:
+          type: string
+          enum:
+          - item
+          example: item
+        type:
+          type: string
+          description: The type of the filter item
+          example: tag
+        filter_provider:
+          type: string
+          description: The provider of the filter
+          example: aws
+        value:
+          type: object
+          description: The value of the filter
+          example:
+            key: Environment
+            value: Production
+        operator:
+          type: string
+          description: The operator for the filter item
+          example: in
+    AverageDailyCostDetailsResponse:
+      type: object
+      properties:
+        averageDailyCost:
+          type: number
+          format: decimal
+        previousPeriodAverageDailyCost:
+          type:
+          - number
+          - 'null'
+          format: decimal
+        trend:
+          type:
+          - number
+          - 'null'
+          format: decimal
+    ResourceExplorerPossibleGrouping:
+      title: ResourceExplorerPossibleGrouping
+      type: object
+      properties:
+        key:
+          $ref: '#/components/schemas/ResourceExplorerGrouping'
+        filter_provider:
+          $ref: '#/components/schemas/ResourceExplorerFilterProvider'
+        parent_label:
+          type: string
+        next_grouping:
+          $ref: '#/components/schemas/ResourceExplorerGrouping'
+        label:
+          $ref: '#/components/schemas/ResourceExplorerGroupingLabel'
+        filter_key:
+          $ref: '#/components/schemas/ResourceExplorerDynamicFilterItemType'
+        filter_type:
+          type: string
+        possible_groupings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceExplorerGrouping'
+        has_nested:
+          type: boolean
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    InternalServerError:
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Internal Server Error.
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Some business domain specific validation message
+    NotFound:
+      description: Resource was not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      name: x-api-key
+      in: header

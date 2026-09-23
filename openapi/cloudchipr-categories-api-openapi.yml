@@ -1,0 +1,355 @@
+openapi: 3.2.0
+info:
+  title: CloudChipr Enterprise Categories API
+  description: CloudChipr Enterprise API document provides detailed description about how to interact with CloudChipr Enterprise service
+  version: 0.1.0
+  contact:
+    email: info@cloudchipr.com
+  license:
+    name: Cloudchipr 1.0
+    url: https://cloudchipr.com
+servers:
+- url: https://api.cloudchipr.com
+tags:
+- name: Categories
+  description: Everything about categories
+paths:
+  /dimensions:
+    get:
+      summary: List dimensions with their categories
+      description: Returns every dimension of the organisation associated with the API key, each with its categories. A category's filter describes the scope it covers and can be matched against a budget's filter tree or used to attribute costs to a team.
+      operationId: listDimensions
+      tags:
+      - Categories
+      security:
+      - ApiKey: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Dimension'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /dimensions/category-structure:
+    put:
+      summary: Update category structure for an organisation
+      description: Updates the entire category structure for the specified organisation, including dimensions, categories, and shared costs
+      operationId: updateCategoryStructure
+      tags:
+      - Categories
+      security:
+      - ApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategoryStructureRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DimensionWithCategoriesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+components:
+  schemas:
+    DimensionCategory:
+      type: object
+      required:
+      - value
+      properties:
+        value:
+          type: string
+          description: The category name
+          example: payments
+        filter:
+          $ref: '#/components/schemas/FilterTreeResponse'
+        source:
+          type:
+          - string
+          - 'null'
+          description: Where the category comes from (CLASSIC for manual/dynamic dimensions, RULE for rule-derived entries)
+    FilterGroupNodeResponse:
+      type: object
+      properties:
+        nodeType:
+          type: string
+          enum:
+          - group
+          example: group
+        operator:
+          type: string
+          description: The operator for the filter group
+          example: and
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterTreeResponse'
+          description: List of filter items in this group
+    UpdateCategoryStructureRequest:
+      type: object
+      required:
+      - dimensions
+      - categories
+      properties:
+        dimensions:
+          type: array
+          items:
+            type: string
+          description: List of dimension names
+          example:
+          - Department
+          - Environment
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryRequest'
+          description: List of categories
+        sharedCosts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SharedCostRequest'
+          description: List of shared costs
+    FilterTreeNodeRequest:
+      type: object
+      discriminator:
+        propertyName: node_type
+        mapping:
+          group: '#/components/schemas/FilterGroupNodeRequest'
+          item: '#/components/schemas/FilterItemNodeRequest'
+      oneOf:
+      - $ref: '#/components/schemas/FilterGroupNodeRequest'
+      - $ref: '#/components/schemas/FilterItemNodeRequest'
+    Dimension:
+      type: object
+      required:
+      - name
+      - categories
+      properties:
+        name:
+          type: string
+          description: The dimension name
+          example: Team
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/DimensionCategory'
+    DimensionWithCategoriesResponse:
+      type: object
+      properties:
+        key:
+          type: string
+          description: The dimension name
+          example: Department
+        value:
+          type: string
+          description: The category name
+          example: Engineering
+        filter:
+          $ref: '#/components/schemas/FilterTreeResponse'
+        sharedCosts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SharedCostResponse'
+          description: List of shared costs for this category
+    FilterTreeResponse:
+      type: object
+      discriminator:
+        propertyName: nodeType
+        mapping:
+          group: '#/components/schemas/FilterGroupNodeResponse'
+          item: '#/components/schemas/FilterItemNodeResponse'
+      oneOf:
+      - $ref: '#/components/schemas/FilterGroupNodeResponse'
+      - $ref: '#/components/schemas/FilterItemNodeResponse'
+    FilterItemNodeRequest:
+      type: object
+      required:
+      - node_type
+      - type
+      - filter_provider
+      - operator
+      properties:
+        node_type:
+          type: string
+          enum:
+          - item
+          example: item
+        type:
+          type: string
+          description: The type of the filter item
+          example: tag
+        filter_provider:
+          type: string
+          description: The provider of the filter
+          example: aws
+        value:
+          type: object
+          description: The value of the filter
+          example:
+            key: Environment
+            value: Production
+        operator:
+          type: string
+          description: The operator for the filter item
+          example: in
+    CategoryRequest:
+      type: object
+      required:
+      - value
+      - key
+      - filter
+      properties:
+        value:
+          type: string
+          description: The category name
+          example: Engineering
+        key:
+          type: string
+          description: The dimension name
+          example: Department
+        filter:
+          $ref: '#/components/schemas/FilterTreeNodeRequest'
+          description: The filter for the category
+    SharedCostResponse:
+      type: object
+      properties:
+        filter:
+          $ref: '#/components/schemas/FilterTreeResponse'
+        amount:
+          type: integer
+          description: The amount of the shared cost
+          example: 25
+    FilterGroupNodeRequest:
+      type: object
+      required:
+      - node_type
+      - operator
+      - items
+      properties:
+        node_type:
+          type: string
+          enum:
+          - group
+          example: group
+        operator:
+          type: string
+          enum:
+          - and
+          - or
+          description: The operator for the filter group
+          example: and
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterTreeNodeRequest'
+          description: List of filter items in this group
+    SharedCostRequest:
+      type: object
+      required:
+      - name
+      - dimensionName
+      - filter
+      - distributionType
+      properties:
+        name:
+          type: string
+          description: The shared cost name
+          example: AWS Shared Cost
+        dimensionName:
+          type: string
+          description: The dimension name
+          example: Department
+        filter:
+          $ref: '#/components/schemas/FilterTreeNodeRequest'
+          description: The filter tree for the shared cost
+        distributionType:
+          type: string
+          enum:
+          - EVEN
+          - MANUAL
+          description: The distribution type for the shared cost
+          example: EVEN
+        shareAmounts:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Map of category names to share amounts (required when distributionType is MANUAL)
+          example:
+            Engineering: 50
+            Marketing: 50
+    FilterItemNodeResponse:
+      type: object
+      properties:
+        nodeType:
+          type: string
+          enum:
+          - item
+          example: item
+        type:
+          type: string
+          description: The type of the filter item
+          example: tag
+        filterProvider:
+          type: string
+          description: The provider of the filter
+          example: aws
+        value:
+          type: object
+          description: The value of the filter
+          example:
+            key: Environment
+            value: Production
+        operator:
+          type: string
+          description: The operator for the filter item
+          example: equals
+  responses:
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Some business domain specific validation message
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    InternalServerError:
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Internal Server Error.
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      name: x-api-key
+      in: header

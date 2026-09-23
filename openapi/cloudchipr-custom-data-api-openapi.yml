@@ -1,0 +1,368 @@
+openapi: 3.2.0
+info:
+  title: CloudChipr Enterprise Custom Data API
+  description: CloudChipr Enterprise API document provides detailed description about how to interact with CloudChipr Enterprise service
+  version: 0.1.0
+  contact:
+    email: info@cloudchipr.com
+  license:
+    name: Cloudchipr 1.0
+    url: https://cloudchipr.com
+servers:
+- url: https://api.cloudchipr.com
+tags:
+- name: Custom Data
+  description: Everything about custom data sources
+paths:
+  /data-sources:
+    post:
+      summary: Creates a data source destination
+      description: Creates a data source destination.
+      operationId: createDataSource
+      tags:
+      - Custom Data
+      security:
+      - ApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDataSourceRequest'
+      responses:
+        '201':
+          description: Data source created. Use ingest_url to send data to this destination.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateDataSourceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /telemetry:
+    get:
+      summary: List telemetries
+      operationId: listTelemetries
+      tags:
+      - Custom Data
+      security:
+      - ApiKey: []
+      responses:
+        '200':
+          description: List of telemetry destinations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Telemetry'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /custom-sources:
+    get:
+      summary: List custom sources
+      operationId: listCustomSources
+      tags:
+      - Custom Data
+      security:
+      - ApiKey: []
+      responses:
+        '200':
+          description: List of custom sources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomSource'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /ingest/{destinationId}:
+    post:
+      summary: Ingest custom data
+      description: Ingests newline-delimited JSON (NDJSON) payload to a destination.
+      operationId: ingestCustomData
+      tags:
+      - Custom Data
+      security:
+      - ApiKey: []
+      parameters:
+      - name: destinationId
+        in: path
+        required: true
+        description: Destination identifier (Telemetry or Custom Source Id)
+        schema:
+          type: string
+          format: uuid
+      - name: Idempotency-Key
+        in: header
+        required: true
+        description: Idempotency key to ensure request is processed only once
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/x-ndjson:
+            schema:
+              type: string
+            examples:
+              ndjsonWithDate:
+                summary: NDJSON lines with date-only field
+                description: Each line is a JSON object. The "date" field must be a date in yyyy-MM-dd format.
+                value: '{"deviceId":"1b2e5e34-2c3a-4a5f-9c1a-2d3e4f5a6b7c","metric":"cpu_usage","value":73.4,"date":"2026-02-16"}
+
+                  {"deviceId":"1b2e5e34-2c3a-4a5f-9c1a-2d3e4f5a6b7c","metric":"memory_usage","value":58.1,"date":"2026-02-16"}'
+      responses:
+        '200':
+          description: Ingestion result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  processed_rows:
+                    type: integer
+                required:
+                - processed_rows
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - type: object
+                  properties:
+                    errors:
+                      type: array
+                      items:
+                        oneOf:
+                        - type: object
+                          description: Invalid JSON
+                          properties:
+                            code:
+                              $ref: '#/components/schemas/ErrorCode'
+                          required:
+                          - code
+                        - type: object
+                          description: Mandatory field missing
+                          properties:
+                            column:
+                              type: string
+                            code:
+                              $ref: '#/components/schemas/ErrorCode'
+                          required:
+                          - code
+                          - column
+                        - type: object
+                          description: Invalid column format
+                          properties:
+                            column:
+                              type: string
+                            invalid_value:
+                              type: string
+                            row_number:
+                              type: integer
+                            expected_format:
+                              type: string
+                            code:
+                              $ref: '#/components/schemas/ErrorCode'
+                          required:
+                          - code
+                          - column
+                          - invalid_value
+                          - row_number
+                          - expected_format
+                  required:
+                  - errors
+                - type: object
+                  properties:
+                    message:
+                      type: string
+                  required:
+                  - message
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  schemas:
+    CustomSourceColumnResponse:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+      - name
+    ErrorCode:
+      type: string
+      enum:
+      - MISSING_MANDATORY_FIELD
+      - INVALID_COLUMN_FORMAT
+      - INVALID_JSON
+    CreateDataSourceRequest:
+      type: object
+      required:
+      - name
+      - type
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+          - TELEMETRY
+          - CUSTOM_SOURCE
+        columns:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/DataSourceColumnRequest'
+          description: Optional. Required when type is CUSTOM_SOURCE. List of column definitions.
+    DataSourceColumnRequest:
+      type: object
+      required:
+      - name
+      - display_name
+      - data_type
+      properties:
+        name:
+          type: string
+          description: Column name (e.g. "Organization", "Account", "Service_ID").
+        display_name:
+          type: string
+          description: Human-readable display name shown in the UI.
+        data_type:
+          type: string
+          enum:
+          - string
+          - number
+          - date
+          description: Data type of the column.
+        next_grouping:
+          type:
+          - string
+          - 'null'
+          description: Name of the column this one drills down into. Null means terminal level (no further drill-down).
+    Telemetry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        created_by:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        modified_by:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        modified_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        columns:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+    CustomSource:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        created_by:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        modified_by:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        modified_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomSourceColumnResponse'
+      required:
+      - id
+      - name
+      - created_by
+      - created_at
+      - columns
+    CreateDataSourceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+          - TELEMETRY
+          - CUSTOM_SOURCE
+        ingest_url:
+          type: string
+          description: Relative path to send data to this data source.
+  responses:
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Some business domain specific validation message
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    NotFound:
+      description: Resource was not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      name: x-api-key
+      in: header
