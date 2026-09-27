@@ -63,12 +63,32 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
       operationId: get-regions
 components:
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Some business domain specific validation message
   schemas:
-    ProviderType:
-      type: string
-      enum:
-      - aws
-      - gcp
+    Regions:
+      type: array
+      items:
+        $ref: '#/components/schemas/Region'
     Region:
       title: Region
       type: object
@@ -84,31 +104,11 @@ components:
       required:
       - name
       - key
-    Regions:
-      type: array
-      items:
-        $ref: '#/components/schemas/Region'
-  responses:
-    BadRequest:
-      description: Bad Request.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Some business domain specific validation message
-    UnauthorizedError:
-      description: Authentication information is missing or invalid
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Unauthorized
+    ProviderType:
+      type: string
+      enum:
+      - aws
+      - gcp
   securitySchemes:
     ApiKey:
       type: apiKey

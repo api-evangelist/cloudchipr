@@ -32,6 +32,9 @@ access: 3rd-Party
 position: Consuming
 kind: company
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/cloudchipr.png
+x-docs-platform: readme
+x-docs-platform-confidence: high
+x-docs-platform-checked: 2026-09-24
 tags:
   - AWS
   - Azure
@@ -62,6 +65,12 @@ apis:
 - aid: cloudchipr:cloudchipr-mcp-server
   name: CloudChipr MCP Server
   tags:
+  - MCP
+  - Agent-Native
+  - FinOps
+  - Cloud Cost Management
+  - Kubernetes
+  tags_raw:
   - MCP
   - agent-native
   - FinOps

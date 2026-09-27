@@ -188,26 +188,44 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    NotFound:
+      description: Resource was not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Some business domain specific validation message
   schemas:
-    CustomSourceColumnResponse:
+    CreateDataSourceResponse:
       type: object
       properties:
-        name:
+        id:
           type: string
-      required:
-      - name
-    ErrorCode:
-      type: string
-      enum:
-      - MISSING_MANDATORY_FIELD
-      - INVALID_COLUMN_FORMAT
-      - INVALID_JSON
-    CreateDataSourceRequest:
-      type: object
-      required:
-      - name
-      - type
-      properties:
+          format: uuid
         name:
           type: string
         type:
@@ -215,38 +233,9 @@ components:
           enum:
           - TELEMETRY
           - CUSTOM_SOURCE
-        columns:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/DataSourceColumnRequest'
-          description: Optional. Required when type is CUSTOM_SOURCE. List of column definitions.
-    DataSourceColumnRequest:
-      type: object
-      required:
-      - name
-      - display_name
-      - data_type
-      properties:
-        name:
+        ingest_url:
           type: string
-          description: Column name (e.g. "Organization", "Account", "Service_ID").
-        display_name:
-          type: string
-          description: Human-readable display name shown in the UI.
-        data_type:
-          type: string
-          enum:
-          - string
-          - number
-          - date
-          description: Data type of the column.
-        next_grouping:
-          type:
-          - string
-          - 'null'
-          description: Name of the column this one drills down into. Null means terminal level (no further drill-down).
+          description: Relative path to send data to this data source.
     Telemetry:
       type: object
       properties:
@@ -280,6 +269,13 @@ components:
             properties:
               name:
                 type: string
+    CustomSourceColumnResponse:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+      - name
     CustomSource:
       type: object
       properties:
@@ -314,12 +310,12 @@ components:
       - created_by
       - created_at
       - columns
-    CreateDataSourceResponse:
+    CreateDataSourceRequest:
       type: object
+      required:
+      - name
+      - type
       properties:
-        id:
-          type: string
-          format: uuid
         name:
           type: string
         type:
@@ -327,40 +323,44 @@ components:
           enum:
           - TELEMETRY
           - CUSTOM_SOURCE
-        ingest_url:
+        columns:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/DataSourceColumnRequest'
+          description: Optional. Required when type is CUSTOM_SOURCE. List of column definitions.
+    ErrorCode:
+      type: string
+      enum:
+      - MISSING_MANDATORY_FIELD
+      - INVALID_COLUMN_FORMAT
+      - INVALID_JSON
+    DataSourceColumnRequest:
+      type: object
+      required:
+      - name
+      - display_name
+      - data_type
+      properties:
+        name:
           type: string
-          description: Relative path to send data to this data source.
-  responses:
-    BadRequest:
-      description: Bad Request.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Some business domain specific validation message
-    UnauthorizedError:
-      description: Authentication information is missing or invalid
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Unauthorized
-    NotFound:
-      description: Resource was not found.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
+          description: Column name (e.g. "Organization", "Account", "Service_ID").
+        display_name:
+          type: string
+          description: Human-readable display name shown in the UI.
+        data_type:
+          type: string
+          enum:
+          - string
+          - number
+          - date
+          description: Data type of the column.
+        next_grouping:
+          type:
+          - string
+          - 'null'
+          description: Name of the column this one drills down into. Null means terminal level (no further drill-down).
   securitySchemes:
     ApiKey:
       type: apiKey

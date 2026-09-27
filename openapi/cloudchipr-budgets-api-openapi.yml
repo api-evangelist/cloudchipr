@@ -99,49 +99,48 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 components:
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    NotFound:
+      description: Resource was not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
+    InternalServerError:
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Internal Server Error.
   schemas:
-    FilterGroupNodeResponse:
+    FilterTreeResponse:
       type: object
-      properties:
-        nodeType:
-          type: string
-          enum:
-          - group
-          example: group
-        operator:
-          type: string
-          description: The operator for the filter group
-          example: and
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/FilterTreeResponse'
-          description: List of filter items in this group
-    BudgetHistoryEntry:
-      type: object
-      required:
-      - period_start
-      - period_end
-      - amount
-      - actual
-      properties:
-        period_start:
-          type: string
-          format: date
-        period_end:
-          type: string
-          format: date
-        amount:
-          type: number
-          description: The budget amount that was in force during this period
-        actual:
-          type: number
-          description: The period's actual spend
-        forecast:
-          type:
-          - number
-          - 'null'
-          description: Forecasted end-of-period spend; null for closed periods
+      discriminator:
+        propertyName: nodeType
+        mapping:
+          group: '#/components/schemas/FilterGroupNodeResponse'
+          item: '#/components/schemas/FilterItemNodeResponse'
+      oneOf:
+      - $ref: '#/components/schemas/FilterGroupNodeResponse'
+      - $ref: '#/components/schemas/FilterItemNodeResponse'
     Budget:
       type: object
       required:
@@ -222,16 +221,6 @@ components:
           format: date
         is_expired:
           type: boolean
-    FilterTreeResponse:
-      type: object
-      discriminator:
-        propertyName: nodeType
-        mapping:
-          group: '#/components/schemas/FilterGroupNodeResponse'
-          item: '#/components/schemas/FilterItemNodeResponse'
-      oneOf:
-      - $ref: '#/components/schemas/FilterGroupNodeResponse'
-      - $ref: '#/components/schemas/FilterItemNodeResponse'
     BudgetThreshold:
       type: object
       required:
@@ -259,6 +248,48 @@ components:
       description: ISO 8601
       example: '2022-06-11T21:14:49.691823'
       title: ''
+    BudgetHistoryEntry:
+      type: object
+      required:
+      - period_start
+      - period_end
+      - amount
+      - actual
+      properties:
+        period_start:
+          type: string
+          format: date
+        period_end:
+          type: string
+          format: date
+        amount:
+          type: number
+          description: The budget amount that was in force during this period
+        actual:
+          type: number
+          description: The period's actual spend
+        forecast:
+          type:
+          - number
+          - 'null'
+          description: Forecasted end-of-period spend; null for closed periods
+    FilterGroupNodeResponse:
+      type: object
+      properties:
+        nodeType:
+          type: string
+          enum:
+          - group
+          example: group
+        operator:
+          type: string
+          description: The operator for the filter group
+          example: and
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterTreeResponse'
+          description: List of filter items in this group
     FilterItemNodeResponse:
       type: object
       properties:
@@ -286,47 +317,16 @@ components:
           description: The operator for the filter item
           example: equals
   parameters:
-    QueryDateTo:
-      name: date_to
-      in: query
-      schema:
-        $ref: '#/components/schemas/NullableDate'
     QueryDateFrom:
       name: date_from
       in: query
       schema:
         $ref: '#/components/schemas/NullableDate'
-  responses:
-    UnauthorizedError:
-      description: Authentication information is missing or invalid
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Unauthorized
-    NotFound:
-      description: Resource was not found.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
-    InternalServerError:
-      description: Internal Server Error.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Internal Server Error.
+    QueryDateTo:
+      name: date_to
+      in: query
+      schema:
+        $ref: '#/components/schemas/NullableDate'
   securitySchemes:
     ApiKey:
       type: apiKey

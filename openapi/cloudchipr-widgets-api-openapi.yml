@@ -93,59 +93,44 @@ paths:
       security:
       - ApiKey: []
 components:
-  parameters:
-    QueryCategoryId:
-      name: category_id
-      in: query
-      schema:
-        type: string
-        format: uuid
-    QueryDateLabel:
-      name: date_label
-      in: query
-      schema:
-        $ref: '#/components/schemas/DateLabelNullable'
-    QueryDateType:
-      name: date_type
-      in: query
-      schema:
-        $ref: '#/components/schemas/DateType'
-    QueryDateValue:
-      name: date_value
-      in: query
-      schema:
-        type:
-        - number
-        - 'null'
-    QueryDateTo:
-      name: date_to
-      in: query
-      schema:
-        $ref: '#/components/schemas/NullableDate'
-    QueryDateUnit:
-      name: date_unit
-      in: query
-      schema:
-        $ref: '#/components/schemas/DateUnit'
-    QueryDateFrom:
-      name: date_from
-      in: query
-      schema:
-        $ref: '#/components/schemas/NullableDate'
-    PathWidgetId:
-      name: widgetId
-      schema:
-        type: string
-        format: uuid
-      in: path
-      required: true
   schemas:
+    ResourceExplorerCostsDateDetails:
+      title: ResourceExplorerCostsDateDetails
+      type: object
+      properties:
+        from_date:
+          $ref: '#/components/schemas/Date'
+        to_date:
+          $ref: '#/components/schemas/Date'
+      required:
+      - from_date
+      - to_date
     DateType:
       type: string
       title: DateType
       enum:
       - past
       - last
+    ResourceExplorerChartData:
+      title: Resource Explorer Chart Data
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceExplorerChartDataItem'
+    DateLabelNullable:
+      title: DateLabelNullable
+      allOf:
+      - $ref: '#/components/schemas/DateLabel'
+    ResourceExplorerGridMetadata:
+      title: A flexible key-value map containing metadata about the row.
+      type: object
+      additionalProperties:
+        type: string
     ResourceExplorerGridTotal:
       title: Resource Explorer Grid Total
       type: object
@@ -196,18 +181,11 @@ components:
       - metadata
       - monthly_forecast
       - quarterly_forecast
-    DateUnit:
-      type: string
-      title: DateUnit
-      enum:
-      - day
-      - week
-      - month
-    ProviderType:
+    TrendType:
       type: string
       enum:
-      - aws
-      - gcp
+      - period_over_period
+      - month_over_month
     DateLabel:
       type: string
       title: DateLabel
@@ -226,108 +204,22 @@ components:
       - last_twelve_months
       - quarter_to_date
       - last_quarter
-    TrendType:
+    Date:
       type: string
+      description: ISO 8601
+      example: '2022-09-11T21:14:49.691823'
+    DateUnit:
+      type: string
+      title: DateUnit
       enum:
-      - period_over_period
-      - month_over_month
-    NullableForecastedCost:
-      allOf:
-      - {}
-      - $ref: '#/components/schemas/ForecastedCost'
+      - day
+      - week
+      - month
     ForecastOption:
       type: string
       enum:
       - month
       - quarter
-    AverageMonthlyCostDetails:
-      title: AverageMonthlyCostDetails
-      type: object
-      properties:
-        from_date:
-          $ref: '#/components/schemas/Date'
-        to_date:
-          $ref: '#/components/schemas/Date'
-        average_monthly_cost:
-          type:
-          - number
-          - 'null'
-        trend:
-          type:
-          - number
-          - 'null'
-      required:
-      - from_date
-      - to_date
-      - average_monthly_cost
-      - trend
-    ResourceExplorerCostsDateDetails:
-      title: ResourceExplorerCostsDateDetails
-      type: object
-      properties:
-        from_date:
-          $ref: '#/components/schemas/Date'
-        to_date:
-          $ref: '#/components/schemas/Date'
-      required:
-      - from_date
-      - to_date
-    CostType:
-      type: string
-      enum:
-      - unblended
-      - blended
-      - amortized
-      - net_unblended
-      - net_amortized
-    DateLabelNullable:
-      title: DateLabelNullable
-      allOf:
-      - $ref: '#/components/schemas/DateLabel'
-    ResourceExplorerChartDataItem:
-      title: Resource Explorer Chart Data Item
-      type: object
-      properties:
-        field:
-          type: string
-        label:
-          type:
-          - string
-          - 'null'
-        cost:
-          type: number
-          format: float
-    ForecastedCostRE:
-      type: array
-      items:
-        $ref: '#/components/schemas/ForecastedCost'
-    NullableDate:
-      type:
-      - string
-      - 'null'
-      description: ISO 8601
-      example: '2022-06-11T21:14:49.691823'
-      title: ''
-    Date:
-      type: string
-      description: ISO 8601
-      example: '2022-09-11T21:14:49.691823'
-    ResourceExplorerChartData:
-      title: Resource Explorer Chart Data
-      type: object
-      properties:
-        date:
-          type: string
-          format: date
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/ResourceExplorerChartDataItem'
-    ResourceExplorerGridMetadata:
-      title: A flexible key-value map containing metadata about the row.
-      type: object
-      additionalProperties:
-        type: string
     ForecastedCost:
       type: object
       properties:
@@ -376,17 +268,69 @@ components:
       - to_date
       - average_daily_cost
       - trend
+    AverageMonthlyCostDetails:
+      title: AverageMonthlyCostDetails
+      type: object
+      properties:
+        from_date:
+          $ref: '#/components/schemas/Date'
+        to_date:
+          $ref: '#/components/schemas/Date'
+        average_monthly_cost:
+          type:
+          - number
+          - 'null'
+        trend:
+          type:
+          - number
+          - 'null'
+      required:
+      - from_date
+      - to_date
+      - average_monthly_cost
+      - trend
+    ProviderType:
+      type: string
+      enum:
+      - aws
+      - gcp
+    NullableDate:
+      type:
+      - string
+      - 'null'
+      description: ISO 8601
+      example: '2022-06-11T21:14:49.691823'
+      title: ''
+    ResourceExplorerChartDataItem:
+      title: Resource Explorer Chart Data Item
+      type: object
+      properties:
+        field:
+          type: string
+        label:
+          type:
+          - string
+          - 'null'
+        cost:
+          type: number
+          format: float
+    CostType:
+      type: string
+      enum:
+      - unblended
+      - blended
+      - amortized
+      - net_unblended
+      - net_amortized
+    ForecastedCostRE:
+      type: array
+      items:
+        $ref: '#/components/schemas/ForecastedCost'
+    NullableForecastedCost:
+      allOf:
+      - {}
+      - $ref: '#/components/schemas/ForecastedCost'
   responses:
-    UnauthorizedError:
-      description: Authentication information is missing or invalid
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Unauthorized
     CostBreakdownWidgetResponse:
       description: Cost Breakdown Widget Response
       content:
@@ -434,6 +378,16 @@ components:
             - previous_period_cost_date_details
             - forecasted_costs
             - cost_type
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
     MethodNotAllowed:
       description: Example response
       content:
@@ -443,6 +397,25 @@ components:
             properties:
               message:
                 type: string
+    LargestCostChangesWidgetResponse:
+      description: Largest Cost Changes Widget Response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResourceExplorerGridTotal'
+              previous_period_cost_date_details:
+                $ref: '#/components/schemas/ResourceExplorerCostsDateDetails'
+              current_period_cost_date_details:
+                $ref: '#/components/schemas/ResourceExplorerCostsDateDetails'
+            required:
+            - total
+            - previous_period_cost_date_details
+            - current_period_cost_date_details
     NotFound:
       description: Resource was not found.
       content:
@@ -487,25 +460,52 @@ components:
             - total_cost_date_details
             - previous_period_cost_date_details
             - forecasted_costs
-    LargestCostChangesWidgetResponse:
-      description: Largest Cost Changes Widget Response
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              total:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ResourceExplorerGridTotal'
-              previous_period_cost_date_details:
-                $ref: '#/components/schemas/ResourceExplorerCostsDateDetails'
-              current_period_cost_date_details:
-                $ref: '#/components/schemas/ResourceExplorerCostsDateDetails'
-            required:
-            - total
-            - previous_period_cost_date_details
-            - current_period_cost_date_details
+  parameters:
+    PathWidgetId:
+      name: widgetId
+      schema:
+        type: string
+        format: uuid
+      in: path
+      required: true
+    QueryCategoryId:
+      name: category_id
+      in: query
+      schema:
+        type: string
+        format: uuid
+    QueryDateValue:
+      name: date_value
+      in: query
+      schema:
+        type:
+        - number
+        - 'null'
+    QueryDateType:
+      name: date_type
+      in: query
+      schema:
+        $ref: '#/components/schemas/DateType'
+    QueryDateFrom:
+      name: date_from
+      in: query
+      schema:
+        $ref: '#/components/schemas/NullableDate'
+    QueryDateTo:
+      name: date_to
+      in: query
+      schema:
+        $ref: '#/components/schemas/NullableDate'
+    QueryDateLabel:
+      name: date_label
+      in: query
+      schema:
+        $ref: '#/components/schemas/DateLabelNullable'
+    QueryDateUnit:
+      name: date_unit
+      in: query
+      schema:
+        $ref: '#/components/schemas/DateUnit'
   securitySchemes:
     ApiKey:
       type: apiKey

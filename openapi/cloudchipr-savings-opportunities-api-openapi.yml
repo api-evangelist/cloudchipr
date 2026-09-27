@@ -56,6 +56,23 @@ components:
       oneOf:
       - $ref: '#/components/schemas/FilterGroupNodeRequest'
       - $ref: '#/components/schemas/FilterItemNodeRequest'
+    SavingsOpportunityFilteredRequest:
+      type: object
+      properties:
+        filterTree:
+          $ref: '#/components/schemas/FilterTreeNodeRequest'
+        oneRecommendationPerResource:
+          type: boolean
+          default: false
+          description: When true, returns only one recommendation per resource
+        getMetrics:
+          type: boolean
+          default: false
+          description: When true, includes CPU/memory metrics in the response
+        include_dimensions:
+          type: boolean
+          default: false
+          description: When true, each opportunity carries its dimension category assignments in the `dimensions` field
     FilterItemNodeRequest:
       type: object
       required:
@@ -235,34 +252,7 @@ components:
           type: number
           description: The percentage of the resource's cost attributed to this category
           example: 100.0
-    SavingsOpportunityFilteredRequest:
-      type: object
-      properties:
-        filterTree:
-          $ref: '#/components/schemas/FilterTreeNodeRequest'
-        oneRecommendationPerResource:
-          type: boolean
-          default: false
-          description: When true, returns only one recommendation per resource
-        getMetrics:
-          type: boolean
-          default: false
-          description: When true, includes CPU/memory metrics in the response
-        include_dimensions:
-          type: boolean
-          default: false
-          description: When true, each opportunity carries its dimension category assignments in the `dimensions` field
   responses:
-    BadRequest:
-      description: Bad Request.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Some business domain specific validation message
     UnauthorizedError:
       description: Authentication information is missing or invalid
       content:
@@ -273,6 +263,16 @@ components:
               message:
                 type: string
                 example: Unauthorized
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Some business domain specific validation message
     InternalServerError:
       description: Internal Server Error.
       content:
