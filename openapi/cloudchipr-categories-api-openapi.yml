@@ -66,6 +66,163 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
 components:
   schemas:
+    SharedCostRequest:
+      type: object
+      required:
+      - name
+      - dimensionName
+      - filter
+      - distributionType
+      properties:
+        name:
+          type: string
+          description: The shared cost name
+          example: AWS Shared Cost
+        dimensionName:
+          type: string
+          description: The dimension name
+          example: Department
+        filter:
+          $ref: '#/components/schemas/FilterTreeNodeRequest'
+          description: The filter tree for the shared cost
+        distributionType:
+          type: string
+          enum:
+          - EVEN
+          - MANUAL
+          description: The distribution type for the shared cost
+          example: EVEN
+        shareAmounts:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Map of category names to share amounts (required when distributionType is MANUAL)
+          example:
+            Engineering: 50
+            Marketing: 50
+    Dimension:
+      type: object
+      required:
+      - name
+      - categories
+      properties:
+        name:
+          type: string
+          description: The dimension name
+          example: Team
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/DimensionCategory'
+    FilterItemNodeRequest:
+      type: object
+      required:
+      - node_type
+      - type
+      - filter_provider
+      - operator
+      properties:
+        node_type:
+          type: string
+          enum:
+          - item
+          example: item
+        type:
+          type: string
+          description: The type of the filter item
+          example: tag
+        filter_provider:
+          type: string
+          description: The provider of the filter
+          example: aws
+        value:
+          type: object
+          description: The value of the filter
+          example:
+            key: Environment
+            value: Production
+        operator:
+          type: string
+          description: The operator for the filter item
+          example: in
+    CategoryRequest:
+      type: object
+      required:
+      - value
+      - key
+      - filter
+      properties:
+        value:
+          type: string
+          description: The category name
+          example: Engineering
+        key:
+          type: string
+          description: The dimension name
+          example: Department
+        filter:
+          $ref: '#/components/schemas/FilterTreeNodeRequest'
+          description: The filter for the category
+    SharedCostResponse:
+      type: object
+      properties:
+        filter:
+          $ref: '#/components/schemas/FilterTreeResponse'
+        amount:
+          type: integer
+          description: The amount of the shared cost
+          example: 25
+    FilterGroupNodeRequest:
+      type: object
+      required:
+      - node_type
+      - operator
+      - items
+      properties:
+        node_type:
+          type: string
+          enum:
+          - group
+          example: group
+        operator:
+          type: string
+          enum:
+          - and
+          - or
+          description: The operator for the filter group
+          example: and
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterTreeNodeRequest'
+          description: List of filter items in this group
+    FilterTreeResponse:
+      type: object
+      discriminator:
+        propertyName: nodeType
+        mapping:
+          group: '#/components/schemas/FilterGroupNodeResponse'
+          item: '#/components/schemas/FilterItemNodeResponse'
+      oneOf:
+      - $ref: '#/components/schemas/FilterGroupNodeResponse'
+      - $ref: '#/components/schemas/FilterItemNodeResponse'
+    FilterGroupNodeResponse:
+      type: object
+      properties:
+        nodeType:
+          type: string
+          enum:
+          - group
+          example: group
+        operator:
+          type: string
+          description: The operator for the filter group
+          example: and
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterTreeResponse'
+          description: List of filter items in this group
     FilterTreeNodeRequest:
       type: object
       discriminator:
@@ -76,6 +233,32 @@ components:
       oneOf:
       - $ref: '#/components/schemas/FilterGroupNodeRequest'
       - $ref: '#/components/schemas/FilterItemNodeRequest'
+    FilterItemNodeResponse:
+      type: object
+      properties:
+        nodeType:
+          type: string
+          enum:
+          - item
+          example: item
+        type:
+          type: string
+          description: The type of the filter item
+          example: tag
+        filterProvider:
+          type: string
+          description: The provider of the filter
+          example: aws
+        value:
+          type: object
+          description: The value of the filter
+          example:
+            key: Environment
+            value: Production
+        operator:
+          type: string
+          description: The operator for the filter item
+          example: equals
     UpdateCategoryStructureRequest:
       type: object
       required:
@@ -118,50 +301,6 @@ components:
           items:
             $ref: '#/components/schemas/SharedCostResponse'
           description: List of shared costs for this category
-    SharedCostRequest:
-      type: object
-      required:
-      - name
-      - dimensionName
-      - filter
-      - distributionType
-      properties:
-        name:
-          type: string
-          description: The shared cost name
-          example: AWS Shared Cost
-        dimensionName:
-          type: string
-          description: The dimension name
-          example: Department
-        filter:
-          $ref: '#/components/schemas/FilterTreeNodeRequest'
-          description: The filter tree for the shared cost
-        distributionType:
-          type: string
-          enum:
-          - EVEN
-          - MANUAL
-          description: The distribution type for the shared cost
-          example: EVEN
-        shareAmounts:
-          type: object
-          additionalProperties:
-            type: integer
-          description: Map of category names to share amounts (required when distributionType is MANUAL)
-          example:
-            Engineering: 50
-            Marketing: 50
-    FilterTreeResponse:
-      type: object
-      discriminator:
-        propertyName: nodeType
-        mapping:
-          group: '#/components/schemas/FilterGroupNodeResponse'
-          item: '#/components/schemas/FilterItemNodeResponse'
-      oneOf:
-      - $ref: '#/components/schemas/FilterGroupNodeResponse'
-      - $ref: '#/components/schemas/FilterItemNodeResponse'
     DimensionCategory:
       type: object
       required:
@@ -178,145 +317,6 @@ components:
           - string
           - 'null'
           description: Where the category comes from (CLASSIC for manual/dynamic dimensions, RULE for rule-derived entries)
-    FilterItemNodeRequest:
-      type: object
-      required:
-      - node_type
-      - type
-      - filter_provider
-      - operator
-      properties:
-        node_type:
-          type: string
-          enum:
-          - item
-          example: item
-        type:
-          type: string
-          description: The type of the filter item
-          example: tag
-        filter_provider:
-          type: string
-          description: The provider of the filter
-          example: aws
-        value:
-          type: object
-          description: The value of the filter
-          example:
-            key: Environment
-            value: Production
-        operator:
-          type: string
-          description: The operator for the filter item
-          example: in
-    Dimension:
-      type: object
-      required:
-      - name
-      - categories
-      properties:
-        name:
-          type: string
-          description: The dimension name
-          example: Team
-        categories:
-          type: array
-          items:
-            $ref: '#/components/schemas/DimensionCategory'
-    SharedCostResponse:
-      type: object
-      properties:
-        filter:
-          $ref: '#/components/schemas/FilterTreeResponse'
-        amount:
-          type: integer
-          description: The amount of the shared cost
-          example: 25
-    FilterGroupNodeRequest:
-      type: object
-      required:
-      - node_type
-      - operator
-      - items
-      properties:
-        node_type:
-          type: string
-          enum:
-          - group
-          example: group
-        operator:
-          type: string
-          enum:
-          - and
-          - or
-          description: The operator for the filter group
-          example: and
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/FilterTreeNodeRequest'
-          description: List of filter items in this group
-    FilterGroupNodeResponse:
-      type: object
-      properties:
-        nodeType:
-          type: string
-          enum:
-          - group
-          example: group
-        operator:
-          type: string
-          description: The operator for the filter group
-          example: and
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/FilterTreeResponse'
-          description: List of filter items in this group
-    CategoryRequest:
-      type: object
-      required:
-      - value
-      - key
-      - filter
-      properties:
-        value:
-          type: string
-          description: The category name
-          example: Engineering
-        key:
-          type: string
-          description: The dimension name
-          example: Department
-        filter:
-          $ref: '#/components/schemas/FilterTreeNodeRequest'
-          description: The filter for the category
-    FilterItemNodeResponse:
-      type: object
-      properties:
-        nodeType:
-          type: string
-          enum:
-          - item
-          example: item
-        type:
-          type: string
-          description: The type of the filter item
-          example: tag
-        filterProvider:
-          type: string
-          description: The provider of the filter
-          example: aws
-        value:
-          type: object
-          description: The value of the filter
-          example:
-            key: Environment
-            value: Production
-        operator:
-          type: string
-          description: The operator for the filter item
-          example: equals
   responses:
     UnauthorizedError:
       description: Authentication information is missing or invalid

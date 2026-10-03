@@ -89,6 +89,11 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Region'
+    ProviderType:
+      type: string
+      enum:
+      - aws
+      - gcp
     Region:
       title: Region
       type: object
@@ -104,11 +109,6 @@ components:
       required:
       - name
       - key
-    ProviderType:
-      type: string
-      enum:
-      - aws
-      - gcp
   securitySchemes:
     ApiKey:
       type: apiKey

@@ -182,78 +182,6 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
-    ForecastedCostResponse:
-      type: object
-      properties:
-        forecastedCost:
-          type: number
-          format: decimal
-        forecastedDate:
-          type: string
-          format: date
-        trend:
-          type:
-          - number
-          - 'null'
-          format: decimal
-    BillingAggregateResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/BillingAggregateItemsResponse'
-        total:
-          type: array
-          items:
-            $ref: '#/components/schemas/BillingAggregateTotalResponse'
-        totalCost:
-          type: number
-          format: decimal
-        previousPeriodTotalCost:
-          type:
-          - number
-          - 'null'
-          format: decimal
-        averageDailyCostDetails:
-          $ref: '#/components/schemas/AverageDailyCostDetailsResponse'
-        averageMonthlyCostDetails:
-          $ref: '#/components/schemas/AverageMonthlyCostDetailsResponse'
-        liveUsageTotalCost:
-          type: number
-          format: decimal
-        totalCostDateDetails:
-          $ref: '#/components/schemas/BillingAggregateCostsDateDetails'
-        previousPeriodCostDateDetails:
-          $ref: '#/components/schemas/BillingAggregateCostsDateDetails'
-        forecastedCosts:
-          type: array
-          items:
-            $ref: '#/components/schemas/ForecastedCostResponse'
-        trendType:
-          type: string
-        costType:
-          type: string
-    DateType:
-      type: string
-      title: DateType
-      enum:
-      - past
-      - last
-    AxisGranularity:
-      type: string
-      enum:
-      - date
-      - account
-      - service
-      - region
-      - product_family
-      - charge_type
-      - instance_family
-      - instance_type
-      - environment
-      - marketplace_service
-      description: Granularity of the time axis
     BillingAggregateCostsDateDetails:
       type: object
       properties:
@@ -265,66 +193,70 @@ components:
           format: date
         days:
           type: integer
+    FilterGroupNodeRequest:
+      type: object
+      required:
+      - node_type
+      - operator
+      - items
+      properties:
+        node_type:
+          type: string
+          enum:
+          - group
+          example: group
+        operator:
+          type: string
+          enum:
+          - and
+          - or
+          description: The operator for the filter group
+          example: and
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterTreeNodeRequest'
+          description: List of filter items in this group
     DateLabelNullable:
       title: DateLabelNullable
       allOf:
       - $ref: '#/components/schemas/DateLabel'
-    TrendType:
-      type: string
-      enum:
-      - period_over_period
-      - month_over_month
-    BillingAggregateItemResponse:
+    PropertiesToLoadRequest:
       type: object
       properties:
-        field:
-          type: string
-        fields:
-          type: object
-          additionalProperties:
-            type: string
-        label:
-          type:
-          - string
-          - 'null'
-        cost:
-          type: number
-          format: decimal
-    FilterTreeNodeRequest:
-      type: object
-      discriminator:
-        propertyName: node_type
-        mapping:
-          group: '#/components/schemas/FilterGroupNodeRequest'
-          item: '#/components/schemas/FilterItemNodeRequest'
-      oneOf:
-      - $ref: '#/components/schemas/FilterGroupNodeRequest'
-      - $ref: '#/components/schemas/FilterItemNodeRequest'
-    DateLabel:
-      type: string
-      title: DateLabel
-      enum:
-      - year_to_date
-      - month_to_date
-      - last_one_month
-      - last_three_months
-      - last_six_months
-      - past_fourteen_days
-      - past_seven_days
-      - past_thirty_days
-      - past_forty_five_days
-      - past_ninety_days
-      - past_one_hundred_eighty_days
-      - last_twelve_months
-      - quarter_to_date
-      - last_quarter
-    DateUnit:
-      type: string
-      title: DateUnit
-      enum:
-      - day
-      - week
-      - month
+        detailedCurrentPeriodData:
+          type: boolean
+          default: true
+        detailedPreviousPeriodData:
+          type: boolean
+          default: true
+        currentPeriodTotalCost:
+          type: boolean
+          default: true
+        previousPeriodTotalCost:
+          type: boolean
+          default: true
+        averageCost:
+          type: boolean
+          default: true
+        forecastedMonthEndCost:
+          type: boolean
+          default: true
+        forecastedQuarterEndCost:
+          type: boolean
+          default: true
+        liveFilteredTotal:
+          type: boolean
+          default: true
+        forecastedMonthEndCostForGroupingItems:
+          type: boolean
+          default: true
+        forecastedQuarterEndCostForGroupingItems:
+          type: boolean
+          default: false
+        showUncategorizedOption:
+          type: boolean
+          default: false
     GroupingType:
       type: string
       enum:
@@ -364,6 +296,223 @@ components:
       - category_v2
       - platform
       description: Type of grouping for the billing data
+    AverageMonthlyCostDetailsResponse:
+      type: object
+      properties:
+        averageMonthlyCost:
+          type: number
+          format: decimal
+        previousPeriodAverageMonthlyCost:
+          type:
+          - number
+          - 'null'
+          format: decimal
+        trend:
+          type:
+          - number
+          - 'null'
+          format: decimal
+    ForecastedCostResponse:
+      type: object
+      properties:
+        forecastedCost:
+          type: number
+          format: decimal
+        forecastedDate:
+          type: string
+          format: date
+        trend:
+          type:
+          - number
+          - 'null'
+          format: decimal
+    DateType:
+      type: string
+      title: DateType
+      enum:
+      - past
+      - last
+    ResourceExplorerGroupingLabel:
+      type: object
+      properties:
+        singular:
+          type:
+          - string
+          - 'null'
+        plural:
+          type:
+          - string
+          - 'null'
+    CostType:
+      type: string
+      enum:
+      - unblended
+      - blended
+      - amortized
+      - net_unblended
+      - net_amortized
+    ResourceExplorerGrouping:
+      type:
+      - string
+      - 'null'
+      title: ResourceExplorerGrouping
+      enum:
+      - service
+      - marketplace_service
+      - cost_allocation_tag
+      - charge_type
+      - account
+      - region
+      - resource
+      - product_family
+      - instance_family
+      - instance_type
+      - credit_type
+      - cloud_provider
+      - cost_allocation_tag_value
+      - category
+      - none
+    AverageDailyCostDetailsResponse:
+      type: object
+      properties:
+        averageDailyCost:
+          type: number
+          format: decimal
+        previousPeriodAverageDailyCost:
+          type:
+          - number
+          - 'null'
+          format: decimal
+        trend:
+          type:
+          - number
+          - 'null'
+          format: decimal
+    TrendType:
+      type: string
+      enum:
+      - period_over_period
+      - month_over_month
+    DateUnit:
+      type: string
+      title: DateUnit
+      enum:
+      - day
+      - week
+      - month
+    ResourceExplorerPossibleGrouping:
+      title: ResourceExplorerPossibleGrouping
+      type: object
+      properties:
+        key:
+          $ref: '#/components/schemas/ResourceExplorerGrouping'
+        filter_provider:
+          $ref: '#/components/schemas/ResourceExplorerFilterProvider'
+        parent_label:
+          type: string
+        next_grouping:
+          $ref: '#/components/schemas/ResourceExplorerGrouping'
+        label:
+          $ref: '#/components/schemas/ResourceExplorerGroupingLabel'
+        filter_key:
+          $ref: '#/components/schemas/ResourceExplorerDynamicFilterItemType'
+        filter_type:
+          type: string
+        possible_groupings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceExplorerGrouping'
+        has_nested:
+          type: boolean
+    ResourceExplorerFilterProvider:
+      type: string
+      title: ResourceExplorerFilterProvider
+      enum:
+      - aws
+      - gcp
+      - azure
+      - confluent
+      - mongo
+      - dimensions
+      - kubernetes
+      - eks
+      - global
+    BillingAggregateItemResponse:
+      type: object
+      properties:
+        field:
+          type: string
+        fields:
+          type: object
+          additionalProperties:
+            type: string
+        label:
+          type:
+          - string
+          - 'null'
+        cost:
+          type: number
+          format: decimal
+    ResourceExplorerPossibleGroupings:
+      type: array
+      items:
+        $ref: '#/components/schemas/ResourceExplorerPossibleGrouping'
+    BillingAggregateResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingAggregateItemsResponse'
+        total:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingAggregateTotalResponse'
+        totalCost:
+          type: number
+          format: decimal
+        previousPeriodTotalCost:
+          type:
+          - number
+          - 'null'
+          format: decimal
+        averageDailyCostDetails:
+          $ref: '#/components/schemas/AverageDailyCostDetailsResponse'
+        averageMonthlyCostDetails:
+          $ref: '#/components/schemas/AverageMonthlyCostDetailsResponse'
+        liveUsageTotalCost:
+          type: number
+          format: decimal
+        totalCostDateDetails:
+          $ref: '#/components/schemas/BillingAggregateCostsDateDetails'
+        previousPeriodCostDateDetails:
+          $ref: '#/components/schemas/BillingAggregateCostsDateDetails'
+        forecastedCosts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ForecastedCostResponse'
+        trendType:
+          type: string
+        costType:
+          type: string
+    DateLabel:
+      type: string
+      title: DateLabel
+      enum:
+      - year_to_date
+      - month_to_date
+      - last_one_month
+      - last_three_months
+      - last_six_months
+      - past_fourteen_days
+      - past_seven_days
+      - past_thirty_days
+      - past_forty_five_days
+      - past_ninety_days
+      - past_one_hundred_eighty_days
+      - last_twelve_months
+      - quarter_to_date
+      - last_quarter
     ResourceExplorerDynamicFilterItemType:
       type: string
       enum:
@@ -397,46 +546,88 @@ components:
       - organisation
       - group
       - resource_group
-    Dates:
-      type: object
-      title: Dates
-      properties:
-        from:
-          $ref: '#/components/schemas/NullableDate'
-        to:
-          $ref: '#/components/schemas/NullableDate'
-        label:
-          $ref: '#/components/schemas/DateLabelNullable'
-        type:
-          $ref: '#/components/schemas/DateType'
-        value:
-          type: integer
-        unit:
-          $ref: '#/components/schemas/DateUnit'
-    FilterGroupNodeRequest:
+    FilterItemNodeRequest:
       type: object
       required:
       - node_type
+      - type
+      - filter_provider
       - operator
-      - items
       properties:
         node_type:
           type: string
           enum:
-          - group
-          example: group
+          - item
+          example: item
+        type:
+          type: string
+          description: The type of the filter item
+          example: tag
+        filter_provider:
+          type: string
+          description: The provider of the filter
+          example: aws
+        value:
+          type: object
+          description: The value of the filter
+          example:
+            key: Environment
+            value: Production
         operator:
           type: string
-          enum:
-          - and
-          - or
-          description: The operator for the filter group
-          example: and
+          description: The operator for the filter item
+          example: in
+    BillingAggregateItemsResponse:
+      type: object
+      properties:
+        value:
+          type: string
         items:
           type: array
           items:
-            $ref: '#/components/schemas/FilterTreeNodeRequest'
-          description: List of filter items in this group
+            $ref: '#/components/schemas/BillingAggregateItemResponse'
+    BillingDataRequest:
+      type: object
+      required:
+      - dataPoint
+      properties:
+        dataPoint:
+          type: string
+          description: The data point to analyze
+          enum:
+          - daily
+          - weekly
+          - monthly
+          - quarterly
+          - yearly
+        dates:
+          $ref: '#/components/schemas/Dates'
+        groupBy:
+          $ref: '#/components/schemas/GroupingType'
+        axisGranularity:
+          $ref: '#/components/schemas/AxisGranularity'
+        groupValues:
+          type: array
+          items:
+            type: string
+          description: Values to group by
+        startMonthOfQuarter:
+          type: integer
+          minimum: 1
+          maximum: 12
+          default: 1
+          description: The starting month of the quarter
+        propertiesToLoad:
+          $ref: '#/components/schemas/PropertiesToLoadRequest'
+        filterTree:
+          $ref: '#/components/schemas/FilterTreeNodeRequest'
+        trendType:
+          $ref: '#/components/schemas/TrendType'
+        costType:
+          $ref: '#/components/schemas/CostType'
+        series:
+          type: integer
+          description: Number of series to return
     BillingAggregateTotalResponse:
       type: object
       properties:
@@ -482,82 +673,46 @@ components:
           $ref: '#/components/schemas/ForecastedCostResponse'
         quarterlyForecast:
           $ref: '#/components/schemas/ForecastedCostResponse'
-    BillingAggregateItemsResponse:
-      type: object
-      properties:
-        value:
-          type: string
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/BillingAggregateItemResponse'
-    FilterItemNodeRequest:
-      type: object
-      required:
-      - node_type
-      - type
-      - filter_provider
-      - operator
-      properties:
-        node_type:
-          type: string
-          enum:
-          - item
-          example: item
-        type:
-          type: string
-          description: The type of the filter item
-          example: tag
-        filter_provider:
-          type: string
-          description: The provider of the filter
-          example: aws
-        value:
-          type: object
-          description: The value of the filter
-          example:
-            key: Environment
-            value: Production
-        operator:
-          type: string
-          description: The operator for the filter item
-          example: in
-    ResourceExplorerPossibleGroupings:
-      type: array
-      items:
-        $ref: '#/components/schemas/ResourceExplorerPossibleGrouping'
-    ResourceExplorerGrouping:
-      type:
-      - string
-      - 'null'
-      title: ResourceExplorerGrouping
+    AxisGranularity:
+      type: string
       enum:
-      - service
-      - marketplace_service
-      - cost_allocation_tag
-      - charge_type
+      - date
       - account
+      - service
       - region
-      - resource
       - product_family
+      - charge_type
       - instance_family
       - instance_type
-      - credit_type
-      - cloud_provider
-      - cost_allocation_tag_value
-      - category
-      - none
-    ResourceExplorerGroupingLabel:
+      - environment
+      - marketplace_service
+      description: Granularity of the time axis
+    Dates:
       type: object
+      title: Dates
       properties:
-        singular:
-          type:
-          - string
-          - 'null'
-        plural:
-          type:
-          - string
-          - 'null'
+        from:
+          $ref: '#/components/schemas/NullableDate'
+        to:
+          $ref: '#/components/schemas/NullableDate'
+        label:
+          $ref: '#/components/schemas/DateLabelNullable'
+        type:
+          $ref: '#/components/schemas/DateType'
+        value:
+          type: integer
+        unit:
+          $ref: '#/components/schemas/DateUnit'
+    FilterTreeNodeRequest:
+      type: object
+      discriminator:
+        propertyName: node_type
+        mapping:
+          group: '#/components/schemas/FilterGroupNodeRequest'
+          item: '#/components/schemas/FilterItemNodeRequest'
+      oneOf:
+      - $ref: '#/components/schemas/FilterGroupNodeRequest'
+      - $ref: '#/components/schemas/FilterItemNodeRequest'
     NullableDate:
       type:
       - string
@@ -565,161 +720,6 @@ components:
       description: ISO 8601
       example: '2022-06-11T21:14:49.691823'
       title: ''
-    ResourceExplorerFilterProvider:
-      type: string
-      title: ResourceExplorerFilterProvider
-      enum:
-      - aws
-      - gcp
-      - azure
-      - confluent
-      - mongo
-      - dimensions
-      - kubernetes
-      - eks
-      - global
-    AverageMonthlyCostDetailsResponse:
-      type: object
-      properties:
-        averageMonthlyCost:
-          type: number
-          format: decimal
-        previousPeriodAverageMonthlyCost:
-          type:
-          - number
-          - 'null'
-          format: decimal
-        trend:
-          type:
-          - number
-          - 'null'
-          format: decimal
-    AverageDailyCostDetailsResponse:
-      type: object
-      properties:
-        averageDailyCost:
-          type: number
-          format: decimal
-        previousPeriodAverageDailyCost:
-          type:
-          - number
-          - 'null'
-          format: decimal
-        trend:
-          type:
-          - number
-          - 'null'
-          format: decimal
-    CostType:
-      type: string
-      enum:
-      - unblended
-      - blended
-      - amortized
-      - net_unblended
-      - net_amortized
-    PropertiesToLoadRequest:
-      type: object
-      properties:
-        detailedCurrentPeriodData:
-          type: boolean
-          default: true
-        detailedPreviousPeriodData:
-          type: boolean
-          default: true
-        currentPeriodTotalCost:
-          type: boolean
-          default: true
-        previousPeriodTotalCost:
-          type: boolean
-          default: true
-        averageCost:
-          type: boolean
-          default: true
-        forecastedMonthEndCost:
-          type: boolean
-          default: true
-        forecastedQuarterEndCost:
-          type: boolean
-          default: true
-        liveFilteredTotal:
-          type: boolean
-          default: true
-        forecastedMonthEndCostForGroupingItems:
-          type: boolean
-          default: true
-        forecastedQuarterEndCostForGroupingItems:
-          type: boolean
-          default: false
-        showUncategorizedOption:
-          type: boolean
-          default: false
-    ResourceExplorerPossibleGrouping:
-      title: ResourceExplorerPossibleGrouping
-      type: object
-      properties:
-        key:
-          $ref: '#/components/schemas/ResourceExplorerGrouping'
-        filter_provider:
-          $ref: '#/components/schemas/ResourceExplorerFilterProvider'
-        parent_label:
-          type: string
-        next_grouping:
-          $ref: '#/components/schemas/ResourceExplorerGrouping'
-        label:
-          $ref: '#/components/schemas/ResourceExplorerGroupingLabel'
-        filter_key:
-          $ref: '#/components/schemas/ResourceExplorerDynamicFilterItemType'
-        filter_type:
-          type: string
-        possible_groupings:
-          type: array
-          items:
-            $ref: '#/components/schemas/ResourceExplorerGrouping'
-        has_nested:
-          type: boolean
-    BillingDataRequest:
-      type: object
-      required:
-      - dataPoint
-      properties:
-        dataPoint:
-          type: string
-          description: The data point to analyze
-          enum:
-          - daily
-          - weekly
-          - monthly
-          - quarterly
-          - yearly
-        dates:
-          $ref: '#/components/schemas/Dates'
-        groupBy:
-          $ref: '#/components/schemas/GroupingType'
-        axisGranularity:
-          $ref: '#/components/schemas/AxisGranularity'
-        groupValues:
-          type: array
-          items:
-            type: string
-          description: Values to group by
-        startMonthOfQuarter:
-          type: integer
-          minimum: 1
-          maximum: 12
-          default: 1
-          description: The starting month of the quarter
-        propertiesToLoad:
-          $ref: '#/components/schemas/PropertiesToLoadRequest'
-        filterTree:
-          $ref: '#/components/schemas/FilterTreeNodeRequest'
-        trendType:
-          $ref: '#/components/schemas/TrendType'
-        costType:
-          $ref: '#/components/schemas/CostType'
-        series:
-          type: integer
-          description: Number of series to return
   responses:
     BadRequest:
       description: Bad Request.
@@ -731,6 +731,16 @@ components:
               message:
                 type: string
                 example: Some business domain specific validation message
+    NotFound:
+      description: Resource was not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
     UnauthorizedError:
       description: Authentication information is missing or invalid
       content:
@@ -751,16 +761,6 @@ components:
               message:
                 type: string
                 example: Internal Server Error.
-    NotFound:
-      description: Resource was not found.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
   securitySchemes:
     ApiKey:
       type: apiKey

@@ -100,16 +100,6 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 components:
   responses:
-    UnauthorizedError:
-      description: Authentication information is missing or invalid
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Unauthorized
     NotFound:
       description: Resource was not found.
       content:
@@ -120,6 +110,16 @@ components:
               message:
                 type: string
                 example: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
     InternalServerError:
       description: Internal Server Error.
       content:
@@ -131,16 +131,51 @@ components:
                 type: string
                 example: Internal Server Error.
   schemas:
-    FilterTreeResponse:
+    BudgetThreshold:
       type: object
-      discriminator:
-        propertyName: nodeType
-        mapping:
-          group: '#/components/schemas/FilterGroupNodeResponse'
-          item: '#/components/schemas/FilterItemNodeResponse'
-      oneOf:
-      - $ref: '#/components/schemas/FilterGroupNodeResponse'
-      - $ref: '#/components/schemas/FilterItemNodeResponse'
+      required:
+      - percent
+      - amount
+      - trigger
+      properties:
+        percent:
+          type: number
+          description: The threshold as a percentage of the budget amount
+          example: 80.0
+        amount:
+          type: number
+          description: The threshold amount derived from the percentage
+        trigger:
+          type: string
+          description: Whether the threshold fires on actual or forecasted spend
+          enum:
+          - actual
+          - forecasted
+    BudgetHistoryEntry:
+      type: object
+      required:
+      - period_start
+      - period_end
+      - amount
+      - actual
+      properties:
+        period_start:
+          type: string
+          format: date
+        period_end:
+          type: string
+          format: date
+        amount:
+          type: number
+          description: The budget amount that was in force during this period
+        actual:
+          type: number
+          description: The period's actual spend
+        forecast:
+          type:
+          - number
+          - 'null'
+          description: Forecasted end-of-period spend; null for closed periods
     Budget:
       type: object
       required:
@@ -221,58 +256,16 @@ components:
           format: date
         is_expired:
           type: boolean
-    BudgetThreshold:
+    FilterTreeResponse:
       type: object
-      required:
-      - percent
-      - amount
-      - trigger
-      properties:
-        percent:
-          type: number
-          description: The threshold as a percentage of the budget amount
-          example: 80.0
-        amount:
-          type: number
-          description: The threshold amount derived from the percentage
-        trigger:
-          type: string
-          description: Whether the threshold fires on actual or forecasted spend
-          enum:
-          - actual
-          - forecasted
-    NullableDate:
-      type:
-      - string
-      - 'null'
-      description: ISO 8601
-      example: '2022-06-11T21:14:49.691823'
-      title: ''
-    BudgetHistoryEntry:
-      type: object
-      required:
-      - period_start
-      - period_end
-      - amount
-      - actual
-      properties:
-        period_start:
-          type: string
-          format: date
-        period_end:
-          type: string
-          format: date
-        amount:
-          type: number
-          description: The budget amount that was in force during this period
-        actual:
-          type: number
-          description: The period's actual spend
-        forecast:
-          type:
-          - number
-          - 'null'
-          description: Forecasted end-of-period spend; null for closed periods
+      discriminator:
+        propertyName: nodeType
+        mapping:
+          group: '#/components/schemas/FilterGroupNodeResponse'
+          item: '#/components/schemas/FilterItemNodeResponse'
+      oneOf:
+      - $ref: '#/components/schemas/FilterGroupNodeResponse'
+      - $ref: '#/components/schemas/FilterItemNodeResponse'
     FilterGroupNodeResponse:
       type: object
       properties:
@@ -316,6 +309,13 @@ components:
           type: string
           description: The operator for the filter item
           example: equals
+    NullableDate:
+      type:
+      - string
+      - 'null'
+      description: ISO 8601
+      example: '2022-06-11T21:14:49.691823'
+      title: ''
   parameters:
     QueryDateFrom:
       name: date_from

@@ -46,33 +46,25 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
-    FilterTreeNodeRequest:
+    OpportunityDimension:
       type: object
-      discriminator:
-        propertyName: node_type
-        mapping:
-          group: '#/components/schemas/FilterGroupNodeRequest'
-          item: '#/components/schemas/FilterItemNodeRequest'
-      oneOf:
-      - $ref: '#/components/schemas/FilterGroupNodeRequest'
-      - $ref: '#/components/schemas/FilterItemNodeRequest'
-    SavingsOpportunityFilteredRequest:
-      type: object
+      required:
+      - dimension_name
+      - category_value
+      - share_percentage
       properties:
-        filterTree:
-          $ref: '#/components/schemas/FilterTreeNodeRequest'
-        oneRecommendationPerResource:
-          type: boolean
-          default: false
-          description: When true, returns only one recommendation per resource
-        getMetrics:
-          type: boolean
-          default: false
-          description: When true, includes CPU/memory metrics in the response
-        include_dimensions:
-          type: boolean
-          default: false
-          description: When true, each opportunity carries its dimension category assignments in the `dimensions` field
+        dimension_name:
+          type: string
+          description: The dimension the resource is attributed to
+          example: Team
+        category_value:
+          type: string
+          description: The category (e.g. team name) within the dimension
+          example: payments
+        share_percentage:
+          type: number
+          description: The percentage of the resource's cost attributed to this category
+          example: 100.0
     FilterItemNodeRequest:
       type: object
       required:
@@ -104,6 +96,57 @@ components:
           type: string
           description: The operator for the filter item
           example: in
+    FilterGroupNodeRequest:
+      type: object
+      required:
+      - node_type
+      - operator
+      - items
+      properties:
+        node_type:
+          type: string
+          enum:
+          - group
+          example: group
+        operator:
+          type: string
+          enum:
+          - and
+          - or
+          description: The operator for the filter group
+          example: and
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterTreeNodeRequest'
+          description: List of filter items in this group
+    SavingsOpportunityFilteredRequest:
+      type: object
+      properties:
+        filterTree:
+          $ref: '#/components/schemas/FilterTreeNodeRequest'
+        oneRecommendationPerResource:
+          type: boolean
+          default: false
+          description: When true, returns only one recommendation per resource
+        getMetrics:
+          type: boolean
+          default: false
+          description: When true, includes CPU/memory metrics in the response
+        include_dimensions:
+          type: boolean
+          default: false
+          description: When true, each opportunity carries its dimension category assignments in the `dimensions` field
+    FilterTreeNodeRequest:
+      type: object
+      discriminator:
+        propertyName: node_type
+        mapping:
+          group: '#/components/schemas/FilterGroupNodeRequest'
+          item: '#/components/schemas/FilterItemNodeRequest'
+      oneOf:
+      - $ref: '#/components/schemas/FilterGroupNodeRequest'
+      - $ref: '#/components/schemas/FilterItemNodeRequest'
     SavingsOpportunityResponse:
       type: object
       required:
@@ -209,49 +252,6 @@ components:
           items:
             $ref: '#/components/schemas/OpportunityDimension'
           description: The opportunity's dimension category assignments (team attribution). Present only when the request sets `include_dimensions` to true; an empty array means the opportunity's resource is not attributed to any dimension category.
-    FilterGroupNodeRequest:
-      type: object
-      required:
-      - node_type
-      - operator
-      - items
-      properties:
-        node_type:
-          type: string
-          enum:
-          - group
-          example: group
-        operator:
-          type: string
-          enum:
-          - and
-          - or
-          description: The operator for the filter group
-          example: and
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/FilterTreeNodeRequest'
-          description: List of filter items in this group
-    OpportunityDimension:
-      type: object
-      required:
-      - dimension_name
-      - category_value
-      - share_percentage
-      properties:
-        dimension_name:
-          type: string
-          description: The dimension the resource is attributed to
-          example: Team
-        category_value:
-          type: string
-          description: The category (e.g. team name) within the dimension
-          example: payments
-        share_percentage:
-          type: number
-          description: The percentage of the resource's cost attributed to this category
-          example: 100.0
   responses:
     UnauthorizedError:
       description: Authentication information is missing or invalid

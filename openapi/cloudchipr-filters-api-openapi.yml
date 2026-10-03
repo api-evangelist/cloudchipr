@@ -47,6 +47,101 @@ paths:
       operationId: get-filters
       description: Get filters
 components:
+  responses:
+    Filters:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                type:
+                  $ref: '#/components/schemas/ResourceType'
+                filters:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/FilterItemTemplate'
+          examples:
+            example-1:
+              value:
+              - type: vm
+                filters:
+                - key: launch_time
+                  value_type: number
+                  min_value: 0
+                  max_value: 315569520
+                  allowed_operators:
+                  - equal
+                  - not_equal
+                  - greater_than
+                  - greater_than_equal_to
+                  - less_than
+                  - less_than_equal_to
+                - key: cpu
+                  value_type: number
+                  min_value: 0
+                  max_value: 100
+                  allowed_operators:
+                  - equal
+                  - greater_than
+                  - greater_than_equal_to
+                  - less_than
+                  - less_than_equal_to
+                - key: network_in
+                  value_type: number
+                  min_value: 0
+                  max_value: 1099511627776
+                  allowed_operators:
+                  - equal
+                  - not_equal
+                  - greater_than
+                  - greater_than_equal_to
+                  - less_than
+                  - less_than_equal_to
+                - key: network_out
+                  value_type: number
+                  min_value: 0
+                  max_value: 1099511627776
+                  allowed_operators:
+                  - equal
+                  - not_equal
+                  - greater_than
+                  - greater_than_equal_to
+                  - less_than
+                  - less_than_equal_to
+                - key: tag
+                  value_type: string
+                  min_value: null
+                  max_value: null
+                  allowed_operators:
+                  - equal
+                  - not_equal
+                  - exists
+                  - does_not_exist
+                  - contains
+                  - does_not_contain
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Some business domain specific validation message
   schemas:
     FilterItemTemplate:
       title: FilterItemTemplate
@@ -124,28 +219,6 @@ components:
       enum:
       - aws
       - gcp
-    FilterKeyType:
-      type: string
-      title: FilterKeyType
-      x-stoplight:
-        id: 1svtkfi62ljs0
-      enum:
-      - launch_time
-      - cpu
-      - network_in
-      - network_out
-      - tag
-      - attachments
-      - volume_age
-      - database_connections
-      - instances
-      - instance_ids
-      - association_ids
-      - region
-      - in_use
-      - total_connections
-      - cloudchipr_ttl
-      - provider_unique_identifier
     FilterOperatorType:
       type: string
       title: FilterOperatorType
@@ -171,101 +244,28 @@ components:
       - is_invalid
       - does_never_expire
       - not_in
-  responses:
-    UnauthorizedError:
-      description: Authentication information is missing or invalid
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Unauthorized
-    BadRequest:
-      description: Bad Request.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Some business domain specific validation message
-    Filters:
-      description: Example response
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              type: object
-              properties:
-                type:
-                  $ref: '#/components/schemas/ResourceType'
-                filters:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/FilterItemTemplate'
-          examples:
-            example-1:
-              value:
-              - type: vm
-                filters:
-                - key: launch_time
-                  value_type: number
-                  min_value: 0
-                  max_value: 315569520
-                  allowed_operators:
-                  - equal
-                  - not_equal
-                  - greater_than
-                  - greater_than_equal_to
-                  - less_than
-                  - less_than_equal_to
-                - key: cpu
-                  value_type: number
-                  min_value: 0
-                  max_value: 100
-                  allowed_operators:
-                  - equal
-                  - greater_than
-                  - greater_than_equal_to
-                  - less_than
-                  - less_than_equal_to
-                - key: network_in
-                  value_type: number
-                  min_value: 0
-                  max_value: 1099511627776
-                  allowed_operators:
-                  - equal
-                  - not_equal
-                  - greater_than
-                  - greater_than_equal_to
-                  - less_than
-                  - less_than_equal_to
-                - key: network_out
-                  value_type: number
-                  min_value: 0
-                  max_value: 1099511627776
-                  allowed_operators:
-                  - equal
-                  - not_equal
-                  - greater_than
-                  - greater_than_equal_to
-                  - less_than
-                  - less_than_equal_to
-                - key: tag
-                  value_type: string
-                  min_value: null
-                  max_value: null
-                  allowed_operators:
-                  - equal
-                  - not_equal
-                  - exists
-                  - does_not_exist
-                  - contains
-                  - does_not_contain
+    FilterKeyType:
+      type: string
+      title: FilterKeyType
+      x-stoplight:
+        id: 1svtkfi62ljs0
+      enum:
+      - launch_time
+      - cpu
+      - network_in
+      - network_out
+      - tag
+      - attachments
+      - volume_age
+      - database_connections
+      - instances
+      - instance_ids
+      - association_ids
+      - region
+      - in_use
+      - total_connections
+      - cloudchipr_ttl
+      - provider_unique_identifier
   securitySchemes:
     ApiKey:
       type: apiKey
