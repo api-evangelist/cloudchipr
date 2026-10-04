@@ -65,7 +65,126 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 components:
+  responses:
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Some business domain specific validation message
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    InternalServerError:
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Internal Server Error.
   schemas:
+    FilterItemNodeRequest:
+      type: object
+      required:
+      - node_type
+      - type
+      - filter_provider
+      - operator
+      properties:
+        node_type:
+          type: string
+          enum:
+          - item
+          example: item
+        type:
+          type: string
+          description: The type of the filter item
+          example: tag
+        filter_provider:
+          type: string
+          description: The provider of the filter
+          example: aws
+        value:
+          type: object
+          description: The value of the filter
+          example:
+            key: Environment
+            value: Production
+        operator:
+          type: string
+          description: The operator for the filter item
+          example: in
+    DimensionCategory:
+      type: object
+      required:
+      - value
+      properties:
+        value:
+          type: string
+          description: The category name
+          example: payments
+        filter:
+          $ref: '#/components/schemas/FilterTreeResponse'
+        source:
+          type:
+          - string
+          - 'null'
+          description: Where the category comes from (CLASSIC for manual/dynamic dimensions, RULE for rule-derived entries)
+    Dimension:
+      type: object
+      required:
+      - name
+      - categories
+      properties:
+        name:
+          type: string
+          description: The dimension name
+          example: Team
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/DimensionCategory'
+    FilterGroupNodeResponse:
+      type: object
+      properties:
+        nodeType:
+          type: string
+          enum:
+          - group
+          example: group
+        operator:
+          type: string
+          description: The operator for the filter group
+          example: and
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterTreeResponse'
+          description: List of filter items in this group
+    FilterTreeNodeRequest:
+      type: object
+      discriminator:
+        propertyName: node_type
+        mapping:
+          group: '#/components/schemas/FilterGroupNodeRequest'
+          item: '#/components/schemas/FilterItemNodeRequest'
+      oneOf:
+      - $ref: '#/components/schemas/FilterGroupNodeRequest'
+      - $ref: '#/components/schemas/FilterItemNodeRequest'
     SharedCostRequest:
       type: object
       required:
@@ -100,69 +219,6 @@ components:
           example:
             Engineering: 50
             Marketing: 50
-    Dimension:
-      type: object
-      required:
-      - name
-      - categories
-      properties:
-        name:
-          type: string
-          description: The dimension name
-          example: Team
-        categories:
-          type: array
-          items:
-            $ref: '#/components/schemas/DimensionCategory'
-    FilterItemNodeRequest:
-      type: object
-      required:
-      - node_type
-      - type
-      - filter_provider
-      - operator
-      properties:
-        node_type:
-          type: string
-          enum:
-          - item
-          example: item
-        type:
-          type: string
-          description: The type of the filter item
-          example: tag
-        filter_provider:
-          type: string
-          description: The provider of the filter
-          example: aws
-        value:
-          type: object
-          description: The value of the filter
-          example:
-            key: Environment
-            value: Production
-        operator:
-          type: string
-          description: The operator for the filter item
-          example: in
-    CategoryRequest:
-      type: object
-      required:
-      - value
-      - key
-      - filter
-      properties:
-        value:
-          type: string
-          description: The category name
-          example: Engineering
-        key:
-          type: string
-          description: The dimension name
-          example: Department
-        filter:
-          $ref: '#/components/schemas/FilterTreeNodeRequest'
-          description: The filter for the category
     SharedCostResponse:
       type: object
       properties:
@@ -172,67 +228,6 @@ components:
           type: integer
           description: The amount of the shared cost
           example: 25
-    FilterGroupNodeRequest:
-      type: object
-      required:
-      - node_type
-      - operator
-      - items
-      properties:
-        node_type:
-          type: string
-          enum:
-          - group
-          example: group
-        operator:
-          type: string
-          enum:
-          - and
-          - or
-          description: The operator for the filter group
-          example: and
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/FilterTreeNodeRequest'
-          description: List of filter items in this group
-    FilterTreeResponse:
-      type: object
-      discriminator:
-        propertyName: nodeType
-        mapping:
-          group: '#/components/schemas/FilterGroupNodeResponse'
-          item: '#/components/schemas/FilterItemNodeResponse'
-      oneOf:
-      - $ref: '#/components/schemas/FilterGroupNodeResponse'
-      - $ref: '#/components/schemas/FilterItemNodeResponse'
-    FilterGroupNodeResponse:
-      type: object
-      properties:
-        nodeType:
-          type: string
-          enum:
-          - group
-          example: group
-        operator:
-          type: string
-          description: The operator for the filter group
-          example: and
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/FilterTreeResponse'
-          description: List of filter items in this group
-    FilterTreeNodeRequest:
-      type: object
-      discriminator:
-        propertyName: node_type
-        mapping:
-          group: '#/components/schemas/FilterGroupNodeRequest'
-          item: '#/components/schemas/FilterItemNodeRequest'
-      oneOf:
-      - $ref: '#/components/schemas/FilterGroupNodeRequest'
-      - $ref: '#/components/schemas/FilterItemNodeRequest'
     FilterItemNodeResponse:
       type: object
       properties:
@@ -259,6 +254,66 @@ components:
           type: string
           description: The operator for the filter item
           example: equals
+    FilterGroupNodeRequest:
+      type: object
+      required:
+      - node_type
+      - operator
+      - items
+      properties:
+        node_type:
+          type: string
+          enum:
+          - group
+          example: group
+        operator:
+          type: string
+          enum:
+          - and
+          - or
+          description: The operator for the filter group
+          example: and
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterTreeNodeRequest'
+          description: List of filter items in this group
+    DimensionWithCategoriesResponse:
+      type: object
+      properties:
+        key:
+          type: string
+          description: The dimension name
+          example: Department
+        value:
+          type: string
+          description: The category name
+          example: Engineering
+        filter:
+          $ref: '#/components/schemas/FilterTreeResponse'
+        sharedCosts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SharedCostResponse'
+          description: List of shared costs for this category
+    CategoryRequest:
+      type: object
+      required:
+      - value
+      - key
+      - filter
+      properties:
+        value:
+          type: string
+          description: The category name
+          example: Engineering
+        key:
+          type: string
+          description: The dimension name
+          example: Department
+        filter:
+          $ref: '#/components/schemas/FilterTreeNodeRequest'
+          description: The filter for the category
     UpdateCategoryStructureRequest:
       type: object
       required:
@@ -283,71 +338,16 @@ components:
           items:
             $ref: '#/components/schemas/SharedCostRequest'
           description: List of shared costs
-    DimensionWithCategoriesResponse:
+    FilterTreeResponse:
       type: object
-      properties:
-        key:
-          type: string
-          description: The dimension name
-          example: Department
-        value:
-          type: string
-          description: The category name
-          example: Engineering
-        filter:
-          $ref: '#/components/schemas/FilterTreeResponse'
-        sharedCosts:
-          type: array
-          items:
-            $ref: '#/components/schemas/SharedCostResponse'
-          description: List of shared costs for this category
-    DimensionCategory:
-      type: object
-      required:
-      - value
-      properties:
-        value:
-          type: string
-          description: The category name
-          example: payments
-        filter:
-          $ref: '#/components/schemas/FilterTreeResponse'
-        source:
-          type:
-          - string
-          - 'null'
-          description: Where the category comes from (CLASSIC for manual/dynamic dimensions, RULE for rule-derived entries)
-  responses:
-    UnauthorizedError:
-      description: Authentication information is missing or invalid
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Unauthorized
-    BadRequest:
-      description: Bad Request.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Some business domain specific validation message
-    InternalServerError:
-      description: Internal Server Error.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Internal Server Error.
+      discriminator:
+        propertyName: nodeType
+        mapping:
+          group: '#/components/schemas/FilterGroupNodeResponse'
+          item: '#/components/schemas/FilterItemNodeResponse'
+      oneOf:
+      - $ref: '#/components/schemas/FilterGroupNodeResponse'
+      - $ref: '#/components/schemas/FilterItemNodeResponse'
   securitySchemes:
     ApiKey:
       type: apiKey

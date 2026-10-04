@@ -151,6 +151,23 @@ components:
           enum:
           - actual
           - forecasted
+    FilterGroupNodeResponse:
+      type: object
+      properties:
+        nodeType:
+          type: string
+          enum:
+          - group
+          example: group
+        operator:
+          type: string
+          description: The operator for the filter group
+          example: and
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterTreeResponse'
+          description: List of filter items in this group
     BudgetHistoryEntry:
       type: object
       required:
@@ -256,33 +273,6 @@ components:
           format: date
         is_expired:
           type: boolean
-    FilterTreeResponse:
-      type: object
-      discriminator:
-        propertyName: nodeType
-        mapping:
-          group: '#/components/schemas/FilterGroupNodeResponse'
-          item: '#/components/schemas/FilterItemNodeResponse'
-      oneOf:
-      - $ref: '#/components/schemas/FilterGroupNodeResponse'
-      - $ref: '#/components/schemas/FilterItemNodeResponse'
-    FilterGroupNodeResponse:
-      type: object
-      properties:
-        nodeType:
-          type: string
-          enum:
-          - group
-          example: group
-        operator:
-          type: string
-          description: The operator for the filter group
-          example: and
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/FilterTreeResponse'
-          description: List of filter items in this group
     FilterItemNodeResponse:
       type: object
       properties:
@@ -316,14 +306,24 @@ components:
       description: ISO 8601
       example: '2022-06-11T21:14:49.691823'
       title: ''
+    FilterTreeResponse:
+      type: object
+      discriminator:
+        propertyName: nodeType
+        mapping:
+          group: '#/components/schemas/FilterGroupNodeResponse'
+          item: '#/components/schemas/FilterItemNodeResponse'
+      oneOf:
+      - $ref: '#/components/schemas/FilterGroupNodeResponse'
+      - $ref: '#/components/schemas/FilterItemNodeResponse'
   parameters:
-    QueryDateFrom:
-      name: date_from
+    QueryDateTo:
+      name: date_to
       in: query
       schema:
         $ref: '#/components/schemas/NullableDate'
-    QueryDateTo:
-      name: date_to
+    QueryDateFrom:
+      name: date_from
       in: query
       schema:
         $ref: '#/components/schemas/NullableDate'

@@ -160,6 +160,399 @@ paths:
       operationId: get-resources
 components:
   schemas:
+    Elb:
+      type: object
+      description: AWS Elastic load balancer
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          example: 00018acc-a66f-4747-9670-fadc3a2ead87
+        type:
+          type: string
+          example: classic
+        load_balancer_name:
+          type: string
+          example: aefa65ba0b5984a288a5b362d364cf05
+        load_balancer_arn:
+          type:
+          - string
+          - 'null'
+        price_per_month:
+          type: number
+          example: 18
+          format: double
+        dns_name:
+          type: string
+          example: aefa65ba0b5984a288a5b362d364cf05-10405585a988f0cx.elb.us-west-2.amazonaws.com
+        created_at:
+          allOf:
+          - {}
+          - $ref: '#/components/schemas/Date'
+        region:
+          type: string
+          example: us-west-2
+        has_attachments:
+          type: boolean
+          example: true
+        tags:
+          allOf:
+          - $ref: '#/components/schemas/Tags'
+          - {}
+        link:
+          type: string
+      required:
+      - id
+      - type
+      - load_balancer_name
+      - load_balancer_arn
+      - price_per_month
+      - dns_name
+      - created_at
+      - region
+      - has_attachments
+      - tags
+      - link
+    Date:
+      type: string
+      description: ISO 8601
+      example: '2022-09-11T21:14:49.691823'
+    Metric:
+      title: Metric
+      type: object
+      x-examples:
+        example-1:
+          timestamp: '2022-02-05T17:20:00Z'
+          average: 0.11278171781244677
+          minimum: 0
+          maximum: 8.64406779661002
+          sum: 162.40567364992333
+          unit: Percent
+      properties:
+        timestamp:
+          type: string
+          example: '2022-02-06T17:20:00Z'
+        average:
+          type: number
+          format: double
+        maximum:
+          type: number
+          format: double
+        minimum:
+          type: number
+          format: double
+        sum:
+          type: number
+          format: double
+        unit:
+          type: string
+          example: Percent
+      required:
+      - timestamp
+      - average
+      - maximum
+      - minimum
+      - sum
+      - unit
+    Ebs:
+      type: object
+      description: AWS Ebs volume
+      properties:
+        id:
+          type: string
+          format: UUID
+          readOnly: true
+          example: d74d45ff-f686-4b2f-86c0-54d3801a236c
+        volume_id:
+          type: string
+          example: vol-02d58dce2f4667172
+        size:
+          type: string
+          example: '1073741824'
+        state:
+          type: string
+          example: available
+        type:
+          type: string
+          example: gp2
+        price_per_month:
+          type: number
+          example: 0.1
+        availability_zone:
+          type: string
+          example: us-east-1a
+        has_attachments:
+          type: boolean
+          example: true
+        created_at:
+          allOf:
+          - {}
+          - $ref: '#/components/schemas/Date'
+        tags:
+          type: array
+          items:
+            allOf:
+            - {}
+            - $ref: '#/components/schemas/Tags'
+          description: List of tags
+        region:
+          type: string
+          example: us-east-1
+          description: Region of ebs volume
+        link:
+          type: string
+          example: https://console.aws.amazon.com/ec2/home?region=us-east-1#VolumeDetails:volumeId=vol-02d58dce2f4667172
+      required:
+      - id
+      - volume_id
+      - size
+      - state
+      - type
+      - price_per_month
+      - availability_zone
+      - has_attachments
+      - created_at
+      - tags
+      - region
+      - link
+    FilterKeyType:
+      type: string
+      title: FilterKeyType
+      x-stoplight:
+        id: 1svtkfi62ljs0
+      enum:
+      - launch_time
+      - cpu
+      - network_in
+      - network_out
+      - tag
+      - attachments
+      - volume_age
+      - database_connections
+      - instances
+      - instance_ids
+      - association_ids
+      - region
+      - in_use
+      - total_connections
+      - cloudchipr_ttl
+      - provider_unique_identifier
+    ResourceDetails:
+      type: object
+      description: A live resource's data. Additional type-specific fields (e.g. instance type, volume size) are present depending on the resource type.
+      additionalProperties: true
+      properties:
+        resource_type:
+          type: string
+        id:
+          type: string
+          format: uuid
+        provider_unique_identifier:
+          type: string
+        name:
+          type: string
+        region:
+          type: string
+        price_per_month:
+          type: number
+        created_at:
+          type: string
+        tags:
+          type: array
+          description: The resource's cloud tags, including any creator/owner tag
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+        creation_data:
+          type:
+          - object
+          - 'null'
+          description: Who created the resource and when, where CloudChipr could determine it
+          properties:
+            creator:
+              type: string
+            timestamp:
+              type: string
+        account:
+          type: object
+          description: The CloudChipr account owning the resource
+        billing_cost:
+          type:
+          - object
+          - 'null'
+        listing_price:
+          type:
+          - object
+          - 'null'
+        forecasted_end_of_month:
+          type:
+          - number
+          - 'null'
+        billing_explorer_resource_identifier:
+          type: array
+          items:
+            type: string
+    FilterStatisticsType:
+      type: string
+      title: FilterStatisticsType
+      enum:
+      - sum
+      - maximum
+      - minimum
+      - average
+    Vm:
+      type: object
+      description: GCP Vm Instance
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 829eeb09-a9be-40d3-93b5-dd12534a3090
+          readOnly: true
+        image_id:
+          type: string
+          example: instance-1
+        type:
+          type: string
+          example: e2-medium
+        cpu:
+          type: array
+          items:
+            $ref: '#/components/schemas/Metric'
+        cpu_by_hours:
+          type: array
+          items:
+            $ref: '#/components/schemas/Metric'
+        network_in:
+          type: array
+          items:
+            $ref: '#/components/schemas/Metric'
+        network_in_by_hours:
+          type: array
+          items:
+            $ref: '#/components/schemas/Metric'
+        network_out:
+          type: array
+          items:
+            $ref: '#/components/schemas/Metric'
+        network_out_by_hours:
+          type: array
+          items:
+            $ref: '#/components/schemas/Metric'
+        created_at:
+          allOf:
+          - {}
+          - $ref: '#/components/schemas/Date'
+        price_per_month:
+          type: number
+        availability_zone:
+          type: string
+        region:
+          type:
+          - string
+          - 'null'
+        tags:
+          allOf:
+          - {}
+          - $ref: '#/components/schemas/Tags'
+        link:
+          type: string
+          example: https://console.cloud.google.com/compute/instancesDetail/zones/us-central1-a/instances/instance-1?project=my-project
+      required:
+      - id
+      - image_id
+      - type
+      - cpu
+      - network_in
+      - network_out
+      - cpu_by_hours
+      - network_in_by_hours
+      - network_out_by_hours
+      - created_at
+      - price_per_month
+      - availability_zone
+      - tags
+      - link
+      - region
+    Elc:
+      type: object
+      description: AWS elasticache cache
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          example: 000e374e-f395-4bce-91a3-2f431dd7ad45
+        cluster_id:
+          type: string
+          example: redis-cluster
+        price_per_month:
+          type: number
+          format: double
+          example: 444.96
+        instance_type:
+          type: string
+          example: cache.r6g.large
+        cache_type:
+          type: string
+          example: redis
+          enum:
+          - redis
+          - memcached
+        nodes_count:
+          type: number
+          example: 3
+        connections:
+          type: array
+          format: double
+          items:
+            $ref: '#/components/schemas/Metric'
+        connections_by_hours:
+          type: array
+          items:
+            $ref: '#/components/schemas/Metric'
+        cpu:
+          type: array
+          format: double
+          items:
+            $ref: '#/components/schemas/Metric'
+        cpu_by_hours:
+          type: array
+          items:
+            $ref: '#/components/schemas/Metric'
+        created_at:
+          allOf:
+          - {}
+          - $ref: '#/components/schemas/Date'
+        region:
+          type: string
+          example: us-east-1
+        tags:
+          allOf:
+          - $ref: '#/components/schemas/Tags'
+          - {}
+        link:
+          example: https://console.aws.amazon.com/elasticache/home?region=us-east-1#/redis/redis-cluster
+          type: string
+      required:
+      - id
+      - cluster_id
+      - price_per_month
+      - instance_type
+      - cache_type
+      - nodes_count
+      - connections
+      - connections_by_hours
+      - cpu
+      - created_at
+      - region
+      - tags
+      - link
     Disk:
       type: object
       description: GCP disk
@@ -215,18 +608,118 @@ components:
       - tags
       - link
       - has_attachments
-    Date:
-      type: string
-      description: ISO 8601
-      example: '2022-09-11T21:14:49.691823'
-    FilterStatisticsType:
-      type: string
-      title: FilterStatisticsType
-      enum:
-      - sum
-      - maximum
-      - minimum
-      - average
+    Ip:
+      type: object
+      description: GCP Ip address
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          example: 05c5c3f5-60ee-43f1-af1d-0723fe440ab2
+        ip:
+          type: string
+          example: 34.120.161.211
+        name:
+          type: string
+          example: ip-address
+        is_in_use:
+          type: boolean
+        price_per_month:
+          type: number
+          example: 7.3
+          format: double
+        region:
+          type: string
+          example: us-central1
+        tags:
+          allOf:
+          - {}
+          - $ref: '#/components/schemas/Tags'
+        created_at:
+          allOf:
+          - {}
+          - $ref: '#/components/schemas/Date'
+        link:
+          type: string
+          example: https://console.cloud.google.com/networking/addresses/list?project=my-project
+      required:
+      - id
+      - ip
+      - is_in_use
+      - price_per_month
+      - region
+      - tags
+      - created_at
+      - link
+      - name
+    Tags:
+      title: Tags
+      type: object
+      x-examples:
+        example-1:
+          key: env
+          value: production
+      description: Provider resource tag
+      properties:
+        key:
+          type: string
+          example: env
+        value:
+          type: string
+          example: production
+      required:
+      - key
+      - value
+    Lb:
+      type: object
+      description: GCP load balancer
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          example: 05c5c3f5-60ee-43f1-af1d-0723fe440ab2
+        load_balancer_name:
+          type: string
+          example: test-backend-load-balancer-forwarding-rule
+        price_per_month:
+          type: number
+          format: double
+        type:
+          type: string
+          enum:
+          - TCP
+        global:
+          type: boolean
+        created_at:
+          allOf:
+          - {}
+          - $ref: '#/components/schemas/Date'
+        has_attachments:
+          type: boolean
+        tags:
+          allOf:
+          - {}
+          - $ref: '#/components/schemas/Tags'
+        region:
+          type:
+          - string
+          - 'null'
+          example: us-central1
+        link:
+          type: string
+          example: https://console.cloud.google.com/net-services/loadbalancing/advanced/forwardingRules/details/regions/us-central1/forwardingRules/test-backend-load-balancer-forwarding-rule?project=my-project
+      required:
+      - id
+      - load_balancer_name
+      - price_per_month
+      - global
+      - created_at
+      - has_attachments
+      - tags
+      - link
+      - type
     Rds:
       type: object
       description: AWS Rds instance
@@ -317,80 +810,22 @@ components:
       - status
       - cluster_id
       - nodes_count
-    Elc:
+    FilterMetric:
       type: object
-      description: AWS elasticache cache
+      description: Object to filter with metrics
       properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-          example: 000e374e-f395-4bce-91a3-2f431dd7ad45
-        cluster_id:
-          type: string
-          example: redis-cluster
-        price_per_month:
-          type: number
-          format: double
-          example: 444.96
-        instance_type:
-          type: string
-          example: cache.r6g.large
-        cache_type:
-          type: string
-          example: redis
-          enum:
-          - redis
-          - memcached
-        nodes_count:
-          type: number
-          example: 3
-        connections:
-          type: array
-          format: double
-          items:
-            $ref: '#/components/schemas/Metric'
-        connections_by_hours:
-          type: array
-          items:
-            $ref: '#/components/schemas/Metric'
-        cpu:
-          type: array
-          format: double
-          items:
-            $ref: '#/components/schemas/Metric'
-        cpu_by_hours:
-          type: array
-          items:
-            $ref: '#/components/schemas/Metric'
-        created_at:
-          allOf:
-          - {}
-          - $ref: '#/components/schemas/Date'
-        region:
-          type: string
-          example: us-east-1
-        tags:
-          allOf:
-          - $ref: '#/components/schemas/Tags'
-          - {}
-        link:
-          example: https://console.aws.amazon.com/elasticache/home?region=us-east-1#/redis/redis-cluster
-          type: string
-      required:
-      - id
-      - cluster_id
-      - price_per_month
-      - instance_type
-      - cache_type
-      - nodes_count
-      - connections
-      - connections_by_hours
-      - cpu
-      - created_at
-      - region
-      - tags
-      - link
+        statistics_type:
+          $ref: '#/components/schemas/FilterStatisticsType'
+        since:
+          type: object
+          properties:
+            value:
+              type: number
+            unit:
+              type: string
+              enum:
+              - hours
+              - days
     FilterOperatorType:
       type: string
       title: FilterOperatorType
@@ -416,279 +851,6 @@ components:
       - is_invalid
       - does_never_expire
       - not_in
-    Vm:
-      type: object
-      description: GCP Vm Instance
-      properties:
-        id:
-          type: string
-          format: uuid
-          example: 829eeb09-a9be-40d3-93b5-dd12534a3090
-          readOnly: true
-        image_id:
-          type: string
-          example: instance-1
-        type:
-          type: string
-          example: e2-medium
-        cpu:
-          type: array
-          items:
-            $ref: '#/components/schemas/Metric'
-        cpu_by_hours:
-          type: array
-          items:
-            $ref: '#/components/schemas/Metric'
-        network_in:
-          type: array
-          items:
-            $ref: '#/components/schemas/Metric'
-        network_in_by_hours:
-          type: array
-          items:
-            $ref: '#/components/schemas/Metric'
-        network_out:
-          type: array
-          items:
-            $ref: '#/components/schemas/Metric'
-        network_out_by_hours:
-          type: array
-          items:
-            $ref: '#/components/schemas/Metric'
-        created_at:
-          allOf:
-          - {}
-          - $ref: '#/components/schemas/Date'
-        price_per_month:
-          type: number
-        availability_zone:
-          type: string
-        region:
-          type:
-          - string
-          - 'null'
-        tags:
-          allOf:
-          - {}
-          - $ref: '#/components/schemas/Tags'
-        link:
-          type: string
-          example: https://console.cloud.google.com/compute/instancesDetail/zones/us-central1-a/instances/instance-1?project=my-project
-      required:
-      - id
-      - image_id
-      - type
-      - cpu
-      - network_in
-      - network_out
-      - cpu_by_hours
-      - network_in_by_hours
-      - network_out_by_hours
-      - created_at
-      - price_per_month
-      - availability_zone
-      - tags
-      - link
-      - region
-    Metric:
-      title: Metric
-      type: object
-      x-examples:
-        example-1:
-          timestamp: '2022-02-05T17:20:00Z'
-          average: 0.11278171781244677
-          minimum: 0
-          maximum: 8.64406779661002
-          sum: 162.40567364992333
-          unit: Percent
-      properties:
-        timestamp:
-          type: string
-          example: '2022-02-06T17:20:00Z'
-        average:
-          type: number
-          format: double
-        maximum:
-          type: number
-          format: double
-        minimum:
-          type: number
-          format: double
-        sum:
-          type: number
-          format: double
-        unit:
-          type: string
-          example: Percent
-      required:
-      - timestamp
-      - average
-      - maximum
-      - minimum
-      - sum
-      - unit
-    Tags:
-      title: Tags
-      type: object
-      x-examples:
-        example-1:
-          key: env
-          value: production
-      description: Provider resource tag
-      properties:
-        key:
-          type: string
-          example: env
-        value:
-          type: string
-          example: production
-      required:
-      - key
-      - value
-    ResourceDetails:
-      type: object
-      description: A live resource's data. Additional type-specific fields (e.g. instance type, volume size) are present depending on the resource type.
-      additionalProperties: true
-      properties:
-        resource_type:
-          type: string
-        id:
-          type: string
-          format: uuid
-        provider_unique_identifier:
-          type: string
-        name:
-          type: string
-        region:
-          type: string
-        price_per_month:
-          type: number
-        created_at:
-          type: string
-        tags:
-          type: array
-          description: The resource's cloud tags, including any creator/owner tag
-          items:
-            type: object
-            properties:
-              key:
-                type: string
-              value:
-                type: string
-        creation_data:
-          type:
-          - object
-          - 'null'
-          description: Who created the resource and when, where CloudChipr could determine it
-          properties:
-            creator:
-              type: string
-            timestamp:
-              type: string
-        account:
-          type: object
-          description: The CloudChipr account owning the resource
-        billing_cost:
-          type:
-          - object
-          - 'null'
-        listing_price:
-          type:
-          - object
-          - 'null'
-        forecasted_end_of_month:
-          type:
-          - number
-          - 'null'
-        billing_explorer_resource_identifier:
-          type: array
-          items:
-            type: string
-    Eip:
-      type: object
-      description: AWS Eip address
-      properties:
-        id:
-          type: string
-          format: UUID
-          readOnly: true
-          example: b8414855-8b25-436f-9364-16c5df2e960d
-        ip:
-          type: string
-          example: 44.199.21.179
-        allocation_id:
-          type:
-          - string
-          - 'null'
-          example: eipalloc-0d32941e0f777d5aa
-        association_id:
-          type:
-          - string
-          - 'null'
-          example: eipassoc-0d50c0ad2e169e445
-        instance_id:
-          type:
-          - string
-          - 'null'
-          example: i-0af2561eb64b7ab79
-        domain:
-          type:
-          - string
-          - 'null'
-          example: vpc
-        price_per_month:
-          type: number
-          example: 3.6
-        created_at:
-          allOf:
-          - {}
-          - $ref: '#/components/schemas/Date'
-        region:
-          type: string
-          example: us-east-1
-        tags:
-          type: array
-          items:
-            allOf:
-            - {}
-            - $ref: '#/components/schemas/Tags'
-        link:
-          type: string
-          example: https://console.aws.amazon.com/ec2/home?region=us-east-1#ElasticIpDetails:AllocationId=eipalloc-0b2a1808368aa6d10
-      required:
-      - id
-      - ip
-      - allocation_id
-      - association_id
-      - instance_id
-      - domain
-      - price_per_month
-      - created_at
-      - region
-      - tags
-      - link
-    FilterKeyType:
-      type: string
-      title: FilterKeyType
-      x-stoplight:
-        id: 1svtkfi62ljs0
-      enum:
-      - launch_time
-      - cpu
-      - network_in
-      - network_out
-      - tag
-      - attachments
-      - volume_age
-      - database_connections
-      - instances
-      - instance_ids
-      - association_ids
-      - region
-      - in_use
-      - total_connections
-      - cloudchipr_ttl
-      - provider_unique_identifier
     Sql:
       type: object
       description: GCP Sql instance
@@ -761,116 +923,6 @@ components:
       - region
       - tags
       - link
-    Ebs:
-      type: object
-      description: AWS Ebs volume
-      properties:
-        id:
-          type: string
-          format: UUID
-          readOnly: true
-          example: d74d45ff-f686-4b2f-86c0-54d3801a236c
-        volume_id:
-          type: string
-          example: vol-02d58dce2f4667172
-        size:
-          type: string
-          example: '1073741824'
-        state:
-          type: string
-          example: available
-        type:
-          type: string
-          example: gp2
-        price_per_month:
-          type: number
-          example: 0.1
-        availability_zone:
-          type: string
-          example: us-east-1a
-        has_attachments:
-          type: boolean
-          example: true
-        created_at:
-          allOf:
-          - {}
-          - $ref: '#/components/schemas/Date'
-        tags:
-          type: array
-          items:
-            allOf:
-            - {}
-            - $ref: '#/components/schemas/Tags'
-          description: List of tags
-        region:
-          type: string
-          example: us-east-1
-          description: Region of ebs volume
-        link:
-          type: string
-          example: https://console.aws.amazon.com/ec2/home?region=us-east-1#VolumeDetails:volumeId=vol-02d58dce2f4667172
-      required:
-      - id
-      - volume_id
-      - size
-      - state
-      - type
-      - price_per_month
-      - availability_zone
-      - has_attachments
-      - created_at
-      - tags
-      - region
-      - link
-    Lb:
-      type: object
-      description: GCP load balancer
-      properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-          example: 05c5c3f5-60ee-43f1-af1d-0723fe440ab2
-        load_balancer_name:
-          type: string
-          example: test-backend-load-balancer-forwarding-rule
-        price_per_month:
-          type: number
-          format: double
-        type:
-          type: string
-          enum:
-          - TCP
-        global:
-          type: boolean
-        created_at:
-          allOf:
-          - {}
-          - $ref: '#/components/schemas/Date'
-        has_attachments:
-          type: boolean
-        tags:
-          allOf:
-          - {}
-          - $ref: '#/components/schemas/Tags'
-        region:
-          type:
-          - string
-          - 'null'
-          example: us-central1
-        link:
-          type: string
-          example: https://console.cloud.google.com/net-services/loadbalancing/advanced/forwardingRules/details/regions/us-central1/forwardingRules/test-backend-load-balancer-forwarding-rule?project=my-project
-      required:
-      - id
-      - load_balancer_name
-      - price_per_month
-      - global
-      - created_at
-      - has_attachments
-      - tags
-      - link
-      - type
     Ec2:
       type: object
       description: AWS Ec2 Instance
@@ -953,132 +1005,70 @@ components:
       - region
       - tags
       - link
-    FilterMetric:
+    Eip:
       type: object
-      description: Object to filter with metrics
-      properties:
-        statistics_type:
-          $ref: '#/components/schemas/FilterStatisticsType'
-        since:
-          type: object
-          properties:
-            value:
-              type: number
-            unit:
-              type: string
-              enum:
-              - hours
-              - days
-    Elb:
-      type: object
-      description: AWS Elastic load balancer
+      description: AWS Eip address
       properties:
         id:
           type: string
-          format: uuid
+          format: UUID
           readOnly: true
-          example: 00018acc-a66f-4747-9670-fadc3a2ead87
-        type:
+          example: b8414855-8b25-436f-9364-16c5df2e960d
+        ip:
           type: string
-          example: classic
-        load_balancer_name:
-          type: string
-          example: aefa65ba0b5984a288a5b362d364cf05
-        load_balancer_arn:
+          example: 44.199.21.179
+        allocation_id:
           type:
           - string
           - 'null'
+          example: eipalloc-0d32941e0f777d5aa
+        association_id:
+          type:
+          - string
+          - 'null'
+          example: eipassoc-0d50c0ad2e169e445
+        instance_id:
+          type:
+          - string
+          - 'null'
+          example: i-0af2561eb64b7ab79
+        domain:
+          type:
+          - string
+          - 'null'
+          example: vpc
         price_per_month:
           type: number
-          example: 18
-          format: double
-        dns_name:
-          type: string
-          example: aefa65ba0b5984a288a5b362d364cf05-10405585a988f0cx.elb.us-west-2.amazonaws.com
+          example: 3.6
         created_at:
           allOf:
           - {}
           - $ref: '#/components/schemas/Date'
         region:
           type: string
-          example: us-west-2
-        has_attachments:
-          type: boolean
-          example: true
+          example: us-east-1
         tags:
-          allOf:
-          - $ref: '#/components/schemas/Tags'
-          - {}
+          type: array
+          items:
+            allOf:
+            - {}
+            - $ref: '#/components/schemas/Tags'
         link:
           type: string
-      required:
-      - id
-      - type
-      - load_balancer_name
-      - load_balancer_arn
-      - price_per_month
-      - dns_name
-      - created_at
-      - region
-      - has_attachments
-      - tags
-      - link
-    Ip:
-      type: object
-      description: GCP Ip address
-      properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-          example: 05c5c3f5-60ee-43f1-af1d-0723fe440ab2
-        ip:
-          type: string
-          example: 34.120.161.211
-        name:
-          type: string
-          example: ip-address
-        is_in_use:
-          type: boolean
-        price_per_month:
-          type: number
-          example: 7.3
-          format: double
-        region:
-          type: string
-          example: us-central1
-        tags:
-          allOf:
-          - {}
-          - $ref: '#/components/schemas/Tags'
-        created_at:
-          allOf:
-          - {}
-          - $ref: '#/components/schemas/Date'
-        link:
-          type: string
-          example: https://console.cloud.google.com/networking/addresses/list?project=my-project
+          example: https://console.aws.amazon.com/ec2/home?region=us-east-1#ElasticIpDetails:AllocationId=eipalloc-0b2a1808368aa6d10
       required:
       - id
       - ip
-      - is_in_use
+      - allocation_id
+      - association_id
+      - instance_id
+      - domain
       - price_per_month
+      - created_at
       - region
       - tags
-      - created_at
       - link
-      - name
   responses:
-    BadRequest:
-      description: Bad Request.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Some business domain specific validation message
     NotFound:
       description: Resource was not found.
       content:
@@ -1089,16 +1079,6 @@ components:
               message:
                 type: string
                 example: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
-    UnauthorizedError:
-      description: Authentication information is missing or invalid
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Unauthorized
     InternalServerError:
       description: Internal Server Error.
       content:
@@ -1109,112 +1089,26 @@ components:
               message:
                 type: string
                 example: Internal Server Error.
-  examples:
-    FilteredResourcesResponseExample:
-      value:
-        ebs:
-        - id: d74d45ff-f686-4b2f-86c0-54d3801a236c
-          volume_id: vol-02d58dce2f4667172
-          size: '1073741824'
-          state: available
-          type: gp2
-          price_per_month: 0.1
-          availability_zone: us-east-1a
-          has_attachments: false
-          created_at: '2023-01-30T07:40:15.188'
-          tags: []
-          region: us-east-1
-          link: https://console.aws.amazon.com/ec2/home?region=us-east-1#VolumeDetails:volumeId=vol-02d58dce2f4667172
-        ec2: []
-        eip:
-        - id: b8414855-8b25-436f-9364-16c5df2e960d
-          ip: 44.199.21.179
-          allocation_id: eipalloc-0d32941e0f777d5aa
-          association_id: null
-          instance_id: null
-          domain: vpc
-          price_per_month: 3.6
-          created_at: '2023-01-30T07:45:26.347834'
-          region: us-east-1
-          tags: []
-          link: https://console.aws.amazon.com/ec2/home?region=us-east-1#ElasticIpDetails:AllocationId=eipalloc-0d32941e0f777d5aa
-        elb:
-        - id: 6827374e-f877-4a17-802e-a7662ef9a600
-          load_balancer_name: lb-test
-          load_balancer_arn: arn:aws:elasticloadbalancing:us-east-1:197857533772:loadbalancer/app/lb-test/9ea3b42ce6167896
-          dns_name: lb-test-1842671261.us-east-1.elb.amazonaws.com
-          price_per_month: 16.2
-          has_attachments: false
-          created_at: '2023-01-30T07:41:46.78'
-          tags: []
-          type: application
-          region: us-east-1
-          link: https://console.aws.amazon.com/ec2/home?region=us-east-1#LoadBalancer:loadBalancerArn=arn:aws:elasticloadbalancing:us-east-1:197857533772:loadbalancer/app/lb-test/9ea3b42ce6167896;tab=listeners
-        rds:
-        - id: ac07400b-e3c3-465c-a138-6d8943a18a3c
-          db_id: test-single
-          price_per_month: 12.24
-          instance_type: db.t3.micro
-          storage_type: gp2
-          cpu:
-          - timestamp: '2023-01-29T07:45:00Z'
-            average: 3.556635830430985
-            minimum: 2.6
-            maximum: 24.725
-            sum: 366.33349053439144
-            unit: Percent
-          connections:
-          - timestamp: '2023-01-29T07:45:00Z'
-            average: 0
-            minimum: 0
-            maximum: 0
-            sum: 0
-            unit: Count
-          cpu_by_hours: []
-          connections_by_hours: []
-          db_type: mysql
-          created_at: '2023-01-30T06:01:04.957'
-          availability_zone: us-east-1a
-          status: available
-          tags: []
-          region: us-east-1
-          cluster_id: null
-          nodes_count: 1
-          link: https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=test-single;is-cluster=false;tab=connectivity
-        elc:
-        - id: 55349e79-f74a-476a-a947-795e8d2f4b25
-          cluster_id: mem-test
-          instance_type: cache.r6g.large
-          cache_type: memcached
-          nodes_count: 1
-          cpu: []
-          connections: []
-          cpu_by_hours: []
-          connections_by_hours: []
-          created_at: '2023-01-30T07:45:26.347834'
-          price_per_month: 148.32
-          region: us-east-1
-          tags: []
-          link: https://console.aws.amazon.com/elasticache/home?region=us-east-1#/memcached/mem-test
-        - id: e111fff7-62ff-432a-ae11-d94e1020c984
-          cluster_id: redis-test
-          instance_type: cache.r6g.large
-          cache_type: redis
-          nodes_count: 3
-          cpu: []
-          connections: []
-          cpu_by_hours: []
-          connections_by_hours: []
-          created_at: '2023-01-30T07:42:42.101'
-          price_per_month: 444.96
-          region: us-east-1
-          tags: []
-          link: https://console.aws.amazon.com/elasticache/home?region=us-east-1#/redis/redis-test
-        vm: []
-        lb: []
-        ip: []
-        disk: []
-        sql: []
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Some business domain specific validation message
   requestBodies:
     GetResourcesWithFilters:
       content:
@@ -1331,6 +1225,112 @@ components:
                       value: 7
                       unit: days
       description: ''
+  examples:
+    FilteredResourcesResponseExample:
+      value:
+        ebs:
+        - id: d74d45ff-f686-4b2f-86c0-54d3801a236c
+          volume_id: vol-02d58dce2f4667172
+          size: '1073741824'
+          state: available
+          type: gp2
+          price_per_month: 0.1
+          availability_zone: us-east-1a
+          has_attachments: false
+          created_at: '2023-01-30T07:40:15.188'
+          tags: []
+          region: us-east-1
+          link: https://console.aws.amazon.com/ec2/home?region=us-east-1#VolumeDetails:volumeId=vol-02d58dce2f4667172
+        ec2: []
+        eip:
+        - id: b8414855-8b25-436f-9364-16c5df2e960d
+          ip: 44.199.21.179
+          allocation_id: eipalloc-0d32941e0f777d5aa
+          association_id: null
+          instance_id: null
+          domain: vpc
+          price_per_month: 3.6
+          created_at: '2023-01-30T07:45:26.347834'
+          region: us-east-1
+          tags: []
+          link: https://console.aws.amazon.com/ec2/home?region=us-east-1#ElasticIpDetails:AllocationId=eipalloc-0d32941e0f777d5aa
+        elb:
+        - id: 6827374e-f877-4a17-802e-a7662ef9a600
+          load_balancer_name: lb-test
+          load_balancer_arn: arn:aws:elasticloadbalancing:us-east-1:197857533772:loadbalancer/app/lb-test/9ea3b42ce6167896
+          dns_name: lb-test-1842671261.us-east-1.elb.amazonaws.com
+          price_per_month: 16.2
+          has_attachments: false
+          created_at: '2023-01-30T07:41:46.78'
+          tags: []
+          type: application
+          region: us-east-1
+          link: https://console.aws.amazon.com/ec2/home?region=us-east-1#LoadBalancer:loadBalancerArn=arn:aws:elasticloadbalancing:us-east-1:197857533772:loadbalancer/app/lb-test/9ea3b42ce6167896;tab=listeners
+        rds:
+        - id: ac07400b-e3c3-465c-a138-6d8943a18a3c
+          db_id: test-single
+          price_per_month: 12.24
+          instance_type: db.t3.micro
+          storage_type: gp2
+          cpu:
+          - timestamp: '2023-01-29T07:45:00Z'
+            average: 3.556635830430985
+            minimum: 2.6
+            maximum: 24.725
+            sum: 366.33349053439144
+            unit: Percent
+          connections:
+          - timestamp: '2023-01-29T07:45:00Z'
+            average: 0
+            minimum: 0
+            maximum: 0
+            sum: 0
+            unit: Count
+          cpu_by_hours: []
+          connections_by_hours: []
+          db_type: mysql
+          created_at: '2023-01-30T06:01:04.957'
+          availability_zone: us-east-1a
+          status: available
+          tags: []
+          region: us-east-1
+          cluster_id: null
+          nodes_count: 1
+          link: https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=test-single;is-cluster=false;tab=connectivity
+        elc:
+        - id: 55349e79-f74a-476a-a947-795e8d2f4b25
+          cluster_id: mem-test
+          instance_type: cache.r6g.large
+          cache_type: memcached
+          nodes_count: 1
+          cpu: []
+          connections: []
+          cpu_by_hours: []
+          connections_by_hours: []
+          created_at: '2023-01-30T07:45:26.347834'
+          price_per_month: 148.32
+          region: us-east-1
+          tags: []
+          link: https://console.aws.amazon.com/elasticache/home?region=us-east-1#/memcached/mem-test
+        - id: e111fff7-62ff-432a-ae11-d94e1020c984
+          cluster_id: redis-test
+          instance_type: cache.r6g.large
+          cache_type: redis
+          nodes_count: 3
+          cpu: []
+          connections: []
+          cpu_by_hours: []
+          connections_by_hours: []
+          created_at: '2023-01-30T07:42:42.101'
+          price_per_month: 444.96
+          region: us-east-1
+          tags: []
+          link: https://console.aws.amazon.com/elasticache/home?region=us-east-1#/redis/redis-test
+        vm: []
+        lb: []
+        ip: []
+        disk: []
+        sql: []
   securitySchemes:
     ApiKey:
       type: apiKey
