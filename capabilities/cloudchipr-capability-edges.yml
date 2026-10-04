@@ -1,0 +1,57 @@
+slug: cloudchipr
+provider: CloudChipr
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Software & Technology
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 4
+edges:
+- tag: Resource Explorer
+  spec_file: cloudchipr-resource-explorer-api-openapi.yml
+  capability_id: BC-600.80
+  capability_id_l1: BC-600
+  capability_name: IT Financial Management
+  confidence: 0.8
+  evidence: POST /billing-explorer  billingDataByOrganisation  Get billing data aggregation; schemas ForecastedCostResponse,
+    AverageMonthlyCostDetailsResponse
+  reason: Aggregation, reporting and forecasting of cloud billing data across the organisation — core
+    IT spend visibility and cost optimisation analytics.
+- tag: Savings Opportunities
+  spec_file: cloudchipr-savings-opportunities-api-openapi.yml
+  capability_id: BC-600.80
+  capability_id_l1: BC-600
+  capability_name: IT Financial Management
+  confidence: 0.75
+  evidence: POST /savings-opportunities  filterSavingsOpportunities  Filter savings opportunities; schema
+    SavingsOpportunityResponse
+  reason: Surfaces cloud cost-saving recommendations (rightsizing/cleanup) — IT cost optimisation and
+    spend management.
+- tag: Budgets
+  spec_file: cloudchipr-budgets-api-openapi.yml
+  capability_id: BC-600.80
+  capability_id_l1: BC-600
+  capability_name: IT Financial Management
+  confidence: 0.72
+  evidence: GET /budgets  listBudgets; GET /budgets/{budgetId}/history  Get budget history per period;
+    schema BudgetThreshold
+  reason: Cloud-spend budgets with thresholds and period history in a cloud cost-management platform —
+    IT spend control and cost optimisation rather than enterprise FP&A budgeting.
+- tag: Widgets
+  spec_file: cloudchipr-widgets-api-openapi.yml
+  capability_id: BC-600.80
+  capability_id_l1: BC-600
+  capability_name: IT Financial Management
+  confidence: 0.72
+  evidence: GET /widgets/cost-breakdown/{widgetId} ... "GET cost and usage summary widget", "GET largest
+    cost changes widget"; schemas ForecastedCost, AverageMonthlyCostDetails
+  reason: The widget endpoints return cloud cost breakdowns, cost-and-usage summaries and cost-change
+    trends for a FinOps console — i.e. IT spend visibility and cost optimisation reporting (IT Financial
+    Management). It is dashboard delivery of cost data rather than generic BI, so BC-600.80 is the most
+    specific honest fit; some ambiguity with analytics/BI delivery keeps confidence moderate.

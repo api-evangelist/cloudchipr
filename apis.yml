@@ -434,6 +434,9 @@ apis:
   - type: Integrations
     url: https://docs.cloudchipr.com/reference/integrations
 common:
+  - type: CapabilityMap
+    url: capabilities/cloudchipr-capability-edges.yml
+    name: CloudChipr Business Capability Map
   - type: TrustCenter
     url: security/cloudchipr-trust-center.yml
   - type: OpenAPI
