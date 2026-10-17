@@ -125,66 +125,7 @@ paths:
         in: query
         name: access_type
 components:
-  responses:
-    BadRequest:
-      description: Bad Request.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Some business domain specific validation message
-    UnauthorizedError:
-      description: Authentication information is missing or invalid
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Unauthorized
   schemas:
-    AwsAccountDetails:
-      title: AwsAccountDetails
-      x-stoplight:
-        id: i9deb75f9cmm8
-      type: object
-      properties:
-        is_root:
-          type:
-          - boolean
-          - 'null'
-        organisation_id:
-          type:
-          - string
-          - 'null'
-      required:
-      - is_root
-      - organisation_id
-      x-examples:
-        Example 1:
-          is_root: true
-          organisation_id: a91df8f5-161f-4ea3-bcf6-070c8dccbb14
-    AccountProviderDetailsResponse:
-      title: AccountProviderDetailsResponse
-      x-stoplight:
-        id: sbupmpj07kp8b
-      type: object
-      properties:
-        aws:
-          allOf:
-          - {}
-          - $ref: '#/components/schemas/AwsAccountDetails'
-        gcp:
-          allOf:
-          - {}
-          - $ref: '#/components/schemas/GcpAccountDetails'
-      required:
-      - aws
-      - gcp
     Account:
       title: Account
       x-stoplight:
@@ -262,6 +203,44 @@ components:
       - provider_account_name
       - provider_details
       - last_resource_updated_date
+    AwsAccountDetails:
+      title: AwsAccountDetails
+      x-stoplight:
+        id: i9deb75f9cmm8
+      type: object
+      properties:
+        is_root:
+          type:
+          - boolean
+          - 'null'
+        organisation_id:
+          type:
+          - string
+          - 'null'
+      required:
+      - is_root
+      - organisation_id
+      x-examples:
+        Example 1:
+          is_root: true
+          organisation_id: a91df8f5-161f-4ea3-bcf6-070c8dccbb14
+    AccountProviderDetailsResponse:
+      title: AccountProviderDetailsResponse
+      x-stoplight:
+        id: sbupmpj07kp8b
+      type: object
+      properties:
+        aws:
+          allOf:
+          - {}
+          - $ref: '#/components/schemas/AwsAccountDetails'
+        gcp:
+          allOf:
+          - {}
+          - $ref: '#/components/schemas/GcpAccountDetails'
+      required:
+      - aws
+      - gcp
     GcpAccountDetails:
       title: GcpAccountDetails
       x-stoplight:
@@ -281,6 +260,27 @@ components:
         Example 1:
           project_id: string
           service_account: string
+  responses:
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Some business domain specific validation message
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
   securitySchemes:
     ApiKey:
       type: apiKey

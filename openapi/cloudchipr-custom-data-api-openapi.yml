@@ -188,38 +188,34 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
-  responses:
-    NotFound:
-      description: Resource was not found.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
-    BadRequest:
-      description: Bad Request.
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Some business domain specific validation message
-    UnauthorizedError:
-      description: Authentication information is missing or invalid
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Unauthorized
   schemas:
+    CustomSourceColumnResponse:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+      - name
+    CreateDataSourceRequest:
+      type: object
+      required:
+      - name
+      - type
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+          - TELEMETRY
+          - CUSTOM_SOURCE
+        columns:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/DataSourceColumnRequest'
+          description: Optional. Required when type is CUSTOM_SOURCE. List of column definitions.
     Telemetry:
       type: object
       properties:
@@ -284,49 +280,6 @@ components:
       - MISSING_MANDATORY_FIELD
       - INVALID_COLUMN_FORMAT
       - INVALID_JSON
-    CreateDataSourceResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        type:
-          type: string
-          enum:
-          - TELEMETRY
-          - CUSTOM_SOURCE
-        ingest_url:
-          type: string
-          description: Relative path to send data to this data source.
-    CustomSourceColumnResponse:
-      type: object
-      properties:
-        name:
-          type: string
-      required:
-      - name
-    CreateDataSourceRequest:
-      type: object
-      required:
-      - name
-      - type
-      properties:
-        name:
-          type: string
-        type:
-          type: string
-          enum:
-          - TELEMETRY
-          - CUSTOM_SOURCE
-        columns:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/DataSourceColumnRequest'
-          description: Optional. Required when type is CUSTOM_SOURCE. List of column definitions.
     CustomSource:
       type: object
       properties:
@@ -361,6 +314,53 @@ components:
       - created_by
       - created_at
       - columns
+    CreateDataSourceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+          - TELEMETRY
+          - CUSTOM_SOURCE
+        ingest_url:
+          type: string
+          description: Relative path to send data to this data source.
+  responses:
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Some business domain specific validation message
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    NotFound:
+      description: Resource was not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Resource not found by id 92262c27-a20b-4814-8717-53f25b69a4d8
   securitySchemes:
     ApiKey:
       type: apiKey

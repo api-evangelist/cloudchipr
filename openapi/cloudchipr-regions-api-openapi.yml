@@ -63,6 +63,31 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
       operationId: get-regions
 components:
+  schemas:
+    Region:
+      title: Region
+      type: object
+      x-examples:
+        example-1:
+          name: US West (N. California)
+          key: us-west-1
+      properties:
+        name:
+          type: string
+        key:
+          type: string
+      required:
+      - name
+      - key
+    Regions:
+      type: array
+      items:
+        $ref: '#/components/schemas/Region'
+    ProviderType:
+      type: string
+      enum:
+      - aws
+      - gcp
   responses:
     BadRequest:
       description: Bad Request.
@@ -84,31 +109,6 @@ components:
               message:
                 type: string
                 example: Unauthorized
-  schemas:
-    Region:
-      title: Region
-      type: object
-      x-examples:
-        example-1:
-          name: US West (N. California)
-          key: us-west-1
-      properties:
-        name:
-          type: string
-        key:
-          type: string
-      required:
-      - name
-      - key
-    ProviderType:
-      type: string
-      enum:
-      - aws
-      - gcp
-    Regions:
-      type: array
-      items:
-        $ref: '#/components/schemas/Region'
   securitySchemes:
     ApiKey:
       type: apiKey
