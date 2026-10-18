@@ -37,6 +37,16 @@ x-docs-platform-confidence: high
 x-docs-platform-checked: 2026-09-24
 tags:
   - AWS
+  - Microsoft Azure
+  - Cloud Cost Management
+  - Cost Optimization
+  - FinOps
+  - GCP
+  - Multi-Cloud
+  - Resource Cleanup
+  - Rightsizing
+tags_raw:
+  - AWS
   - Azure
   - Cloud Cost Management
   - Cost Optimization
