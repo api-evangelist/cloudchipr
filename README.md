@@ -1,4 +1,4 @@
-# CloudChipr (cloudchipr)
+# CloudChipr
 
 <!-- API-EVANGELIST-PROVENANCE:BEGIN -->
 > ### About this repository
@@ -64,56 +64,150 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-CloudChipr is a cloud cost-management and FinOps platform that consolidates AWS, Azure, and GCP spend in a single console and automates resource cleanup, rightsizing, and cost governance. The product surface centres on dashboards, automated workflows, budget alerts, and integrations with email, Slack, Microsoft Teams, Jira, and webhooks. CloudChipr exposes an API Reference at docs.cloudchipr.com/reference for programmatic access to the same capabilities.
+CloudChipr is a cloud cost-management and FinOps platform that consolidates AWS, Azure, GCP, Kubernetes and AI-vendor spend (OpenAI, Anthropic, Datadog, Snowflake, MongoDB, Confluent) in a single console and automates resource cleanup, rightsizing, and cost governance. The product surface centres on Billing Explorer, dashboards, live resource management, savings opportunities, commitments, budgets and anomaly alerts, no-code automation workflows, and integrations with email, Slack, Jira and webhooks. Two machine surfaces are published: a 26-operation OpenAPI 3.0.3 Enterprise API at api.cloudchipr.com, authenticated with an x-api-key header and served as a spec at cloudchipr.github.io/api-service, and a hosted remote MCP server at mcp.cloudchipr.com/mcp exposing 25 read-only tools over OAuth 2.0 or a bearer API key. CloudChipr is a FinOps Foundation member, states SOC 2 Type II certification, and lists on AWS Marketplace.
 
-**URL:** [Visit APIs.json URL](https://raw.githubusercontent.com/api-evangelist/cloudchipr/refs/heads/main/apis.yml)
+**Areas:** AWS · Microsoft Azure · Cloud Cost Management · Cost Optimization · FinOps · GCP · Multi-Cloud · Resource Cleanup · Rightsizing
 
-## Scope
+## CloudChipr on APIs.io
 
-- **Type:** Index
-- **Position:** Consumer
-- **Access:** 3rd-Party
+Everything profiled for CloudChipr is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/cloudchipr/](https://apis.io/providers/cloudchipr/)** — or go straight to one of the APIs or properties below.
 
-## Tags
+### APIs (12)
 
-- AWS, Azure, Cloud Cost Management, Cost Optimization, FinOps, GCP, Multi-Cloud, Resource Cleanup, Rightsizing
+- [CloudChipr MCP Server](https://apis.io/apis/cloudchipr/cloudchipr-mcp-server/) — Hosted, fully remote Model Context Protocol server at https://mcp.cloudchipr.com/mcp exposing 25 read-only tools across five categories - cloud accounts and…
+- [CloudChipr Accounts API](https://apis.io/apis/cloudchipr/cloudchipr-accounts-api/) — Everything about accounts
+- [CloudChipr Budgets API](https://apis.io/apis/cloudchipr/cloudchipr-budgets-api/) — Everything about budgets
+- [CloudChipr Categories API](https://apis.io/apis/cloudchipr/cloudchipr-categories-api/) — Everything about categories
+- [CloudChipr Custom Data API](https://apis.io/apis/cloudchipr/cloudchipr-custom-data-api/) — Everything about custom data sources
+- [CloudChipr Dashboards API](https://apis.io/apis/cloudchipr/cloudchipr-dashboards-api/) — Everything about dashboards
+- [CloudChipr Filters API](https://apis.io/apis/cloudchipr/cloudchipr-filters-api/) — Everything about filters
+- [CloudChipr Regions API](https://apis.io/apis/cloudchipr/cloudchipr-regions-api/) — The Regions API from CloudChipr — 1 operation(s) for regions.
+- [CloudChipr Resource Explorer API](https://apis.io/apis/cloudchipr/cloudchipr-resource-explorer-api/) — Everything about Resource Explorer
+- [CloudChipr Resources API](https://apis.io/apis/cloudchipr/cloudchipr-resources-api/) — Endpoints for resources
+- [CloudChipr Savings Opportunities API](https://apis.io/apis/cloudchipr/cloudchipr-savings-opportunities-api/) — Everything about savings opportunities
+- [CloudChipr Widgets API](https://apis.io/apis/cloudchipr/cloudchipr-widgets-api/) — Everything about widgets
 
-## Timestamps
+### Published properties
 
-- **Created:** 2026-03-27
-- **Modified:** 2026-04-27
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
 
-## APIs
+#### AsyncAPI (1)
 
-### CloudChipr API
-CloudChipr publishes a developer API Reference at docs.cloudchipr.com/reference covering the same multi-cloud cost-management capabilities as the web app: connecting cloud provider accounts, viewing inventoried resources and rightsizing recommendations, running automated workflows, and configuring integrations such as Slack, Jira, and webhooks. Specific endpoint paths and authentication details are maintained in that portal and gated by an account login.
+Event-driven and webhook contracts.
 
-**Human URL:** [https://docs.cloudchipr.com/reference](https://docs.cloudchipr.com/reference)
+- [Cloudchipr Webhooks](https://apis.io/asyncapis/cloudchipr/cloudchipr-webhooks/)
 
-#### Tags
+#### MCP servers (1)
 
-- Cloud Cost Management, FinOps, Multi-Cloud, Rightsizing
+Model Context Protocol servers that expose the API to agents.
 
-#### Properties
+- [cloudchipr](https://apis.io/servers/cloudchipr/cloudchipr/)
 
-- [Documentation](https://docs.cloudchipr.com/reference)
-- [Getting Started](https://docs.cloudchipr.com/)
-- [Reference](https://docs.cloudchipr.com/docs/aws-supported-services)
-- [Integrations](https://docs.cloudchipr.com/reference/integrations)
+#### Overlays (1)
 
-## Common Properties
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Cloudchipr Enterprise Api Overlay](https://apis.io/overlays/cloudchipr/cloudchipr-enterprise-api-overlay/)
+
+#### Security (3)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Cloudchipr Authentication](https://apis.io/security/cloudchipr/cloudchipr-authentication/)
+- [Cloudchipr Domain Security](https://apis.io/security/cloudchipr/cloudchipr-domain-security/)
+- [Cloudchipr Trust Center](https://apis.io/security/cloudchipr/cloudchipr-trust-center/)
+
+#### OAuth scopes (1)
+
+The permissions the API asks for.
+
+- [Cloudchipr Scopes](https://apis.io/scopes/cloudchipr/cloudchipr-scopes/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Cloudchipr Plans Pricing](https://apis.io/plans/cloudchipr/cloudchipr-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Cloudchipr Rate Limits](https://apis.io/rate-limits/cloudchipr/cloudchipr-rate-limits/)
+
+#### FinOps (1)
+
+What the API costs to run, by operation.
+
+- [Cloudchipr Finops](https://apis.io/finops/cloudchipr/cloudchipr-finops/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
 
 - [Website](https://cloudchipr.com/)
-- [Portal](https://docs.cloudchipr.com/)
 - [Documentation](https://docs.cloudchipr.com/reference)
+- [Getting started](https://docs.cloudchipr.com/docs/welcome)
+- [API reference](https://cloudchipr.github.io/api-service/)
 - [Pricing](https://cloudchipr.com/pricing)
+- [Sign up](https://app.cloudchipr.com/registration)
+- [Support](https://cloudchipr.com/support)
 - [Blog](https://cloudchipr.com/blog)
-- [GitHub Org](https://github.com/cloudchipr)
-- [FinOps Foundation Member](https://www.finops.org/members/cloudchipr/)
-- [Naftiko Capabilities](capabilities/cloudchipr-capabilities.yml)
+- [Terms of service](https://cloudchipr.com/terms-conditions)
+- [Privacy policy](https://cloudchipr.com/privacy-policy)
+- [GitHub](https://github.com/cloudchipr)
 
-## Maintainers
+## API Evangelist rating
 
-**FN:** Kin Lane
+**Kin Score 57.7** — strong · rubric 0.25.0 · scored 2026-10-23
 
-**Email:** kin@apievangelist.com
+| Facet | Score |
+|---|---|
+| Discoverability | 75.0 |
+| Contract quality | 57.7 |
+| Contract governance | 18.2 |
+| Operational transparency | 26.3 |
+| Developer ergonomics | 50.6 |
+| Access clarity | 85.5 |
+
+**Agent readiness 51.7** — agent-ready (gated down from agent-native)
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | documented (partial credit) |
+| Auth Clarity | served (partial credit) |
+| Idempotency | verified |
+| Error Semantics | derived (partial credit) |
+| OpenAPI Examples | partial |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | yes |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | verified |
+| Dynamic Client Registration | yes |
+| Agentic Commerce | — |
+| Pagination Ratio | — |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 39.2** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/cloudchipr/](https://apis.io/providers/cloudchipr/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for CloudChipr: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/cloudchipr/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
