@@ -1,0 +1,149 @@
+# Pricing transcribed from the provider's own page — see provenance. Numbers are quoted, not derived.
+generated: '2026-10-28'
+method: searched
+source: https://cloudchipr.com/pricing
+sources:
+- https://cloudchipr.com/pricing
+provenance:
+  tool: engine/economics/harvest_pricing.py
+  run: 20261028T141238
+  grounding: every price_text was found verbatim in the fetched page text
+audience: business-product
+pricing_basis: tiered-subscription
+delivery:
+  delivery: managed
+  method: page
+  read: '2026-10-28'
+  managed_tier: Basic
+published: true
+note: Tiers banded by monthly cloud spend; monthly and annual (Save 10%) toggles shown; Enterprise is
+  contact sales.
+plan_count: 8
+currency: USD
+plans:
+- name: Free 14-day Trial
+  price_text: Get Started For Free
+  period: none
+  included_quota: 20+ Cloud Accounts, Check Every 15m, Unlimited Integrations, Scheduled Run, Anomaly
+    Detection, Organization SSO, Dedicated SRE consultant
+- name: Basic (monthly)
+  price_text: $49 /month
+  price: 49
+  currency: USD
+  period: month
+  unit: Up to $5k Monthly Cloud Spend
+  included_quota: 2 Cloud Accounts, Live Resource Management, Email Integration, Scheduled Run
+- name: Advanced (monthly)
+  price_text: $189 /month
+  price: 189
+  currency: USD
+  period: month
+  unit: $5k - 25k Monthly Cloud Spend
+  included_quota: 10 Cloud Accounts, Live Resource Management, 3 Integration, Scheduled Run, Auto Clean
+- name: Pro (monthly)
+  price_text: $890 /month
+  price: 890
+  currency: USD
+  period: month
+  unit: $25k - 100k Monthly Cloud Spend
+  included_quota: 20 Cloud Accounts, Unlimited Integrations, Anomaly Detection, Task Management, Team
+    Access, Organization SSO
+- name: Basic (annual)
+  price_text: $530 /year
+  price: 530
+  currency: USD
+  period: year
+  unit: Up to $5k Monthly Cloud Spend
+  included_quota: 2 Cloud Accounts, Live Resource Management, Email Integration, Scheduled Run
+- name: Advanced (annual)
+  price_text: $2,040 /year
+  price: 2040
+  currency: USD
+  period: year
+  unit: $5k - 25k Monthly Cloud Spend
+  included_quota: 10 Cloud Accounts, 3 Integration, Auto Clean
+- name: Pro (annual)
+  price_text: 9,560 /year
+  price: 9560
+  currency: USD
+  period: year
+  unit: $25k - 100k Monthly Cloud Spend
+  included_quota: 20 Cloud Accounts, Unlimited Integrations, Anomaly Detection, Team Access, Organization
+    SSO
+- name: Enterprise
+  price_text: Contact sales
+  period: none
+  unit: $100k+ Monthly Cloud Spend
+  included_quota: 20+ Cloud Accounts, Dedicated SRE consultant, Dedicated Slack Channel
+rate_limit_statements:
+- Check Every 15m
+x-canonical:
+  generated: '2026-11-01'
+  vocabulary: engine/economics/plans-canonical.yml
+  models:
+  - subscription
+  units: []
+  plans:
+  - name: Free 14-day Trial
+    access: other
+    model: unstated
+    model_how: derived
+    units: []
+    periods:
+    - none
+  - name: Basic (monthly)
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods:
+    - month
+  - name: Advanced (monthly)
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods:
+    - month
+  - name: Pro (monthly)
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods:
+    - month
+  - name: Basic (annual)
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods:
+    - year
+  - name: Advanced (annual)
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods:
+    - year
+  - name: Pro (annual)
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods:
+    - year
+  - name: Enterprise
+    access: other
+    model: unstated
+    model_how: derived
+    units:
+    - other
+    periods:
+    - none
