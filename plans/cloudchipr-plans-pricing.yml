@@ -78,11 +78,12 @@ plans:
 rate_limit_statements:
 - Check Every 15m
 x-canonical:
-  generated: '2026-11-02'
+  generated: '2026-11-06'
   vocabulary: engine/economics/plans-canonical.yml
   models:
   - subscription
-  units: []
+  units:
+  - period
   plans:
   - name: Free 14-day Trial
     access: other
@@ -96,7 +97,7 @@ x-canonical:
     model: subscription
     model_how: derived
     units:
-    - other
+    - period
     periods:
     - month
   - name: Advanced (monthly)
@@ -104,7 +105,7 @@ x-canonical:
     model: subscription
     model_how: derived
     units:
-    - other
+    - period
     periods:
     - month
   - name: Pro (monthly)
@@ -112,7 +113,7 @@ x-canonical:
     model: subscription
     model_how: derived
     units:
-    - other
+    - period
     periods:
     - month
   - name: Basic (annual)
@@ -120,7 +121,7 @@ x-canonical:
     model: subscription
     model_how: derived
     units:
-    - other
+    - period
     periods:
     - year
   - name: Advanced (annual)
@@ -128,7 +129,7 @@ x-canonical:
     model: subscription
     model_how: derived
     units:
-    - other
+    - period
     periods:
     - year
   - name: Pro (annual)
@@ -136,7 +137,7 @@ x-canonical:
     model: subscription
     model_how: derived
     units:
-    - other
+    - period
     periods:
     - year
   - name: Enterprise
@@ -144,6 +145,6 @@ x-canonical:
     model: unstated
     model_how: derived
     units:
-    - other
+    - period
     periods:
     - none
