@@ -29,7 +29,7 @@ accessModel:
   - scopes
   - rate-limits
   - security
-  generated: '2026-11-06'
+  generated: '2026-11-13'
   method: derived
 created: '2026-03-27'
 modified: '2026-09-05'
@@ -544,6 +544,18 @@ common:
     url: https://www.finops.org/members/cloudchipr/
   - type: LLMsTxt
     url: https://docs.cloudchipr.com/llms.txt
+  - type: UsageTerms
+    url: terms/cloudchipr-terms-of-service.yml
+  - type: DataProcessing
+    url: privacy/cloudchipr-privacy-policy.yml
+  - type: Attestations
+    url: compliance/cloudchipr-compliance.yml
+  - type: Eligibility
+    url: eligibility/cloudchipr-eligibility.yml
+  - type: AIPreferences
+    url: ai-preferences/cloudchipr-ai-preferences.yml
+  - type: DataLicense
+    url: data-license/cloudchipr-data-license.yml
 maintainers:
   - FN: Kin Lane
     email: kin@apievangelist.com
